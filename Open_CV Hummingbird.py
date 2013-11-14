@@ -1,20 +1,12 @@
-# -*- coding: utf-8 -*-
-# <nbformat>3.0</nbformat>
-
-# <markdowncell>
-
-# First attempt getting Open CV to view Hummingbird-Flower Videos
-
-# <codecell>
-
 import cv2
 import cv2.cv as cv
 import numpy as np
 
-# <codecell>
+#Set location of the file directory
+fileD="C:/Users/Jorge/Documents/OpenCV_HummingbirdsMotion/"
 
 #Begin with a still image test to show that package works.
-photo = 'C:/Users/Jorge/Documents/OpenCV_HummingbirdsMotion/17.jpg'
+photo = fileD+"17.jpg"
 
 # Load an color image in grayscale
 img = cv2.imread(photo)
@@ -22,55 +14,25 @@ cv2.imshow('my window',img)
 cv2.waitKey(0)
 cv2.destroyWindow('my window')
 
-# <markdowncell>
-
-# Try a sample flower video frame
-
-# <codecell>
-
-#Define Input file
-#Sample file from online
-videoPath="C:/Users/Jorge/Documents/OpenCV_HummingbirdsMotion/PlotwatcherTest.tlv"
+#Define Input Video file
+videoPath=fileD+"PlotwatcherTest.tlv"
 cap = cv2.VideoCapture(videoPath)
 ret, frame = cap.read()
 
 #show first image
 cv2.imshow('frame',frame)
-cv2.waitKey(1000)
+cv2.waitKey(10000)
 cv2.destroyWindow('frame')
 
-# <markdowncell>
-
-# Get Statistics on Video
-
-# <codecell>
-
+#Capture Information
 nFrames = int(cap.get(cv.CV_CAP_PROP_FRAME_COUNT))
 fps = cap.get(cv.CV_CAP_PROP_FPS)
 
 print("Num. frames = ",nFrames)
 print("Frame rate = ", fps, " fps")
 
-# <markdowncell>
 
-# Select Next Image to compare.
-
-# <codecell>
-
-next_image=cap.read()[1]
-
-# <codecell>
-
-cv2.imshow('frame',next_image)
-cv2.waitKey(1000)
-cv2.destroyWindow('frame')
-
-# <markdowncell>
-
-# Play Video (still fails, who cares?)
-
-# <codecell>
-
+# Play Video 
 while(cap.isOpened()):
     ret, frame = cap.read()
     if not ret:
@@ -81,26 +43,18 @@ while(cap.isOpened()):
         break
 cv2.destroyWindow('frame')
 
-# <markdowncell>
 
 # TO DO: Mark a Mouse ROI selection
 
-# <codecell>
 
 #cvSetImageROI()
 
-# <markdowncell>
-
 # Difference between sample frames
-
-# <codecell>
 
 def diffImg(t0, t1, t2):
   d1 = cv2.absdiff(t2, t1)
   d2 = cv2.absdiff(t1, t0)
   return cv2.bitwise_and(d1, d2)
-
-# <codecell>
 
 #Need to reinitiate the video
 cap = cv2.VideoCapture(videoPath)
@@ -136,7 +90,7 @@ while frames < framecount-3:
   t_minus = t
   t = t_plus
   t_plus = cv2.cvtColor(cap.read()[1], cv2.COLOR_RGB2GRAY)
-  key = cv2.waitKey(100)
+  key = cv2.waitKey(500)
   if key == 27:
     cv2.destroyWindow(winName)
     break
@@ -148,16 +102,11 @@ print "Goodbye"
 
 cv2.destroyWindow(winName)
 
-# <codecell>
-
 #Sum of any given array
 sum(map(sum, diffsArray[1]))
 
-# <markdowncell>
 
-# Define Smoothing Functions
-
-# <codecell>
+# Test Script for Motion
 
 #!/usr/bin/env python
 
@@ -231,88 +180,50 @@ def merge_collided_bboxes( bbox_list ):
         # When there are no collions between boxes, return that list:
         return bbox_list
 
-
-def detect_faces( image, haar_cascade, mem_storage ):
-
-        faces = []
-        image_size = cv.GetSize( image )
-
-        #faces = cv.HaarDetectObjects(grayscale, haar_cascade, storage, 1.2, 2, cv.CV_HAAR_DO_CANNY_PRUNING, (20, 20) )
-        #faces = cv.HaarDetectObjects(image, haar_cascade, storage, 1.2, 2, cv.CV_HAAR_DO_CANNY_PRUNING )
-        #faces = cv.HaarDetectObjects(image, haar_cascade, storage )
-        #faces = cv.HaarDetectObjects(image, haar_cascade, mem_storage, 1.2, 2, cv.CV_HAAR_DO_CANNY_PRUNING, ( 16, 16 ) )
-        #faces = cv.HaarDetectObjects(image, haar_cascade, mem_storage, 1.2, 2, cv.CV_HAAR_DO_CANNY_PRUNING, ( 4,4 ) )
-        faces = cv.HaarDetectObjects(image, haar_cascade, mem_storage, 1.2, 2, cv.CV_HAAR_DO_CANNY_PRUNING, ( image_size[0]/10, image_size[1]/10) )
-        
-        for face in faces:
-                box = face[0]
-                cv.Rectangle(image, ( box[0], box[1] ),
-                        ( box[0] + box[2], box[1] + box[3]), cv.RGB(255, 0, 0), 1, 8, 0)
-
-
 class Target:
         def __init__(self):
+            self.writer = None
+            cap = cv2.VideoCapture(fP)
+            frame = cap.read()[1]
+            width = np.size(frame, 1)
+            height = np.size(frame, 0)
+            frame_size=(width, height)
+            cv.NamedWindow("Target", 1)
+            #Optionally show
+            cv2.imshow("frame",frame)
+            cv2.waitKey(1000)
+            cv2.destroyWindow("frame")
                 
-                if len( sys.argv ) > 1:
-                        self.writer = None
-                        self.capture = cv.CaptureFromFile( sys.argv[1] )
-                        frame = cv.QueryFrame(self.capture)
-                        frame_size = cv.GetSize(frame)
-                else:
-                        fps=15
-                        is_color = True
-
-                        self.capture = cv.CaptureFromCAM(0)
-                        #cv.SetCaptureProperty( self.capture, cv.CV_CAP_PROP_FRAME_WIDTH, 640 );
-                        #cv.SetCaptureProperty( self.capture, cv.CV_CAP_PROP_FRAME_HEIGHT, 480 );
-                        cv.SetCaptureProperty( self.capture, cv.CV_CAP_PROP_FRAME_WIDTH, 320 );
-                        cv.SetCaptureProperty( self.capture, cv.CV_CAP_PROP_FRAME_HEIGHT, 240 );
-                        frame = cv.QueryFrame(self.capture)
-                        frame_size = cv.GetSize(frame)
-                        
-                        self.writer = None
-                        #self.writer = cv.CreateVideoWriter("/dev/shm/test1.mp4", cv.CV_FOURCC('D', 'I', 'V', 'X'), fps, frame_size, is_color )
-                        #self.writer = cv.CreateVideoWriter("test2.mpg", cv.CV_FOURCC('P', 'I', 'M', '1'), fps, frame_size, is_color )
-                        #self.writer = cv.CreateVideoWriter("test3.mp4", cv.CV_FOURCC('D', 'I', 'V', 'X'), fps, cv.GetSize(frame), is_color )
-                        #self.writer = cv.CreateVideoWriter("test4.mpg", cv.CV_FOURCC('P', 'I', 'M', '1'), fps, (320, 240), is_color )
-                        
-                        # These both gave no error message, but saved no file:
-                        ###self.writer = cv.CreateVideoWriter("test5.h263i", cv.CV_FOURCC('I', '2', '6', '3'), fps, cv.GetSize(frame), is_color )
-                        ###self.writer = cv.CreateVideoWriter("test6.fli",   cv.CV_FOURCC('F', 'L', 'V', '1'), fps, cv.GetSize(frame), is_color )
-                        # Can't play this one:
-                        ###self.writer = cv.CreateVideoWriter("test7.mp4",   cv.CV_FOURCC('D', 'I', 'V', '3'), fps, cv.GetSize(frame), is_color )
-
-                # 320x240 15fpx in DIVX is about 4 gigs per day.
-
-                frame = cv.QueryFrame(self.capture)
-                cv.NamedWindow("Target", 1)
-                #cv.NamedWindow("Target2", 1)
-                
-
         def run(self):
                 # Initialize
                 #log_file_name = "tracker_output.log"
                 #log_file = file( log_file_name, 'a' )
                 
-                frame = cv.QueryFrame( self.capture )
-                frame_size = cv.GetSize( frame )
-                
-                # Capture the first frame from webcam for image properties
-                display_image = cv.QueryFrame( self.capture )
+                cap = cv2.VideoCapture(fP)
+                    
+                # Capture the first frame from file for image properties
+                display_image = cap.read()[1]
+                cv2.imshow("frame",display_image)
+                cv2.waitKey(1000)
+                cv2.destroyWindow("frame")
+                width = np.size(display_image, 1)
+                height = np.size(display_image, 0)
+                frame_size=(width, height)
                 
                 # Greyscale image, thresholded to create the motion mask:
-                grey_image = cv.CreateImage( cv.GetSize(frame), cv.IPL_DEPTH_8U, 1 )
+                grey_image = np.uint8(display_image)
                 
                 # The RunningAvg() function requires a 32-bit or 64-bit image...
-                running_average_image = cv.CreateImage( cv.GetSize(frame), cv.IPL_DEPTH_32F, 3 )
+                running_average_image = np.float32(display_image)
+                
                 # ...but the AbsDiff() function requires matching image depths:
-                running_average_in_display_color_depth = cv.CloneImage( display_image )
+                running_average_in_display_color_depth = display_image.copy()
                 
                 # RAM used by FindContours():
                 mem_storage = cv.CreateMemStorage(0)
                 
                 # The difference between the running average and the current frame:
-                difference = cv.CloneImage( display_image )
+                difference =  display_image.copy()
                 
                 target_count = 1
                 last_target_count = 1
@@ -334,59 +245,74 @@ class Target:
                 text_coord = ( 5, 15 )
                 text_color = cv.CV_RGB(255,255,255)
 
-                ###############################
-                ### Face detection stuff
-                #haar_cascade = cv.Load( 'haarcascades/haarcascade_frontalface_default.xml' )
-                haar_cascade = cv.Load( 'haarcascades/haarcascade_frontalface_alt.xml' )
-                #haar_cascade = cv.Load( 'haarcascades/haarcascade_frontalface_alt2.xml' )
-                #haar_cascade = cv.Load( 'haarcascades/haarcascade_mcs_mouth.xml' )
-                #haar_cascade = cv.Load( 'haarcascades/haarcascade_eye.xml' )
-                #haar_cascade = cv.Load( 'haarcascades/haarcascade_frontalface_alt_tree.xml' )
-                #haar_cascade = cv.Load( 'haarcascades/haarcascade_upperbody.xml' )
-                #haar_cascade = cv.Load( 'haarcascades/haarcascade_profileface.xml' )
                 
                 # Set this to the max number of targets to look for (passed to k-means):
-                max_targets = 3
+                max_targets = 1
                 
                 while True:
                         
                         # Capture frame from webcam
-                        camera_image = cv.QueryFrame( self.capture )
+                        camera_image = cap.read()[1]
                         
                         frame_count += 1
                         frame_t0 = time.time()
                         
                         # Create an image with interactive feedback:
-                        display_image = cv.CloneImage( camera_image )
+                        display_image = camera_image.copy()
                         
                         # Create a working "color image" to modify / blur
-                        color_image = cv.CloneImage( display_image )
+                        color_image =  display_image.copy()
+                        cv2.imshow("frame",color_image)
+                        cv2.waitKey(1000)
+                        cv2.destroyWindow("frame")                        
 
                         # Smooth to get rid of false positives
-                        cv.Smooth( color_image, color_image, cv.CV_GAUSSIAN, 19, 0 )
+                        color_image = cv2.GaussianBlur(color_image,(9,9),0)
+                        cv2.imshow("frame",color_image)
+                        cv2.waitKey(1000)
+                        cv2.destroyWindow("frame")  
                         
                         # Use the Running Average as the static background                        
                         # a = 0.020 leaves artifacts lingering way too long.
                         # a = 0.320 works well at 320x240, 15fps.  (1/a is roughly num frames.)
-                        cv.RunningAvg( color_image, running_average_image, 0.320, None )
+                        #This value is very critical.
+                        cv2.accumulateWeighted(color_image,running_average_image,.3)
+                        cv2.imshow("frame",running_average_image)
+                        cv2.waitKey(1000)
+                        cv2.destroyWindow("frame")                          
                         
                         # Convert the scale of the moving average.
-                        cv.ConvertScale( running_average_image, running_average_in_display_color_depth, 1.0, 0.0 )
+                        cv2.convertScaleAbs( running_average_image, running_average_in_display_color_depth, 1.0, 0.0 )
+                        cv2.imshow("frame",running_average_in_display_color_depth)
+                        cv2.waitKey(1000)
+                        cv2.destroyWindow("frame")                        
                         
                         # Subtract the current frame from the moving average.
-                        cv.AbsDiff( color_image, running_average_in_display_color_depth, difference )
+                        cv2.absdiff( color_image, running_average_in_display_color_depth, difference )
+                        cv2.imshow("frame",running_average_in_display_color_depth)
+                        cv2.waitKey(1000)
+                        cv2.destroyWindow("frame")
                         
                         # Convert the image to greyscale.
-                        cv.CvtColor( difference, grey_image, cv.CV_RGB2GRAY )
-
-                        # Threshold the image to a black and white motion mask:
-                        cv.Threshold( grey_image, grey_image, 2, 255, cv.CV_THRESH_BINARY )
-                        # Smooth and threshold again to eliminate "sparkles"
-                        cv.Smooth( grey_image, grey_image, cv.CV_GAUSSIAN, 19, 0 )
-                        cv.Threshold( grey_image, grey_image, 240, 255, cv.CV_THRESH_BINARY )
+                        grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
+                        cv2.imshow("frame",grey_image)
+                        cv2.waitKey(1000)
+                        cv2.destroyWindow("frame")
                         
-                        grey_image_as_array = numpy.asarray( cv.GetMat( grey_image ) )
-                        non_black_coords_array = numpy.where( grey_image_as_array > 3 )
+                        # Threshold the image to a black and white motion mask:
+                        ret,grey_image = cv2.threshold(grey_image, 2, 255, cv2.THRESH_BINARY )
+                        cv2.imshow("frame",grey_image)
+                        cv2.waitKey(1000)
+                        cv2.destroyWindow("frame")
+                        
+                        # Smooth and threshold again to eliminate "sparkles"
+                        #grey_image = cv2.GaussianBlur(grey_image,(9,9),0)    
+                        ret,grey_image = cv2.threshold(grey_image, 240, 255, cv2.THRESH_BINARY )
+                        cv2.imshow("frame",grey_image)
+                        cv2.waitKey(1000)
+                        cv2.destroyWindow("frame") 
+                        
+                        non_black_coords_array = numpy.where( grey_image > 3 )
                         # Convert from numpy.where()'s two separate lists to one list of (x, y) tuples:
                         non_black_coords_array = zip( non_black_coords_array[1], non_black_coords_array[0] )
                         
@@ -394,7 +320,7 @@ class Target:
                         bounding_box_list = []
 
                         # Now calculate movements using the white pixels as "motion" data
-                        contour = cv.FindContours( grey_image, mem_storage, cv.CV_RETR_CCOMP, cv.CV_CHAIN_APPROX_SIMPLE )
+                        contour = cv2.findContours(grey_image, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE )
                         
                         while contour:
                                 
@@ -684,20 +610,22 @@ class Target:
                 time_delta = t1 - t0
                 processed_fps = float( frame_count ) / time_delta
                 print "Got %d frames. %.1f s. %f fps." % ( frame_count, time_delta, processed_fps )
-                
-if __name__=="__main__":
-        t = Target()
-#        import cProfile
-#        cProfile.run( 't.run()' )
-        t.run()
+
+#Set the file path
+
+fP=fileD+"PlotwatcherTest.tlv"
+
+#Create Target Class
+
+t = Target()
+
+#Run Motion Function
+t.run()
+
+
+t = Target()
 
 # <codecell>
 
-cap = cv2.VideoCapture(videoPath)
-camera_image=cv.fromarray(cap.read()[1])
-
-=cv.Smooth(camera_image,camera_image,cv.CV_BLUR,5,5)
-cv2.imshow('frame',camera_image)
-cv2.waitKey(1000)
-cv2.destroyWindow('frame')
-
+#Destroy Windows
+cv2.destroyAllWindows()
