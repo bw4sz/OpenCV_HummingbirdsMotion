@@ -1,126 +1,22 @@
 import cv2
 import cv2.cv as cv
 import numpy as np
-
-#Set location of the file directory
-fileD="C:/Users/Jorge/Documents/OpenCV_HummingbirdsMotion/"
-
-#Begin with a still image test to show that package works.
-photo = fileD+"17.jpg"
-
-# Load an color image in grayscale
-img = cv2.imread(photo)
-cv2.imshow('my window',img)
-cv2.waitKey(0)
-cv2.destroyWindow('my window')
-
-#Define Input Video file
-videoPath=fileD+"PlotwatcherTest.tlv"
-cap = cv2.VideoCapture(videoPath)
-ret, frame = cap.read()
-
-#show first image
-cv2.imshow('frame',frame)
-cv2.waitKey(10000)
-cv2.destroyWindow('frame')
-
-#Capture Information
-nFrames = int(cap.get(cv.CV_CAP_PROP_FRAME_COUNT))
-fps = cap.get(cv.CV_CAP_PROP_FPS)
-
-print("Num. frames = ",nFrames)
-print("Frame rate = ", fps, " fps")
-
-
-# Play Video 
-while(cap.isOpened()):
-    ret, frame = cap.read()
-    if not ret:
-        break
-    cv2.imshow('frame',frame)
-    if cv2.waitKey(100) & 0xFF == ord('q'):
-        cv2.destroyWindow('frame')
-        break
-cv2.destroyWindow('frame')
-
-
-# TO DO: Mark a Mouse ROI selection
-
-
-#cvSetImageROI()
-
-# Difference between sample frames
-
-def diffImg(t0, t1, t2):
-  d1 = cv2.absdiff(t2, t1)
-  d2 = cv2.absdiff(t1, t0)
-  return cv2.bitwise_and(d1, d2)
-
-#Need to reinitiate the video
-cap = cv2.VideoCapture(videoPath)
-
-#get a frame count
-framecount = cap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT)
-print(framecount)
-#start the iterator
-frames=0
-winName = "Movement Indicator"
-cv2.namedWindow(winName, cv2.CV_WINDOW_AUTOSIZE)
-
-#End the loop if there are no more frames
-
-# Read three images first:
-t_minus = cv2.cvtColor(cap.read()[1], cv2.COLOR_RGB2GRAY)
-t = cv2.cvtColor(cap.read()[1], cv2.COLOR_RGB2GRAY)
-t_plus = cv2.cvtColor(cap.read()[1], cv2.COLOR_RGB2GRAY)
-
-#Create an empty array
-diffsArray = []
-
-#While there are frames left, subtract three since you all ready grabbed them from above.
-while frames < framecount-3:
-  diffs=diffImg(t_minus, t, t_plus)
-#Add the difference to an output array
-  diffsArray.append(diffs)
-  cv2.imshow( winName,diffs)
-  frames +=1
-  #Place into the holder
-    
-  # Read next image
-  t_minus = t
-  t = t_plus
-  t_plus = cv2.cvtColor(cap.read()[1], cv2.COLOR_RGB2GRAY)
-  key = cv2.waitKey(500)
-  if key == 27:
-    cv2.destroyWindow(winName)
-    break
-cv2.destroyWindow(winName)
-
-print "Goodbye"
-
-# <codecell>
-
-cv2.destroyWindow(winName)
-
-#Sum of any given array
-sum(map(sum, diffsArray[1]))
-
-
-# Test Script for Motion
-
-#!/usr/bin/env python
-
-# See also: http://sundararajana.blogspot.com/2007/05/motion-detection-using-opencv.html
-
-import cv
 import time
-
 from scipy import *
 from scipy.cluster import vq
 import numpy
 import sys, os, random, hashlib
 
 from math import *
+
+
+#Set location of the file directory
+fileD="C:/Users/Jorge/Documents/OpenCV_HummingbirdsMotion/"
+
+
+#Set the file path to video
+
+fP=fileD+"PlotwatcherTest.tlv"
 
 """
 Python Motion Tracker
@@ -194,7 +90,7 @@ class Target:
             cv2.waitKey(1000)
             cv2.destroyWindow("frame")
                 
-        def run(self):
+        def run(fP):
                 # Initialize
                 #log_file_name = "tracker_output.log"
                 #log_file = file( log_file_name, 'a' )
@@ -202,10 +98,106 @@ class Target:
                 cap = cv2.VideoCapture(fP)
                     
                 # Capture the first frame from file for image properties
-                display_image = cap.read()[1]
-                cv2.imshow("frame",display_image)
+                display_image = cap.read()[1]                             
+               
+                #Mouse callback
+                CV_EVENT_LBUTTONDOWN = 1
+                def my_mouse_callback(event,x,y,flag,param):
+                        if (flag == 1):                # here event is left mouse button double-clicked
+                                print "mouse is at: " + str(x) + " , " + str(y)
+                                
+                cv2.imshow("Display",display_image)
+                cv2.setMouseCallback("Display",my_mouse_callback,CV_EVENT_LBUTTONDOWN)        #binds the screen,function and image
                 cv2.waitKey(1000)
-                cv2.destroyWindow("frame")
+               
+                cv.DestroyWindow("Display")    
+                
+                # mouse callback function
+                drawing = False # true if mouse is pressed
+                mode = True # if True, draw rectangle. Press 'm' to toggle to curve
+                ix,iy = -1,-1                
+                def draw_circle(event,x,y,flags,param):
+                        global ix,iy,drawing,mode
+                
+                        if event == cv2.EVENT_LBUTTONDOWN:
+                                drawing = True
+                                ix,iy = x,y
+                    
+                        elif event == cv2.EVENT_MOUSEMOVE:
+                                if drawing == True:
+                                        if mode == True:
+                                                cv2.rectangle(img,(ix,iy),(x,y),(0,255,0),-1)
+                                else:
+                                        cv2.circle(img,(x,y),5,(0,0,255),-1)
+                    
+                        elif event == cv2.EVENT_LBUTTONUP:
+                                drawing = False
+                                if mode == True:
+                                        cv2.rectangle(img,(ix,iy),(x,y),(0,255,0),-1)
+                                else:
+                                        cv2.circle(img,(x,y),5,(0,0,255),-1)
+                #Define Mouse Event
+                img = np.zeros((512,512,3), np.uint8)
+                cv2.namedWindow('image')
+                cv2.setMouseCallback('image',draw_circle)
+                
+                while(1):
+                    cv2.imshow('image',img)
+                    k = cv2.waitKey(1) & 0xFF
+                    if k == ord('m'):
+                        mode = not mode
+                    elif k == 27:
+                        break
+                
+                cv2.destroyAllWindows()    
+                
+                
+                
+                #        cvRect        box=[box.x,box.y,box.width,box.height]
+                box=[0,0,0,0]
+                
+                #        creating mouse callback function
+                def my_mouse_callback(event,x,y,flags,param):
+                        global drawing_box
+                        if event==cv2.EVENT_LBUTTONDOWN:
+                                drawing_box=True
+                                [box[0],box[1],box[2],box[3]]=[x,y,0,0]
+                                print box[0]
+                
+                        if event==cv2.EVENT_LBUTTONUP:
+                                drawing_box=False
+                                if box[2]<0:
+                                        box[0]+=box[2]
+                                        box[2]*=-1
+                                if box[3]<0:
+                                        box[1]+=box[3]
+                                        box[3]*=-1
+                                        
+                        if event==cv2.EVENT_MOUSEMOVE:
+                                if (drawing_box==True):
+                                        box[2]=x-box[0]
+                                        box[3]=y-box[1]        
+                                
+                # Function to draw the rectangle                
+                def draw_box(img,box):
+                        cv2.rectangle(img,(box[0],box[1]),(box[0]+box[2],box[1]+box[3]),(255,0,0))
+                
+                #        main program        
+                drawing_box=False              
+                cv2.namedWindow("Box Example")
+                cv2.setMouseCallback("Box Example",my_mouse_callback,display_image)
+                
+                while(1):
+                        temp=display_image.copy()
+                        if drawing_box==True:
+                                draw_box(temp,box)
+                        cv2.imshow("Box Example",temp)
+                        if cv.WaitKey(20)%0x100==27:break
+ 
+                cv2.destroyWindow("Box Example")                
+
+##############################################################
+
                 width = np.size(display_image, 1)
                 height = np.size(display_image, 0)
                 frame_size=(width, height)
@@ -238,14 +230,12 @@ class Target:
                 # For toggling display:
                 image_list = [ "camera", "difference", "threshold", "display", "faces" ]
                 image_index = 0   # Index into image_list
-        
-        
+                
                 # Prep for text drawing:
                 text_font = cv.InitFont(cv.CV_FONT_HERSHEY_COMPLEX, .5, .5, 0.0, 1, cv.CV_AA )
                 text_coord = ( 5, 15 )
                 text_color = cv.CV_RGB(255,255,255)
 
-                
                 # Set this to the max number of targets to look for (passed to k-means):
                 max_targets = 1
                 
@@ -253,60 +243,60 @@ class Target:
                         
                         # Capture frame from webcam
                         camera_image = cap.read()[1]
-                        
+                       
                         frame_count += 1
                         frame_t0 = time.time()
-                        
+                                      
                         # Create an image with interactive feedback:
                         display_image = camera_image.copy()
                         
                         # Create a working "color image" to modify / blur
                         color_image =  display_image.copy()
                         cv2.imshow("frame",color_image)
-                        cv2.waitKey(1000)
+                        cv2.waitKey(500)
                         cv2.destroyWindow("frame")                        
 
                         # Smooth to get rid of false positives
                         color_image = cv2.GaussianBlur(color_image,(9,9),0)
                         cv2.imshow("frame",color_image)
-                        cv2.waitKey(1000)
+                        cv2.waitKey(500)
                         cv2.destroyWindow("frame")  
                         
                         # Use the Running Average as the static background                        
                         # a = 0.020 leaves artifacts lingering way too long.
                         # a = 0.320 works well at 320x240, 15fps.  (1/a is roughly num frames.)
                         #This value is very critical.
-                        cv2.accumulateWeighted(color_image,running_average_image,.3)
-                        cv2.imshow("frame",running_average_image)
-                        cv2.waitKey(1000)
-                        cv2.destroyWindow("frame")                          
-                        
-                        # Convert the scale of the moving average.
-                        cv2.convertScaleAbs( running_average_image, running_average_in_display_color_depth, 1.0, 0.0 )
+                                               
+                        cv2.accumulateWeighted(color_image,running_average_image,.4)
+                        #cv2.imshow("frame",running_average_image)
+                        #cv2.waitKey(1000)
+                        #cv2.destroyWindow("frame")                                       
+                                               
+                        running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
                         cv2.imshow("frame",running_average_in_display_color_depth)
-                        cv2.waitKey(1000)
+                        cv2.waitKey(500)
                         cv2.destroyWindow("frame")                        
                         
                         # Subtract the current frame from the moving average.
-                        cv2.absdiff( color_image, running_average_in_display_color_depth, difference )
-                        cv2.imshow("frame",running_average_in_display_color_depth)
-                        cv2.waitKey(1000)
+                        difference=cv2.absdiff( color_image, running_average_in_display_color_depth)
+                        cv2.imshow("frame",difference)
+                        cv2.waitKey(500)
                         cv2.destroyWindow("frame")
                         
                         # Convert the image to greyscale.
                         grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
                         cv2.imshow("frame",grey_image)
-                        cv2.waitKey(1000)
+                        cv2.waitKey(500)
                         cv2.destroyWindow("frame")
                         
                         # Threshold the image to a black and white motion mask:
-                        ret,grey_image = cv2.threshold(grey_image, 2, 255, cv2.THRESH_BINARY )
+                        ret,grey_image = cv2.threshold(grey_image, 5, 255, cv2.THRESH_BINARY )
                         cv2.imshow("frame",grey_image)
                         cv2.waitKey(1000)
                         cv2.destroyWindow("frame")
                         
                         # Smooth and threshold again to eliminate "sparkles"
-                        #grey_image = cv2.GaussianBlur(grey_image,(9,9),0)    
+                        grey_image = cv2.GaussianBlur(grey_image,(9,9),0)    
                         ret,grey_image = cv2.threshold(grey_image, 240, 255, cv2.THRESH_BINARY )
                         cv2.imshow("frame",grey_image)
                         cv2.waitKey(1000)
@@ -320,27 +310,45 @@ class Target:
                         bounding_box_list = []
 
                         # Now calculate movements using the white pixels as "motion" data
-                        contour = cv2.findContours(grey_image, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE )
+                        contours,hierarchy = cv2.findContours(grey_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
                         
-                        while contour:
+                        print(len(contours))
+                        cnt=contours[0]
+                        len(cnt)
+                        
+                        drawing = np.uint8(display_image)
+                        
+                        for cnt in contours:
+                                bx,by,bw,bh = cv2.boundingRect(cnt)
+                                cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw contours in green color
+                                cv2.imshow('output',drawing)
+                                cv2.waitKey(1)
                                 
-                                bounding_rect = cv.BoundingRect( list(contour) )
+            
+                        cv2.destroyWindow("output")
+                        
+                        for cnt in contours:
+                                
+                                bounding_rect = cv2.boundingRect( cnt )
                                 point1 = ( bounding_rect[0], bounding_rect[1] )
                                 point2 = ( bounding_rect[0] + bounding_rect[2], bounding_rect[1] + bounding_rect[3] )
                                 
                                 bounding_box_list.append( ( point1, point2 ) )
-                                polygon_points = cv.ApproxPoly( list(contour), mem_storage, cv.CV_POLY_APPROX_DP )
+                                polygon_points = cv2.approxPolyDP( cnt,0.1*cv2.arcLength(cnt,True),True)
+                                approx = cv2.approxPolyDP(cnt,0.1*cv2.arcLength(cnt,True),True)
                                 
-                                # To track polygon points only (instead of every pixel):
-                                #points += list(polygon_points)
+                                ## To track polygon points only (instead of every pixel):
+                                ##points += list(polygon_points)
                                 
-                                # Draw the contours:
-                                ###cv.DrawContours(color_image, contour, cv.CV_RGB(255,0,0), cv.CV_RGB(0,255,0), levels, 3, 0, (0,0) )
-                                cv.FillPoly( grey_image, [ list(polygon_points), ], cv.CV_RGB(255,255,255), 0, 0 )
-                                cv.PolyLine( display_image, [ polygon_points, ], 0, cv.CV_RGB(255,255,255), 1, 0, 0 )
-                                #cv.Rectangle( display_image, point1, point2, cv.CV_RGB(120,120,120), 1)
+                                ## Draw the contours:
+                                ##cv.DrawContours(color_image, contour, cv.CV_RGB(255,0,0), cv.CV_RGB(0,255,0), levels, 3, 0, (0,0) )
+                                
+                                ##cv.FillPoly( grey_image, [ list(polygon_points), ], cv.CV_RGB(255,255,255), 0, 0 )
+                                ##cv.PolyLine( display_image, [ polygon_points, ], 0, cv.CV_RGB(255,255,255), 1, 0, 0 )
+                                
+                                ##cv.Rectangle( display_image, point1, point2, cv.CV_RGB(120,120,120), 1)
 
-                                contour = contour.h_next()
+                                ##contour = contour.h_next()
                         
                         
                         # Find the average size of the bbox (targets), then
@@ -353,7 +361,6 @@ class Target:
                                 box_height = box[bottom][0] - box[top][0]
                                 box_areas.append( box_width * box_height )
                                 
-                                #cv.Rectangle( display_image, box[0], box[1], cv.CV_RGB(255,0,0), 1)
                         
                         average_box_area = 0.0
                         if len(box_areas): average_box_area = float( sum(box_areas) ) / len(box_areas)
@@ -367,15 +374,21 @@ class Target:
                                 if (box_width * box_height) > average_box_area*0.1: trimmed_box_list.append( box )
                         
                         # Draw the trimmed box list:
-                        #for box in trimmed_box_list:
-                        #        cv.Rectangle( display_image, box[0], box[1], cv.CV_RGB(0,255,0), 2 )
+                        for box in trimmed_box_list:
+                                cv2.rectangle( display_image, box[0], box[1], (0,255,0), 3 )
+                                cv2.imshow('output',display_image)
+                                cv2.waitKey(100)    
+                        cv2.destroyWindow("output")
                                 
                         bounding_box_list = merge_collided_bboxes( trimmed_box_list )
 
                         # Draw the merged box list:
                         for box in bounding_box_list:
-                                cv.Rectangle( display_image, box[0], box[1], cv.CV_RGB(0,255,0), 1 )
-                        
+                                cv2.rectangle( display_image, box[0], box[1], 0,255,0, 1 )
+                                cv2.imshow('output',display_image)
+                                cv2.waitKey(1000)  
+                        cv2.destroyWindow("output")
+                                
                         # Here are our estimate points to track, based on merged & trimmed boxes:
                         estimated_target_count = len( bounding_box_list )
                         
@@ -549,14 +562,13 @@ class Target:
                         for entity in this_frame_entity_list:
                                 center_point = entity[3]
                                 c = entity[1]  # RGB color tuple
-                                cv.Circle(display_image, center_point, 20, cv.CV_RGB(c[0], c[1], c[2]), 1)
-                                cv.Circle(display_image, center_point, 15, cv.CV_RGB(c[0], c[1], c[2]), 1)
-                                cv.Circle(display_image, center_point, 10, cv.CV_RGB(c[0], c[1], c[2]), 2)
-                                cv.Circle(display_image, center_point,  5, cv.CV_RGB(c[0], c[1], c[2]), 3)
-                        
-                        
-                        #print "min_size is: " + str(min_size)
-                        # Listen for ESC or ENTER key
+                                cv2.circle(display_image, center_point, 20, cv.CV_RGB(c[0], c[1], c[2]), 1)
+                                cv2.circle(display_image, center_point, 15, cv.CV_RGB(c[0], c[1], c[2]), 1)
+                                cv2.circle(display_image, center_point, 10, cv.CV_RGB(c[0], c[1], c[2]), 2)
+                                cv2.circle(display_image, center_point,  5, cv.CV_RGB(c[0], c[1], c[2]), 3)
+    
+                        ##print ("min_size is: " + str(min_size))
+                        ## Listen for ESC or ENTER key
                         c = cv.WaitKey(7) % 0x100
                         if c == 27 or c == 10:
                                 break
@@ -570,25 +582,28 @@ class Target:
                         # Display frame to user
                         if image_name == "camera":
                                 image = camera_image
-                                cv.PutText( image, "Camera (Normal)", text_coord, text_font, text_color )
+                                cv2.putText( image, "Camera (Normal)", text_coord, text_font, text_color )
                         elif image_name == "difference":
                                 image = difference
-                                cv.PutText( image, "Difference Image", text_coord, text_font, text_color )
+                                cv2.putText( image, "Difference Image", text_coord, text_font, text_color )
                         elif image_name == "display":
                                 image = display_image
-                                cv.PutText( image, "Targets (w/AABBs and contours)", text_coord, text_font, text_color )
+                                cv2.putText( image, "Targets (w/AABBs and contours)", text_coord, text_font, text_color )
                         elif image_name == "threshold":
                                 # Convert the image to color.
                                 cv.CvtColor( grey_image, display_image, cv.CV_GRAY2RGB )
                                 image = display_image  # Re-use display image here
-                                cv.PutText( image, "Motion Mask", text_coord, text_font, text_color )
+                                cv2.putText( image, "Motion Mask", text_coord, text_font, text_color )
                         elif image_name == "faces":
                                 # Do face detection
                                 detect_faces( camera_image, haar_cascade, mem_storage )                                
                                 image = camera_image  # Re-use camera image here
-                                cv.PutText( image, "Face Detection", text_coord, text_font, text_color )
+                                cv2.putText( image, "Face Detection", text_coord, text_font, text_color )
                         
-                        cv.ShowImage( "Target", image )
+                        #cv2.ShowImage( "Target", image )
+                        cv2.imshow("Target",image)
+                        cv2.waitKey(1000)
+                        cv2.destroyWindow("frame")                        
                         
                         if self.writer: 
                                 cv.WriteFrame( self.writer, image );
@@ -611,16 +626,12 @@ class Target:
                 processed_fps = float( frame_count ) / time_delta
                 print "Got %d frames. %.1f s. %f fps." % ( frame_count, time_delta, processed_fps )
 
-#Set the file path
-
-fP=fileD+"PlotwatcherTest.tlv"
-
 #Create Target Class
 
 t = Target()
 
 #Run Motion Function
-t.run()
+run(fP)
 
 
 t = Target()
