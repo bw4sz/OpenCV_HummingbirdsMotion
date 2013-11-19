@@ -6,7 +6,7 @@ from scipy import *
 from scipy.cluster import vq
 import numpy
 import sys, os, random, hashlib
-import re
+
 from math import *
 
 """
@@ -98,7 +98,7 @@ def run(fP,accAvg,threshL,ID):
         #For now, just cut off the bottom 5% ####NEEDS TO BE CHANGED
         display_image = orig_image[1:700,1:1280]
         #cv2.imshow("frame",display_image)
-        #cv2.waitKey(1000)
+        #cv2.waitKey(1200)
         #cv2.destroyWindow("frame")        
 
         #Define SubArea Based on Mouse Event   
@@ -206,15 +206,15 @@ def run(fP,accAvg,threshL,ID):
                 
                 # Create a working "color image" to modify / blur
                 color_image =  display_image.copy()
-                #cv2.imshow("Initial",color_image)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("Initial")                        
+                cv2.imshow("Initial",color_image)
+                cv2.waitKey(1200)
+                cv2.destroyWindow("Initial")                        
 
                 # Smooth to get rid of false positives
                 color_image = cv2.GaussianBlur(color_image,(9,9),0)
-                #cv2.imshow("Blur",color_image)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("Blur")  
+                cv2.imshow("Blur",color_image)
+                cv2.waitKey(1200)
+                cv2.destroyWindow("Blur")  
                 
                 # Use the Running Average as the static background                        
                 # a = 0.020 leaves artifacts lingering way too long.
@@ -227,15 +227,15 @@ def run(fP,accAvg,threshL,ID):
                 #cv2.destroyWindow("frame")                                       
                                        
                 running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
-                #cv2.imshow("runnAVG",running_average_in_display_color_depth)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("runnAVG")                        
+                cv2.imshow("runnAVG",running_average_in_display_color_depth)
+                cv2.waitKey(1200)
+                cv2.destroyWindow("runnAVG")                        
                 
                 # Subtract the current frame from the moving average.
                 difference=cv2.absdiff( color_image, running_average_in_display_color_depth)
-                #cv2.imshow("diff",difference)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("diff")
+                cv2.imshow("diff",difference)
+                cv2.waitKey(1200)
+                cv2.destroyWindow("diff")
                 
                 # Convert the image to greyscale.
                 grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
@@ -245,15 +245,15 @@ def run(fP,accAvg,threshL,ID):
                 
                 # Threshold the image to a black and white motion mask:
                 ret,grey_image = cv2.threshold(grey_image, threshL, 255, cv2.THRESH_BINARY )
-                #cv2.imshow("Threshold",grey_image)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("Threshold")
+                cv2.imshow("Threshold",grey_image)
+                cv2.waitKey(1200)
+                cv2.destroyWindow("Threshold")
                 
                 # Smooth and threshold again to eliminate "sparkles"
                 #grey_image = cv2.GaussianBlur(grey_image,(9,9),0)    
                 #ret,grey_image = cv2.threshold(grey_image, 240, 255, cv2.THRESH_BINARY )
                 #cv2.imshow("frame",grey_image)
-                #cv2.waitKey(1000)
+                #cv2.waitKey(1200)
                 #cv2.destroyWindow("frame") 
                 
                 non_black_coords_array = numpy.where( grey_image > 3 )
@@ -346,9 +346,9 @@ def run(fP,accAvg,threshL,ID):
                 
                 for box in bounding_box_list:
                         cv2.rectangle( display_image, box[0], box[1], (0,255,0), 1 )
-                        #cv2.imshow('output',orig_image)
-                #cv2.waitKey(1000)  
-                #cv2.destroyWindow("output")
+                        cv2.imshow('output',orig_image)
+                cv2.waitKey(1200)  
+                cv2.destroyWindow("output")
                         
                 # Here are our estimate points to track, based on merged & trimmed boxes:
                 estimated_target_count = len( bounding_box_list )
@@ -393,9 +393,9 @@ def run(fP,accAvg,threshL,ID):
                                 center_points.append( center_point )
                                 cv2.circle(display_image, center_point, 10, (255, 0, 0), 2)
                                 cv2.circle(display_image, center_point, 5, (255, 0, 0), 3)
-                                #cv2.imshow('output',orig_image)
-                                #cv2.waitKey(500)  
-                        #cv2.destroyWindow("output")                        
+                                cv2.imshow('output',orig_image)
+                                cv2.waitKey(500)  
+                        cv2.destroyWindow("output")                        
                 # Now we have targets that are NOT computed from bboxes -- just
                 # movement weights (according to kmeans).  If any two targets are
                 # within the same "bbox count", average them into a single target.  
@@ -529,9 +529,9 @@ def run(fP,accAvg,threshL,ID):
                         cv2.circle(camera_imageO, center_point, 15, (c[0], c[1], c[2]), 1)
                         cv2.circle(camera_imageO, center_point, 10, (c[0], c[1], c[2]), 2)
                         cv2.circle(camera_imageO, center_point,  5, (c[0], c[1], c[2]), 3)
-                #cv2.imshow('output',camera_imageO)
-                #cv2.waitKey(1000)  
-                #cv2.destroyWindow("output")                                     
+                cv2.imshow('output',camera_imageO)
+                cv2.waitKey(1200)  
+                cv2.destroyWindow("output")                                     
 
                 ###print ("min_size is: " + str(min_size))
                 ### Listen for ESC or ENTER key
@@ -564,7 +564,7 @@ def run(fP,accAvg,threshL,ID):
                 
                 ##cv2.ShowImage( "Target", image )
                 #cv2.imshow("Target",image)
-                #cv2.waitKey(1000)
+                #cv2.waitKey(1200)
                 #cv2.destroyWindow("frame")                        
                 
                 ##################################################
@@ -601,19 +601,10 @@ def run(fP,accAvg,threshL,ID):
 
 
 #Set location of the file directory
-fileD="C:/Users/Jorge/Dropbox/Thesis/Maquipucuna_SantaLucia/MotionTest/"
+fileD="C:/Users/Jorge/Documents/OpenCV_HummingbirdsMotion/"
 
-#Set Path to video files
-videoP= ["C:/Users/Jorge/Documents/OpenCV_HummingbirdsMotion/PlotwatcherTest.tlv", "F:/SantaLucia2/Flowers/FL078/130725AB.TLV", "F:/SantaLucia2/Flowers/FL090/130801AA.TLV"]
+fullPath="C:/Users/Jorge/Documents/OpenCV_HummingbirdsMotion/PlotwatcherTest.tlv"
 
-#Set IDs with each of those paths
-ID_list
-
-string1= "F:/SantaLucia2/Flowers/FL072/130726AA.tlv"
-obj1 = re.search('',string1)
-print(obj1.group(1))
-
-#fullPath="F:/SantaLucia2/Flowers/FL072/130726AA.tlv"
 ##Set the file path to video
 ##The first arguement is the filepath of the video
 ##The second argument is the name of the output folder.
@@ -631,67 +622,3 @@ Target(fullPath,ID)
 run(fullPath,.4,40,ID)
 
 
-#############Run a few for the weekend
-
-#fullPath=
-#ID="FL078"
-#Target(fullPath,ID)
-#run(fullPath,.4,40,ID)
-
-###################Try a new flower
-#fullPath=
-#ID="FL078_T40"
-#Target(fullPath,ID)
-#run(fullPath,.4,40,ID)
-
-####Same flower, twice the threshold.
-#fullPath="F:/SantaLucia2/Flowers/FL090/130801AA.TLV"
-#ID="FL090_T80"
-#Target(fullPath,ID)
-#run(fullPath,.4,80,ID)
-
-
-###Same flower, twice the threshold.
-fullPath="F:/SantaLucia2/Flowers/FL090/130801AA.TLV"
-ID="FL090_T40"
-Target(fullPath,ID)
-run(fullPath,.4,40,ID)
-
-
-###Same flower, twice the threshold.
-fullPath="F:/SantaLucia2/Flowers/FL090/130801AA.TLV"
-ID="FL090_AGG2"
-Target(fullPath,ID)
-run(fullPath,.2,40,ID)
-
-
-###Same flower, twice the threshold.
-fullPath="F:/SantaLucia2/Flowers/FL090/130801AA.TLV"
-ID="FL090_AGG9"
-Target(fullPath,ID)
-run(fullPath,.9,40,ID)
-
-
-########################Try a new flower, really awful flower
-
-#fullPath="F:/SantaLucia2/Flowers/FL081/130727AB.TLV"
-#ID="FL081"
-#Target(fullPath,ID)
-#run(fullPath,.4,40,ID)
-
-########################## One more flower
-#fullPath="F:/SantaLucia2/Flowers/FL083/130730AA.TLV"
-#ID="FL083_AGG4"
-#Target(fullPath,ID)
-#run(fullPath,.4,40,ID)
-
-########################## Same flower, double the background averaging
-#fullPath="F:/SantaLucia2/Flowers/FL083/130730AA.TLV"
-#ID="FL083_AGG8"
-#Target(fullPath,ID)
-#run(fullPath,.8,40,ID)
-
-
-
-#Destroy Windows
-cv2.destroyAllWindows()
