@@ -345,9 +345,13 @@ def run(fP,accAvg,threshL):
                         #cv2.imshow('output',display_image)
                         ##cv2.waitKey(100)    
                 #cv2.destroyWindow("output")
-                        
-                bounding_box_list = merge_collided_bboxes( trimmed_box_list )
-
+                
+                try:       
+                        bounding_box_list = merge_collided_bboxes( trimmed_box_list )
+                except Exception, e:
+                        print 'Error:',e
+                        print 'Box Merge Fail:'
+                        continue                
                 # Draw the merged box list:
                 
                 for box in bounding_box_list:
@@ -580,8 +584,7 @@ def run(fP,accAvg,threshL):
                 
                 ##################################################
                 
-                
-                ##log_file.flush()
+                #log_file.flush()
                 
                 ## If only using a camera, then there is no time.sleep() needed, 
                 ## because the camera clips us to 15 fps.  But if reading from a file,
@@ -618,19 +621,23 @@ for vid in videoPool:
         ##The first arguement is the filepath of the video
         ##The second argument is the name of the output folder.
         Target(vid)
+        
+        #Place run inside try catch loop; in case of error, step to next video
         ##Run Motion Function
         ##The first arguement is the filepath of the video
         ##The second argument is the accumlated averaging, higher values are more sensitive to sudden movements
         ##The third value is the thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
-        run(vid,.1,40)
+        try:
+                run(vid,.1,40)
+        except Exception, e:
+                print 'Error:',e
+                print 'Video:',vid
+                continue  ## I thought this would just move on to the next row in 'hkx'        
+        
 
-
-##############Run a few for the weekend
-
-##fullPath=
-##ID="FL078"
-##Target(fullPath,ID)
-##run(fullPath,.4,40,ID)
+##############Run a sample video
+#Target(videoPool[48])
+#run(videoPool[48],.4,40)
 
 ####################Try a new flower
 ##fullPath=
