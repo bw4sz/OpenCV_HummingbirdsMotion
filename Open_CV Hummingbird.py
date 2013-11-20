@@ -89,7 +89,9 @@ def Target(fP):
                 
             
 def run(fP,accAvg,threshL):
+        #Define Directories
         ID = str.split(fP,"\\")[3]
+        subD = str.split(str.split(fP,"\\")[4],".")[0]
         # Initialize
         #log_file_name = "tracker_output.log"
         #log_file = file( log_file_name, 'a' )
@@ -574,7 +576,7 @@ def run(fP,accAvg,threshL):
                 ##################################################
                 #To Do, write to file if the center is in the box?
                 #If it makes it to here, write an image
-                cv2.imwrite(fileD+ID+"/"+str(frame_count)+".jpg",camera_imageO)
+                cv2.imwrite(fileD+ID+"/"+subD+"/"+str(frame_count)+".jpg",camera_imageO)
                 
                 ##################################################
                 
@@ -601,6 +603,9 @@ def run(fP,accAvg,threshL):
 #Run Analysis
 ####################################################################################################
 
+#Overall destination
+fileD="C:/Users/Jorge/Dropbox/Thesis/Maquipucuna_SantaLucia/MotionTest/"
+
 videoPool= []
 #Create Pool of Videos
 for root, dirs, files in os.walk("F:\\SantaLucia2\\Flowers\\"):
@@ -608,92 +613,77 @@ for root, dirs, files in os.walk("F:\\SantaLucia2\\Flowers\\"):
                 if file.endswith(".TLV"):
                         videoPool.append( os.path.join(root, file))
 
-
-#Set location of the file directory for output. 
-fileD="C:/Users/Jorge/Dropbox/Thesis/Maquipucuna_SantaLucia/MotionTest/"
-
-
-string1= "F:/SantaLucia2/Flowers/FL072/130726AA.tlv"
-obj1 = re.search('',string1)
-print(obj1.group(1))
-
-#fullPath="F:/SantaLucia2/Flowers/FL072/130726AA.tlv"
-##Set the file path to video
-##The first arguement is the filepath of the video
-##The second argument is the name of the output folder.
-
-##Set output directory name
-ID="Test1"
-
-Target(fullPath)
-
-##Run Motion Function
-##The first arguement is the filepath of the video
-##The second argument is the accumlated averaging, higher values are more sensitive to sudden movements
-##The third value is the thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
-
-run(fullPath,.4,40)
+for vid in videoPool:      
+        ##Set the file path to video
+        ##The first arguement is the filepath of the video
+        ##The second argument is the name of the output folder.
+        Target(vid)
+        ##Run Motion Function
+        ##The first arguement is the filepath of the video
+        ##The second argument is the accumlated averaging, higher values are more sensitive to sudden movements
+        ##The third value is the thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
+        run(vid,.1,40)
 
 
-#############Run a few for the weekend
+##############Run a few for the weekend
 
-#fullPath=
-#ID="FL078"
-#Target(fullPath,ID)
-#run(fullPath,.4,40,ID)
+##fullPath=
+##ID="FL078"
+##Target(fullPath,ID)
+##run(fullPath,.4,40,ID)
 
-###################Try a new flower
-#fullPath=
-#ID="FL078_T40"
-#Target(fullPath,ID)
-#run(fullPath,.4,40,ID)
+####################Try a new flower
+##fullPath=
+##ID="FL078_T40"
+##Target(fullPath,ID)
+##run(fullPath,.4,40,ID)
+
+#####Same flower, twice the threshold.
+##fullPath="F:/SantaLucia2/Flowers/FL090/130801AA.TLV"
+##ID="FL090_T80"
+##Target(fullPath,ID)
+##run(fullPath,.4,80,ID)
+
 
 ####Same flower, twice the threshold.
 #fullPath="F:/SantaLucia2/Flowers/FL090/130801AA.TLV"
-#ID="FL090_T80"
-#Target(fullPath,ID)
-#run(fullPath,.4,80,ID)
-
-
-###Same flower, twice the threshold.
-fullPath="F:/SantaLucia2/Flowers/FL090/130801AA.TLV"
-ID="FL090_T40"
-Target(fullPath,ID)
-run(fullPath,.4,40,ID)
-
-
-###Same flower, twice the threshold.
-fullPath="F:/SantaLucia2/Flowers/FL090/130801AA.TLV"
-ID="FL090_AGG2"
-Target(fullPath,ID)
-run(fullPath,.2,40,ID)
-
-
-###Same flower, twice the threshold.
-fullPath="F:/SantaLucia2/Flowers/FL090/130801AA.TLV"
-ID="FL090_AGG9"
-Target(fullPath,ID)
-run(fullPath,.9,40,ID)
-
-
-########################Try a new flower, really awful flower
-
-#fullPath="F:/SantaLucia2/Flowers/FL081/130727AB.TLV"
-#ID="FL081"
+#ID="FL090_T40"
 #Target(fullPath,ID)
 #run(fullPath,.4,40,ID)
 
-########################## One more flower
-#fullPath="F:/SantaLucia2/Flowers/FL083/130730AA.TLV"
-#ID="FL083_AGG4"
-#Target(fullPath,ID)
-#run(fullPath,.4,40,ID)
 
-########################## Same flower, double the background averaging
-#fullPath="F:/SantaLucia2/Flowers/FL083/130730AA.TLV"
-#ID="FL083_AGG8"
+####Same flower, twice the threshold.
+#fullPath="F:/SantaLucia2/Flowers/FL090/130801AA.TLV"
+#ID="FL090_AGG2"
 #Target(fullPath,ID)
-#run(fullPath,.8,40,ID)
+#run(fullPath,.2,40,ID)
+
+
+####Same flower, twice the threshold.
+#fullPath="F:/SantaLucia2/Flowers/FL090/130801AA.TLV"
+#ID="FL090_AGG9"
+#Target(fullPath,ID)
+#run(fullPath,.9,40,ID)
+
+
+#########################Try a new flower, really awful flower
+
+##fullPath="F:/SantaLucia2/Flowers/FL081/130727AB.TLV"
+##ID="FL081"
+##Target(fullPath,ID)
+##run(fullPath,.4,40,ID)
+
+########################### One more flower
+##fullPath="F:/SantaLucia2/Flowers/FL083/130730AA.TLV"
+##ID="FL083_AGG4"
+##Target(fullPath,ID)
+##run(fullPath,.4,40,ID)
+
+########################### Same flower, double the background averaging
+##fullPath="F:/SantaLucia2/Flowers/FL083/130730AA.TLV"
+##ID="FL083_AGG8"
+##Target(fullPath,ID)
+##run(fullPath,.8,40,ID)
 
 
 
