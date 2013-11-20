@@ -68,7 +68,7 @@ def merge_collided_bboxes( bbox_list ):
         return bbox_list
 
 
-def Target(fP,ID):
+def Target(fP):
         cap = cv2.VideoCapture(fP)
         frame = cap.read()[1]
         width = np.size(frame, 1)
@@ -80,12 +80,16 @@ def Target(fP,ID):
         #cv2.imshow("frame",frame)
         #cv2.waitKey(100)
         #cv2.destroyWindow("frame")
-            
+        #Create directory and subdirectory
+        ID = str.split(fP,"\\")[3]
+        subD = str.split(str.split(fP,"\\")[4],".")[0]
     #Create a directory for output files
-        if not os.path.exists(fileD+ID):
-                os.makedirs(fileD+ID)            
+        if not os.path.exists(fileD+ID+"/"+subD):
+                os.makedirs(fileD+ID+"/"+subD)
+                
             
-def run(fP,accAvg,threshL,ID):
+def run(fP,accAvg,threshL):
+        ID = str.split(fP,"\\")[3]
         # Initialize
         #log_file_name = "tracker_output.log"
         #log_file = file( log_file_name, 'a' )
@@ -596,18 +600,18 @@ def run(fP,accAvg,threshL,ID):
 ####################################################################################################
 #Run Analysis
 ####################################################################################################
-#Create Target Class
+
+videoPool= []
+#Create Pool of Videos
+for root, dirs, files in os.walk("F:\\SantaLucia2\\Flowers\\"):
+        for file in files:
+                if file.endswith(".TLV"):
+                        videoPool.append( os.path.join(root, file))
 
 
-
-#Set location of the file directory
+#Set location of the file directory for output. 
 fileD="C:/Users/Jorge/Dropbox/Thesis/Maquipucuna_SantaLucia/MotionTest/"
 
-#Set Path to video files
-videoP= ["C:/Users/Jorge/Documents/OpenCV_HummingbirdsMotion/PlotwatcherTest.tlv", "F:/SantaLucia2/Flowers/FL078/130725AB.TLV", "F:/SantaLucia2/Flowers/FL090/130801AA.TLV"]
-
-#Set IDs with each of those paths
-ID_list
 
 string1= "F:/SantaLucia2/Flowers/FL072/130726AA.tlv"
 obj1 = re.search('',string1)
@@ -621,14 +625,14 @@ print(obj1.group(1))
 ##Set output directory name
 ID="Test1"
 
-Target(fullPath,ID)
+Target(fullPath)
 
 ##Run Motion Function
 ##The first arguement is the filepath of the video
 ##The second argument is the accumlated averaging, higher values are more sensitive to sudden movements
 ##The third value is the thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
 
-run(fullPath,.4,40,ID)
+run(fullPath,.4,40)
 
 
 #############Run a few for the weekend
