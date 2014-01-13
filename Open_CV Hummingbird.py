@@ -99,17 +99,17 @@ def merge_collided_bboxes( bbox_list ):
 def run(fP,accAvg,threshL,typ):
         #Define Directories
         if typ =="Feeders":
-                        ID= str.split(fP,"\\")[4]
-                        subD=str.split(fP,"\\")[5]
-                        subDD=str.split( str.split(fP,"\\")[6],".")[0]
+                        ID= str.split(fP,"\\")[5]
+                        subD=str.split(fP,"\\")[6]
+                        subDD=str.split( str.split(fP,"\\")[7],".")[0]
                         print(ID + "/" + subD + "/" + subDD)
                         file_destination = fileD+ID+"/"+subD + "/" + subDD
                         if not os.path.exists(fileD+ID+"/"+subD +"/" + subDD):
                                         os.makedirs(fileD+ID+"/"+subD + "/" + subDD)                
                 #Create directory and subdirectory
         if typ =="Flowers":
-                ID = str.split(fP,"\\")[3]
-                subD = str.split(str.split(fP,"\\")[4],".")[0]
+                ID = str.split(fP,"\\")[5]
+                subD = str.split(str.split(fP,"\\")[6],".")[0]
                 print(ID + "/" + subD)
                 file_destination=fileD+ID+"/"+subD
                 if not os.path.exists(fileD+ID+"/"+subD):
@@ -743,7 +743,7 @@ for root, dirs, files in os.walk("F:\SantaLucia2\Feeders\Competition"):
 ##Set type
 #typ="Feeders" 
 #if typ =="Feeders":
-        #ID= str.split(videoPool[26],"\\")[4]
+        ID= str.split("G:\\Fieldwork2013\\Maqui2\\Feeders\\1500R\\Low\\130714AA.TLV","\\")[4]
         #subD=str.split(videoPool[26],"\\")[5]
         #subDD=str.split( str.split(videoPool[45],"\\")[6],".")[0]
         #print(ID + "/" + subD + "/" + subDD)
@@ -761,9 +761,12 @@ for root, dirs, files in os.walk("F:\SantaLucia2\Feeders\Competition"):
 #subD = str.split(str.split("F:\\130612AA.TLV","\\")[1],".")[0]
 
 #If you want to find a specific string? still in progress. 
-#desired_video=
+#desired_video='F:\\SantaLucia2\\Feeders\\Competition\\1900\\Corolla\\15\\High\\130810AB.TLV'
 #desired_video in videoPool
-run("F:\\SantaLucia2\\Feeders\\Competition\\1900\\High\\130807AA.TLV",.3,100,"Feeders")
+run("G:\Fieldwork2013\BackupfromSmalldrive_donotuse\Santa Lucia 1\Feeders\2500\High\F2500H\\130628AA.TLV",.30,100,"Feeders")
+run("G:\Fieldwork2013\BackupfromSmalldrive_donotuse\Santa Lucia 1\Feeders\2500\Low\F2500H\\130628AA.TLV",.30,100,"Feeders")
+
+
 
 ##Destroy Windows
 cv2.destroyAllWindows()
