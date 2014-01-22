@@ -1,5 +1,16 @@
+import cv2
+import cv2.cv as cv
+import numpy as np
+import time
+from scipy import *
+from scipy.cluster import vq
+import numpy
+import sys, os, random, hashlib
+import re
+from math import *
+
 #Set location of the file directory
-fileD="C:/Users/Jorge/Documents/OpenCV_HummingbirdsMotion/"
+fileD="C:/Users/Office653-1/Documents/GitHub/OpenCV_HummingbirdsMotion/"
 
 #Set the file path to video
 

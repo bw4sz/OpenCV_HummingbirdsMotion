@@ -70,11 +70,7 @@ def merge_collided_bboxes( bbox_list ):
 
 #def Target(fP,typ):
         #cap = cv2.VideoCapture(fP)
-        #frame = cap.read()[1]
-        #width = np.size(frame, 1)
-        #height = np.size(frame, 0)
-        #frame_size=(width, height)
-        
+       
         
         ##Optionally show
         ##cv2.imshow("frame",frame)
@@ -99,9 +95,9 @@ def merge_collided_bboxes( bbox_list ):
 def run(fP,accAvg,threshL,typ):
         #Define Directories
         if typ =="Feeders":
-                        ID= str.split(fP,"\\")[6]
-                        subD=str.split(fP,"\\")[7]
-                        subDD=str.split( str.split(fP,"\\")[8],".")[0]
+                        ID= str.split(fP,"\\")[1]
+                        subD=str.split(fP,"\\")[2]
+                        subDD=str.split( str.split(fP,"\\")[3],".")[0]
                         print(ID + "/" + subD + "/" + subDD)
                         file_destination = fileD+ID+"/"+subD + "/" + subDD
                         if not os.path.exists(fileD+ID+"/"+subD +"/" + subDD):
@@ -124,6 +120,12 @@ def run(fP,accAvg,threshL,typ):
         # Capture the first frame from file for image properties
         orig_image = cap.read()[1]  
         
+        ###Get information about camera and image
+
+        width = np.size(orig_image, 1)
+        height = np.size(orig_image, 0)
+        frame_size=(width, height)
+ 
         #For now, just cut off the bottom 5% ####NEEDS TO BE CHANGED
         display_image = orig_image[1:700,1:1280]
         #cv2.imshow("frame",display_image)
@@ -180,6 +182,9 @@ def run(fP,accAvg,threshL,typ):
         width = np.size(display_image, 1)
         height = np.size(display_image, 0)
         frame_size=(width, height)
+        
+        #Get frame rate
+        cap.get(cv.CV_CAP_PROP_FRAME_COUNT)        
         
         # Greyscale image, thresholded to create the motion mask:
         grey_image = np.uint8(display_image)
@@ -242,7 +247,7 @@ def run(fP,accAvg,threshL,typ):
                                 #Just count the frames in the last half hour, ie, between frame count and frame count - 1800
                                 if(frame_count-900 < int(jpgN) < frame_count):
                                         counter = counter + 1
-                       #If the total base is 1800 (30min window), then assuming 95% of images are junk the threshold should be
+                       #If the total base is 900 (15min window), then assuming 95% of images are junk the threshold should be
                         
                         if counter > (900*.05) :
                                 accAvg = accAvg + .025
@@ -763,8 +768,8 @@ for root, dirs, files in os.walk("F:\SantaLucia2\Feeders\Competition"):
 #If you want to find a specific string? still in progress. 
 #desired_video='F:\\SantaLucia2\\Feeders\\Competition\\1900\\Corolla\\15\\High\\130810AB.TLV'
 #desired_video in videoPool
-run("F:\\FieldWork2013\\Maqui1\\Feeders\\Maqui_1\\Comp\\1300\\1300_H\\130612AA",.30,100,"Feeders")
-run("F:\\FieldWork2013\\Maqui1\\Feeders\\Maqui_1\\Comp\\1300\\1300_L\\130612AA",.30,100,"Feeders")
+#run("F:\\FieldWork2013\\Santa Lucia 1\\Feeders\\1900\\High\\130626AC.TLV",.30,100,"Feeders")
+run("F:\\FieldWork2013\\Santa Lucia 1\\HDV_0341.MP4",.25,100,"Feeders")
 
 
 
