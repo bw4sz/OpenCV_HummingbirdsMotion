@@ -70,13 +70,14 @@ def merge_collided_bboxes( bbox_list ):
 def run(fP,accAvg,threshL,typ):
         #Define Directories
         if typ =="Feeders":
-                        ID= str.split(fP,"\\")[1]
-                        subD=str.split(fP,"\\")[2]
-                        subDD=str.split( str.split(fP,"\\")[3],".")[0]
-                        print(ID + "/" + subD + "/" + subDD)
-                        file_destination = fileD+ID+"/"+subD + "/" + subDD
-                        if not os.path.exists(fileD+ID+"/"+subD +"/" + subDD):
-                                        os.makedirs(fileD+ID+"/"+subD + "/" + subDD)                
+                splitfp =str.split(fP,"\\")
+                ID= splitfp[len(splitfp)-3]
+                subD=splitfp[len(splitfp)-2]
+                subDD=str.split(splitfp[len(splitfp)-1],".")[0]
+                print(ID + "/" + subD + "/" + subDD)
+                file_destination = fileD+ID+"/"+subD + "/" + subDD
+                if not os.path.exists(fileD+ID+"/"+subD +"/" + subDD):
+                        os.makedirs(fileD+ID+"/"+subD + "/" + subDD)                
                 #Create directory and subdirectory
         if typ =="Flowers":
                 ID = str.split(fP,"\\")[5]
@@ -632,7 +633,7 @@ def run(fP,accAvg,threshL,typ):
 ######################################################################################################
 
 ##Overall destination
-fileD="C:/Users/Office653-1/Dropbox/Thesis/Maquipucuna_SantaLucia/MotionTest/"
+fileD="C:/Users/Jorge/Dropbox/Thesis/Maquipucuna_SantaLucia/MotionTest/"
 
 videoPool= []
 #Create Pool of Videos
@@ -745,9 +746,13 @@ for root, dirs, files in os.walk("F:\SantaLucia2\Feeders\Competition"):
 #If you want to find a specific string? still in progress. 
 #desired_video='F:\\SantaLucia2\\Feeders\\Competition\\1900\\Corolla\\15\\High\\130810AB.TLV'
 #desired_video in videoPool
-run("F:\\FieldWork2013\\Santa Lucia 1\\Feeders\\1900\\High\\130626AC.TLV",.30,100,"Feeders")
-run("F:\\FieldWork2013\\Santa Lucia 1\\HDV_0341.MP4",.25,100,"Feeders")
 
+
+#run("G:\\Fieldwork2013\\Maqui2\\Feeders\\1700R\\Low\\130721AA.TLV",.35,100,"Feeders")
+#run("G:\\Fieldwork2013\\Maqui2\\Feeders\\1700R\\High\\130721AA.TLV",.35,100,"Feeders")
+
+run("G:\\Fieldwork2013\\BackupfromSmalldrive_donotuse\\Santa Lucia 1\\Feeders\\R2300\\High\\130701AA.TLV",.35,100,"Feeders")
+run("G:\\Fieldwork2013\\BackupfromSmalldrive_donotuse\\Santa Lucia 1\\Feeders\\R2300\\Low\\130701AA.TLV",.35,100,"Feeders")
 
 
 ##Destroy Windows
