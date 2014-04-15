@@ -6,7 +6,7 @@ from scipy import *
 from scipy.cluster import vq
 import numpy
 import sys, os, random, hashlib
-import re
+
 from math import *
 
 """
@@ -65,28 +65,27 @@ def merge_collided_bboxes( bbox_list ):
                                 return merge_collided_bboxes( bbox_list )
         
         # When there are no collions between boxes, return that list:
-        return bbox_list   
-            
-def run(fP,accAvg,threshL,typ):
-        #Define Directories
-        if typ =="Feeders":
-                splitfp =str.split(fP,"\\")
-                ID= splitfp[len(splitfp)-3]
-                subD=splitfp[len(splitfp)-2]
-                subDD=str.split(splitfp[len(splitfp)-1],".")[0]
-                print(ID + "/" + subD + "/" + subDD)
-                file_destination = fileD+ID+"/"+subD + "/" + subDD
-                if not os.path.exists(fileD+ID+"/"+subD +"/" + subDD):
-                        os.makedirs(fileD+ID+"/"+subD + "/" + subDD)                
-                #Create directory and subdirectory
-        if typ =="Flowers":
-                ID = str.split(fP,"\\")[5]
-                subD = str.split(str.split(fP,"\\")[6],".")[0]
-                print(ID + "/" + subD)
-                file_destination=fileD+ID+"/"+subD
-                if not os.path.exists(fileD+ID+"/"+subD):
-                                os.makedirs(fileD+ID+"/"+subD)          
+        return bbox_list
 
+
+def Target(fP,ID):
+        cap = cv2.VideoCapture(fP)
+        frame = cap.read()[1]
+        width = np.size(frame, 1)
+        height = np.size(frame, 0)
+        frame_size=(width, height)
+        
+        
+        #Optionally show
+        #cv2.imshow("frame",frame)
+        #cv2.waitKey(100)
+        #cv2.destroyWindow("frame")
+            
+    #Create a directory for output files
+        if not os.path.exists(fileD+ID):
+                os.makedirs(fileD+ID)            
+            
+def run(fP,accAvg,threshL,ID):
         # Initialize
         #log_file_name = "tracker_output.log"
         #log_file = file( log_file_name, 'a' )
@@ -96,16 +95,10 @@ def run(fP,accAvg,threshL,typ):
         # Capture the first frame from file for image properties
         orig_image = cap.read()[1]  
         
-        ###Get information about camera and image
-
-        width = np.size(orig_image, 1)
-        height = np.size(orig_image, 0)
-        frame_size=(width, height)
- 
         #For now, just cut off the bottom 5% ####NEEDS TO BE CHANGED
         display_image = orig_image[1:700,1:1280]
         #cv2.imshow("frame",display_image)
-        #cv2.waitKey(1000)
+        #cv2.waitKey(1200)
         #cv2.destroyWindow("frame")        
 
         #Define SubArea Based on Mouse Event   
@@ -159,9 +152,6 @@ def run(fP,accAvg,threshL,typ):
         height = np.size(display_image, 0)
         frame_size=(width, height)
         
-        #Get frame rate
-        frame_rate=cap.get(cv.CV_CAP_PROP_FPS)        
-        
         # Greyscale image, thresholded to create the motion mask:
         grey_image = np.uint8(display_image)
         
@@ -210,44 +200,23 @@ def run(fP,accAvg,threshL,typ):
                 camera_image = camera_imageO[1:700,1:1280]                
                 frame_count += 1
                 frame_t0 = time.time()
-                
-                ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
-                #Every 15min, reset the agg threshold, depending on wind?
-                #how many frames per fiteen minutes? Open cv seems have 10 frames per second for these videos instead of 1. 
-                fift=15*60*frame_rate/10
-                
-                if frame_count % fift == 0:  
-                        #How many frames have been spit out in the last half hour?
-                        outputs=os.listdir(file_destination)
-                        counter=0
-                        for fil in outputs:
-                                #Split out the fileextensions                                
-                                jpgN =os.path.splitext(fil)[0]
-                                #Just count the frames in the last half hour, ie, between frame count and frame count - 1800
-                                if(frame_count-fift < int(jpgN) < frame_count):
-                                        counter = counter + 1
-                       #If the total base is fift (15min window), then assuming 95% of images are junk the threshold should be
-                        
-                        if counter > (fift*.05) :
-                                accAvg = accAvg + .025
-                        if counter < (fift*.05) :
-                                accAvg = accAvg - .025
-                        print(fileD+ID+"/"+subD+"/" + str(frame_count) + " accAvg is changed to: " + str(accAvg))
-                                
+                              
                 # Create an image with interactive feedback:
                 display_image = camera_image.copy()
                 
                 # Create a working "color image" to modify / blur
                 color_image =  display_image.copy()
-                #cv2.imshow("Initial",color_image)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("Initial")                        
+                cv2.imshow("Initial",color_image)
+                cv2.waitKey(1200)
+                cv2.destroyWindow("Initial")                        
+                cv2.imwrite(file_destination + "/"+str(frame_count)+ "Initial" + ".jpg",color_image)
 
                 # Smooth to get rid of false positives
                 color_image = cv2.GaussianBlur(color_image,(9,9),0)
-                #cv2.imshow("Blur",color_image)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("Blur")  
+                cv2.imshow("Blur",color_image)
+                cv2.waitKey(1200)
+                cv2.destroyWindow("Blur")  
+                cv2.imwrite(file_destination + "/"+str(frame_count)+ "Blur" + ".jpg",color_image)
                 
                 # Use the Running Average as the static background                        
                 # a = 0.020 leaves artifacts lingering way too long.
@@ -260,15 +229,17 @@ def run(fP,accAvg,threshL,typ):
                 #cv2.destroyWindow("frame")                                       
                                        
                 running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
-                #cv2.imshow("runnAVG",running_average_in_display_color_depth)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("runnAVG")                        
+                cv2.imshow("runnAVG",running_average_in_display_color_depth)
+                cv2.waitKey(1200)
+                cv2.destroyWindow("runnAVG")                        
                 
                 # Subtract the current frame from the moving average.
                 difference=cv2.absdiff( color_image, running_average_in_display_color_depth)
-                #cv2.imshow("diff",difference)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("diff")
+                cv2.imshow("diff",difference)
+                cv2.waitKey(1200)
+                cv2.destroyWindow("diff")
+                cv2.imwrite(file_destination + "/"+str(frame_count)+ "diff" + ".jpg",difference)
+                
                 
                 # Convert the image to greyscale.
                 grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
@@ -278,15 +249,17 @@ def run(fP,accAvg,threshL,typ):
                 
                 # Threshold the image to a black and white motion mask:
                 ret,grey_image = cv2.threshold(grey_image, threshL, 255, cv2.THRESH_BINARY )
-                #cv2.imshow("Threshold",grey_image)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("Threshold")
+                cv2.imshow("Threshold",grey_image)
+                cv2.waitKey(1200)
+                cv2.destroyWindow("Threshold")
+                cv2.imwrite(file_destination + "/"+str(frame_count)+ "threshold" + ".jpg",grey_image)
+                
                 
                 # Smooth and threshold again to eliminate "sparkles"
                 #grey_image = cv2.GaussianBlur(grey_image,(9,9),0)    
                 #ret,grey_image = cv2.threshold(grey_image, 240, 255, cv2.THRESH_BINARY )
                 #cv2.imshow("frame",grey_image)
-                #cv2.waitKey(1000)
+                #cv2.waitKey(1200)
                 #cv2.destroyWindow("frame") 
                 
                 non_black_coords_array = numpy.where( grey_image > 3 )
@@ -301,10 +274,11 @@ def run(fP,accAvg,threshL,typ):
                 
                 if len(contours) == 0 :
                         continue                        
-                #print(len(contours))
+                print(len(contours))
                 cnt=contours[0]
                 len(cnt)
                         
+                       
                         
                 drawing = np.uint8(display_image)
                 
@@ -371,20 +345,18 @@ def run(fP,accAvg,threshL,typ):
                         #cv2.imshow('output',display_image)
                         ##cv2.waitKey(100)    
                 #cv2.destroyWindow("output")
-                
-                try:       
-                        bounding_box_list = merge_collided_bboxes( trimmed_box_list )
-                except Exception, e:
-                        print 'Error:',e
-                        print 'Box Merge Fail:'
-                        continue                
+                        
+                bounding_box_list = merge_collided_bboxes( trimmed_box_list )
+
                 # Draw the merged box list:
                 
                 for box in bounding_box_list:
                         cv2.rectangle( display_image, box[0], box[1], (0,255,0), 1 )
-                        #cv2.imshow('output',orig_image)
-                #cv2.waitKey(1000)  
-                #cv2.destroyWindow("output")
+                        cv2.imshow('output',orig_image)
+                cv2.waitKey(1200)  
+                cv2.destroyWindow("output")
+                cv2.imwrite(file_destination + "/"+str(frame_count)+ "output" + ".jpg",orig_image)
+                
                         
                 # Here are our estimate points to track, based on merged & trimmed boxes:
                 estimated_target_count = len( bounding_box_list )
@@ -429,9 +401,9 @@ def run(fP,accAvg,threshL,typ):
                                 center_points.append( center_point )
                                 cv2.circle(display_image, center_point, 10, (255, 0, 0), 2)
                                 cv2.circle(display_image, center_point, 5, (255, 0, 0), 3)
-                                #cv2.imshow('output',orig_image)
-                                #cv2.waitKey(500)  
-                        #cv2.destroyWindow("output")                        
+                                cv2.imshow('output',orig_image)
+                                cv2.waitKey(500)  
+                        cv2.destroyWindow("output")                        
                 # Now we have targets that are NOT computed from bboxes -- just
                 # movement weights (according to kmeans).  If any two targets are
                 # within the same "bbox count", average them into a single target.  
@@ -565,9 +537,11 @@ def run(fP,accAvg,threshL,typ):
                         cv2.circle(camera_imageO, center_point, 15, (c[0], c[1], c[2]), 1)
                         cv2.circle(camera_imageO, center_point, 10, (c[0], c[1], c[2]), 2)
                         cv2.circle(camera_imageO, center_point,  5, (c[0], c[1], c[2]), 3)
-                #cv2.imshow('output',camera_imageO)
-                #cv2.waitKey(1000)  
-                #cv2.destroyWindow("output")                                     
+                cv2.imshow('output',camera_imageO)
+                cv2.waitKey(1200)  
+                cv2.destroyWindow("output")
+                cv2.imwrite(file_destination + "/"+str(frame_count)+ "final" + ".jpg",camera_imageO)
+                
 
                 ###print ("min_size is: " + str(min_size))
                 ### Listen for ESC or ENTER key
@@ -600,17 +574,18 @@ def run(fP,accAvg,threshL,typ):
                 
                 ##cv2.ShowImage( "Target", image )
                 #cv2.imshow("Target",image)
-                #cv2.waitKey(1000)
+                #cv2.waitKey(1200)
                 #cv2.destroyWindow("frame")                        
                 
                 ##################################################
                 #To Do, write to file if the center is in the box?
                 #If it makes it to here, write an image
-                cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",camera_imageO)
+                cv2.imwrite(fileD+ID+"/"+str(frame_count)+".jpg",camera_imageO)
                 
                 ##################################################
                 
-                #log_file.flush()
+                
+                ##log_file.flush()
                 
                 ## If only using a camera, then there is no time.sleep() needed, 
                 ## because the camera clips us to 15 fps.  But if reading from a file,
@@ -628,133 +603,33 @@ def run(fP,accAvg,threshL,typ):
         #print "Got %d frames. %.1f s. %f fps." % ( frame_count, time_delta, processed_fps )
 
 
-######################################################################################################
-###Run Analysis on a Pool of videos
-######################################################################################################
-
-##Overall destination
-fileD="C:/Users/Jorge/Dropbox/Thesis/Maquipucuna_SantaLucia/MotionTest/"
-
-videoPool= []
-#Create Pool of Videos
-for root, dirs, files in os.walk("F:\SantaLucia2\Feeders\Competition"):
-        for file in files:
-                if file.endswith(".TLV"):
-                        videoPool.append( os.path.join(root, file))
-
-#for vid in videoPool:      
-     
-        ##Place run inside try catch loop; in case of error, step to next video
-        ###Run Motion Function
-        ###The first arguement is the filepath of the video
-        ###The second argument is the accumlated averaging, higher values are more sensitive to sudden movements
-        ###The third value is the thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
-        #try:
-                #run(vid,.5,100)
-        #except Exception, e:
-                #print 'Error:',e
-                #print 'Video:',vid
-                #continue  ##         
-
-################Next video Drive
-##Overall destination
-#fileD="C:/Users/Jorge/Dropbox/Thesis/Maquipucuna_SantaLucia/MotionTest/"
-
-#videoPool= []
-##Create Pool of Videos
-#for root, dirs, files in os.walk("G:\\Fieldwork2013\\Maqui2\\Flowers\\"):
-        #for file in files:
-                #if file.endswith(".TLV"):
-                        #videoPool.append( os.path.join(root, file))
-
-#for vid in videoPool:      
-        ###Set the file path to video
-        ###The first arguement is the filepath of the video
-       
-        #try:
-                #run(vid,.1,100)
-        #except Exception, e:
-                #print 'Error:',e
-                #print 'Video:',vid
-                #continue  ##            
-
-################Next video Drive
-##Overall destination
-#fileD="C:/Users/Jorge/Dropbox/Thesis/Maquipucuna_SantaLucia/MotionTest/"
-
-#videoPool= []
-##Create Pool of Videos
-#for root, dirs, files in os.walk("G:\\Fieldwork2013\\Maqui3\\Flowers\\"):
-        #for file in files:
-                #if file.endswith(".TLV"):
-                        #videoPool.append( os.path.join(root, file))
-
-#for vid in videoPool:      
-       
-     
-               
-        #try:
-                #run(vid,.1,100)
-        #except Exception, e:
-                #print 'Error:',e
-                #print 'Video:',vid
-                #continue  ##    
-      
-
-###############Next video Drive
-#Overall destination
-#fileD="G:/MotionTest/"
-
-#videoPool= []
-##Create Pool of Videos
-#for root, dirs, files in os.walk("F:\\SantaLucia2\\Feeders\\Competition\\"):
-        #for file in files:
-                #if file.endswith(".TLV"):
-                        #videoPool.append( os.path.join(root, file))
-
-#for vid in videoPool:      
-        
-    
-        #try:
-                #run(vid,.1,120)
-        #except Exception, e:
-                #print 'Error:',e
-                #print 'Video:',vid
-                #continue  ## 
-        
-################Run an individual video to test what ids look like?
-##Set type
-#typ="Feeders" 
-#if typ =="Feeders":
-        #ID= str.split("G:\\Fieldwork2013\\Maqui2\\Feeders\\1500R\\Low\\130714AA.TLV","\\")[4]
-        #subD=str.split(videoPool[26],"\\")[5]
-        #subDD=str.split( str.split(videoPool[45],"\\")[6],".")[0]
-        #print(ID + "/" + subD + "/" + subDD)
-        
-##Create directory and subdirectory
-#if typ =="Flowers":
-        #ID = str.split(videoPool[26],"\\")[3]
-        #subD = str.split(str.split(videoPool[26],"\\")[4],".")[0]
-        #print(ID + "/" + subD)
-        #file_destination=fileD+ID+"/"+subD
-        #if not os.path.exists(fileD+ID+"/"+subD):
-                        #os.makedirs(fileD+ID+"/"+subD) 
-                        
-#ID = str.split("F:\SantaLucia2\Feeders\Competition\2300\High","\\")[1]
-#subD = str.split(str.split("F:\\130612AA.TLV","\\")[1],".")[0]
-
-#If you want to find a specific string? still in progress. 
-#desired_video='F:\\SantaLucia2\\Feeders\\Competition\\1900\\Corolla\\15\\High\\130810AB.TLV'
-#desired_video in videoPool
+####################################################################################################
+#Run Analysis
+####################################################################################################
+#Create Target Class
 
 
-#run("G:\\Fieldwork2013\\Maqui2\\Feeders\\1700R\\Low\\130721AA.TLV",.35,100,"Feeders")
-#run("G:\\Fieldwork2013\\Maqui2\\Feeders\\1700R\\High\\130721AA.TLV",.35,100,"Feeders")
 
-run("G:\\Fieldwork2013\\BackupfromSmalldrive_donotuse\\Santa Lucia 1\\Feeders\\R2300\\High\\130701AA.TLV",.35,100,"Feeders")
-run("G:\\Fieldwork2013\\BackupfromSmalldrive_donotuse\\Santa Lucia 1\\Feeders\\R2300\\Low\\130701AA.TLV",.35,100,"Feeders")
+#Set location of the file directory
+fileD="C:/Users/Jorge/Documents/OpenCV_HummingbirdsMotion/"
+file_destination="C:/Users/Jorge/Documents/OpenCV_HummingbirdsMotion/"
 
+fullPath="C:/Users/Jorge/Documents/OpenCV_HummingbirdsMotion/PlotwatcherTest.tlv"
 
-##Destroy Windows
-cv2.destroyAllWindows()
+##Set the file path to video
+##The first arguement is the filepath of the video
+##The second argument is the name of the output folder.
+
+##Set output directory name
+ID="Test1"
+
+Target(fullPath,ID)
+
+##Run Motion Function
+##The first arguement is the filepath of the video
+##The second argument is the accumlated averaging, higher values are more sensitive to sudden movements
+##The third value is the thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
+
+run(fullPath,.4,50,ID)
+
 
