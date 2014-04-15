@@ -265,12 +265,15 @@ def run(fP,accAvg,threshL):
                                         counter = counter + 1
                        #If the total base is fift (15min window), then assuming 95% of images are junk the threshold should be
                         
-                        if counter > (fift*.05) :
+                        if counter > (fift*.01) :
                                 accAvg = accAvg + .025
-                        if counter < (fift*.05) :
+                        if counter < (fift*.01) :
                                 accAvg = accAvg - .025
-                        print(fileD+ID+"/"+subD+"/" + str(frame_count) + " accAvg is changed to: " + str(accAvg))
-                                
+                        #Hard code a .2 limit
+			if accAvg < .2 :
+				accAvg=.2
+			print(fileD+ID+"/"+subD+"/" + str(frame_count) + " accAvg is changed to: " + str(accAvg))
+			
                 # Create an image with interactive feedback:
                 display_image = camera_image.copy()
                 
