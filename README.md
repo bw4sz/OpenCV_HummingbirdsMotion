@@ -12,7 +12,7 @@ Please fork and try it yourself, test files are included in this repository, as 
 
 General
 ------------
-You need open_cv, and FFmpeg installed and connected to python.
+You need open_cv, and FFmpeg installed and connected to python. Easiest solution is install python using anaconda distribution. 
 
 Contents
 ----------------------
@@ -21,3 +21,12 @@ Open_CV Hummingbird.py is the workhorse function, it takes in a video path and I
 SingleTest.py is a sample video that shows the steps involved and creates a gui window for each step
 
 test.py was an assortment of test analysis to ensure the system can read and write images. 
+
+Motion.py
+----------------
+
+Python executable - can be run from shell, takes in three arguments file/batch mode, file input, file destination
+
+If not system arguments, they will be asked for direct input. 
+
+#Please check paths depending on your cloned git library - they are not relative. 
