@@ -23,8 +23,8 @@ if len(sys.argv)<2:
         print Usage
 else:
         FileList=sys.argv[1:]
-        for infileName in FieList:
-                print InfileName
+        for infileName in FileList:
+                print infileName
 ##########################################
 #System arguments
 ##########################################
@@ -33,15 +33,20 @@ if(len(sys.argv) >=2):
         #first argument is batch or file
         runtype=sys.argv[1]
         #second argument is filename
-        inDest=sys.argv[2]
+        inDEST=sys.argv[2]
         #third argument is destination file
         fileD=sys.argv[3]
+	##accumlated averaging, higher values are more sensitive to sudden movements
+	#The accumlated average	
+	accAVG = sys.argv[4]
         
 #########################################
 #Get user inputs if no system arguments
 #########################################
 
 if(len(sys.argv)<=2):
+        fileD=raw_input("File Destination Folder:")
+	accAVG=raw_input("Accumalated averaging (default type 0.35:")
         
         runtype=raw_input("runtype batch or file:")
         if(runtype=="file"):
@@ -56,10 +61,15 @@ if(len(sys.argv)<=2):
 #Hitrate, the expected 5 of frames per 15 minutes - this is a helpful adaptive setting that helps tune the model
 frameHIT=.01
 
-#sizetarget
+##accumlated averaging, higher values are more sensitive to sudden movements
+#The accumlated average
+accAVG = .35
+
+#thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
+threshT=100
 
 ##Visualize the frames, this should only be used for testing!
-vis=FALSE
+vis=False
       
 """
 Python Motion Tracker
@@ -403,7 +413,7 @@ def run(fP,accAvg,threshL):
                         if (box_width * box_height) > average_box_area*.3: trimmed_box_list.append( box )
                 
                 ## Draw the trimmed box list:
-                print(len(trimmed_box_list))
+                #print(len(trimmed_box_list))
                 for box in trimmed_box_list:
 			if vis:
 				cv2.rectangle( display_image, box[0], box[1], (0,255,0), 3 )
@@ -628,9 +638,6 @@ def run(fP,accAvg,threshL):
                 
                 
 ######################################################################################################
-#Set file destination
-fileD="C:/Users/Jorge/Dropbox/Thesis/Maquipucuna_SantaLucia/MotionTest/"
-######################################################################################################
 
 ######################################################################################################
 ###Run Analysis on a Pool of videos
@@ -653,7 +660,7 @@ if (runtype == "batch"):
                 ##The second argument is the accumlated averaging, higher values are more sensitive to sudden movements
                 ##The third value is the thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
                 try:
-                        run(vid,.35,100)
+                        run(vid,accAVG,threshT)
                 except Exception, e:
                         print 'Error:',e
                         print 'Video:',vid
@@ -661,7 +668,7 @@ if (runtype == "batch"):
 
 ###If runtype is a single file - run file destination        
 if (runtype == "file"):
-        run(inDEST,.35,100)
+        run(inDEST,accAVG,threshT)
 
 
 ##Destroy Windows
