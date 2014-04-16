@@ -50,6 +50,16 @@ if(len(sys.argv)<=2):
         if(runtype=="batch"):
                 batchpool=raw_input("Enter folder containing videos:")
                 
+#################################################
+#Hard coded variables, these could be changed in the future
+
+#Hitrate, the expected 5 of frames per 15 minutes - this is a helpful adaptive setting that helps tune the model
+frameHIT=.01
+
+#sizetarget
+
+##Visualize the frames, this should only be used for testing!
+vis=FALSE
       
 """
 Python Motion Tracker
@@ -114,7 +124,7 @@ def run(fP,accAvg,threshL):
         #Report name of file
         sys.stderr.write("Processing file %s\n" % (fP))
         
-        #Define Directories, here assuming that we want to append the file structure of the last three folders to the file destination
+        #Define directories, here assuming that we want to append the file structure of the last three folders to the file destination
        
         splitfp =str.split(fP,"/")
         ID= splitfp[len(splitfp)-3]
@@ -126,7 +136,6 @@ def run(fP,accAvg,threshL):
         if not os.path.exists(fileD+ID+"/"+subD +"/" + subDD):
                 os.makedirs(fileD+ID+"/"+subD + "/" + subDD)
                      
-        
         # Initialize
         #log_file_name = "tracker_output.log"
         #log_file = file( log_file_name, 'a' )
@@ -144,12 +153,13 @@ def run(fP,accAvg,threshL):
  
         #For now, just cut off the bottom 5% ####NEEDS TO BE CHANGED
         display_image = orig_image[1:700,1:1280]
-        #cv2.imshow("frame",display_image)
-        #cv2.waitKey(1000)
-        #cv2.destroyWindow("frame")        
-
+	if vis:
+		cv2.imshow("frame",display_image)
+		cv2.waitKey(1000)
+		cv2.destroyWindow("frame")
+		
         #Define SubArea Based on Mouse Event   
-        box=[0,0,0,0]
+	box=[0,0,0,0]
         
         ##        creating mouse callback function
         #def my_mouse_callback(event,x,y,flags,param):
@@ -249,7 +259,7 @@ def run(fP,accAvg,threshL):
                 frame_t0 = time.time()
                 
                 ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
-                #Every 15min, reset the agg threshold, depending on wind?
+                #Every 15min, reset the agg threshold, depending on expected level of movement
                 #how many frames per fiteen minutes? Open cv seems have 10 frames per second for these videos instead of 1. 
                 fift=15*60*frame_rate/10
                 
@@ -265,9 +275,9 @@ def run(fP,accAvg,threshL):
                                         counter = counter + 1
                        #If the total base is fift (15min window), then assuming 95% of images are junk the threshold should be
                         
-                        if counter > (fift*.01) :
+                        if counter > (fift*frameHIT) :
                                 accAvg = accAvg + .025
-                        if counter < (fift*.01) :
+                        if counter < (fift*frameHIT) :
                                 accAvg = accAvg - .025
                         #Hard code a .2 limit
 			if accAvg < .2 :
@@ -278,10 +288,13 @@ def run(fP,accAvg,threshL):
                 display_image = camera_image.copy()
                 
                 # Create a working "color image" to modify / blur
-                color_image =  display_image.copy()
-                #cv2.imshow("Initial",color_image)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("Initial")                        
+                color_image =  display_image.copy()\
+		
+		if vis:
+		
+			cv2.imshow("Initial",color_image)
+			cv2.waitKey(1000)
+			cv2.destroyWindow("Initial")                        
 
                 # Smooth to get rid of false positives
                 color_image = cv2.GaussianBlur(color_image,(9,9),0)
@@ -295,40 +308,37 @@ def run(fP,accAvg,threshL):
                 #This value is very critical.
                                        
                 cv2.accumulateWeighted(color_image,running_average_image,accAvg)
-                #cv2.imshow("frame",running_average_image)
-                ##cv2.waitKey(100)
-                #cv2.destroyWindow("frame")                                       
+                if vis:
+			cv2.imshow("frame",running_average_image)
+			cv2.waitKey(1000)
+			cv2.destroyWindow("frame")                                       
                                        
                 running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
-                #cv2.imshow("runnAVG",running_average_in_display_color_depth)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("runnAVG")                        
+                if vis:
+			cv2.imshow("runnAVG",running_average_in_display_color_depth)
+			cv2.waitKey(1000)
+			cv2.destroyWindow("runnAVG")                        
                 
                 # Subtract the current frame from the moving average.
                 difference=cv2.absdiff( color_image, running_average_in_display_color_depth)
-                #cv2.imshow("diff",difference)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("diff")
+                if vis:
+			cv2.imshow("diff",difference)
+			cv2.waitKey(1000)
+			cv2.destroyWindow("diff")
                 
                 # Convert the image to greyscale.
                 grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
                 #cv2.imshow("Convertgray",grey_image)
-                #cv2.waitKey(100)
+                #cv2.waitKey(1000)
                 #cv2.destroyWindow("Convertgray")
                 
                 # Threshold the image to a black and white motion mask:
                 ret,grey_image = cv2.threshold(grey_image, threshL, 255, cv2.THRESH_BINARY )
-                #cv2.imshow("Threshold",grey_image)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("Threshold")
-                
-                # Smooth and threshold again to eliminate "sparkles"
-                #grey_image = cv2.GaussianBlur(grey_image,(9,9),0)    
-                #ret,grey_image = cv2.threshold(grey_image, 240, 255, cv2.THRESH_BINARY )
-                #cv2.imshow("frame",grey_image)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("frame") 
-                
+		if vis:
+			cv2.imshow("Threshold",grey_image)
+			cv2.waitKey(1000)
+			cv2.destroyWindow("Threshold")
+                              
                 non_black_coords_array = numpy.where( grey_image > 3 )
                 # Convert from numpy.where()'s two separate lists to one list of (x, y) tuples:
                 non_black_coords_array = zip( non_black_coords_array[1], non_black_coords_array[0] )
@@ -350,9 +360,10 @@ def run(fP,accAvg,threshL):
                 
                 ##Draw the initial contours?
                 #for cnt in contours:
-                        #bx,by,bw,bh = cv2.boundingRect(cnt)
-                        #cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw contours in green color
-                        #cv2.imshow('output',drawing)
+		if vis:
+                        bx,by,bw,bh = cv2.boundingRect(cnt)
+                        cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw contours in green color
+                        cv2.imshow('output',drawing)
                         ##cv2.waitKey(100)
                         
     
@@ -369,9 +380,8 @@ def run(fP,accAvg,threshL):
                         approx = cv2.approxPolyDP(cnt,0.1*cv2.arcLength(cnt,True),True)
                         
                 
-                
                 # Find the average size of the bbox (targets), then
-                # remove any tiny bboxes (which are prolly just noise).
+                # remove any tiny bboxes (which are probably just noise).
                 # "Tiny" is defined as any box with 1/10th the area of the average box.
                 # This reduces false positives on tiny "sparkles" noise.
                 box_areas = []
@@ -390,15 +400,16 @@ def run(fP,accAvg,threshL):
                         box_height = box[bottom][0] - box[top][0]
                         
                         # Only keep the box if it's not a tiny noise box:
-                        if (box_width * box_height) > average_box_area*0.1: trimmed_box_list.append( box )
+                        if (box_width * box_height) > average_box_area*.3: trimmed_box_list.append( box )
                 
                 ## Draw the trimmed box list:
-                #print(len(trimmed_box_list))
-                #for box in trimmed_box_list:
-                        #cv2.rectangle( display_image, box[0], box[1], (0,255,0), 3 )
-                        #cv2.imshow('output',display_image)
-                        ##cv2.waitKey(100)    
-                #cv2.destroyWindow("output")
+                print(len(trimmed_box_list))
+                for box in trimmed_box_list:
+			if vis:
+				cv2.rectangle( display_image, box[0], box[1], (0,255,0), 3 )
+				cv2.imshow('output',display_image)
+				cv2.waitKey(100)    
+				cv2.destroyWindow("output")
                 
                 try:       
                         bounding_box_list = merge_collided_bboxes( trimmed_box_list )
@@ -410,9 +421,10 @@ def run(fP,accAvg,threshL):
                 
                 for box in bounding_box_list:
                         cv2.rectangle( display_image, box[0], box[1], (0,255,0), 1 )
-                        #cv2.imshow('output',orig_image)
-                #cv2.waitKey(1000)  
-                #cv2.destroyWindow("output")
+			if vis: 
+				cv2.imshow('output',orig_image)
+				cv2.waitKey(1000)  
+				cv2.destroyWindow("output")
                         
                 # Here are our estimate points to track, based on merged & trimmed boxes:
                 estimated_target_count = len( bounding_box_list )
@@ -448,7 +460,6 @@ def run(fP,accAvg,threshL):
                         if len(codebook) == estimated_target_count: 
                                 k_or_guess = codebook
                         
-                        #points = vq.whiten(array( points ))  # Don't do this!  Ruins everything.
                         codebook, distortion = vq.kmeans( array( points ), k_or_guess )
                         
                         # Convert to tuples (and draw it to screen)
@@ -457,9 +468,10 @@ def run(fP,accAvg,threshL):
                                 center_points.append( center_point )
                                 cv2.circle(display_image, center_point, 10, (255, 0, 0), 2)
                                 cv2.circle(display_image, center_point, 5, (255, 0, 0), 3)
-                                #cv2.imshow('output',orig_image)
-                                #cv2.waitKey(500)  
-                        #cv2.destroyWindow("output")                        
+				if vis:
+					cv2.imshow('output',orig_image)
+					cv2.waitKey(500)  
+					cv2.destroyWindow("output")                        
                 # Now we have targets that are NOT computed from bboxes -- just
                 # movement weights (according to kmeans).  If any two targets are
                 # within the same "bbox count", average them into a single target.  
@@ -550,7 +562,7 @@ def run(fP,accAvg,threshL):
                                         #print "Target %s: Skipping the one iwth distance: %d at %s, C:%s" % (target, distance, nearest_possible_entity[3], nearest_possible_entity[1] )
                                         continue
                                 
-                                #print "Target %s: USING the one iwth distance: %d at %s, C:%s" % (target, distance, nearest_possible_entity[3] , nearest_possible_entity[1])
+                                #print "Target %s: USING the one with distance: %d at %s, C:%s" % (target, distance, nearest_possible_entity[3] , nearest_possible_entity[1])
                                 # Found the nearest entity to claim:
                                 entity_found = True
                                 nearest_possible_entity[2] = frame_t0  # Update last_time_seen
@@ -593,47 +605,28 @@ def run(fP,accAvg,threshL):
                         cv2.circle(camera_imageO, center_point, 15, (c[0], c[1], c[2]), 1)
                         cv2.circle(camera_imageO, center_point, 10, (c[0], c[1], c[2]), 2)
                         cv2.circle(camera_imageO, center_point,  5, (c[0], c[1], c[2]), 3)
-                #cv2.imshow('output',camera_imageO)
-                #cv2.waitKey(1000)  
-                #cv2.destroyWindow("output")                                     
-
-                ###print ("min_size is: " + str(min_size))
-                ### Listen for ESC or ENTER key
-                #c = cv.WaitKey(7) % 0x100
-                #if c == 27 or c == 10:
-                        #break
-            
+		if vis:
+				
+			cv2.imshow('output',camera_imageO)
+			cv2.waitKey(1000)  
+			cv2.destroyWindow("output")                                     
+                      
                 #Show final image
                 
                 ##cv2.ShowImage( "Target", image )
-                #cv2.imshow("Target",image)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("frame")                        
+		
+                if vis:
+			cv2.imshow("Target",camera_imageO)
+			cv2.waitKey(1000)
+			cv2.destroyWindow("frame")                        
                 
                 ##################################################
                 #To Do, write to file if the center is in the box?
                 #If it makes it to here, write an image
                 cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",camera_imageO)
-                
                 ##################################################
                 
-                #log_file.flush()
                 
-                ## If only using a camera, then there is no time.sleep() needed, 
-                ## because the camera clips us to 15 fps.  But if reading from a file,
-                ## we need this to keep the time-based target clipping correct:
-                #frame_t1 = time.time()
-                
-                ### If reading from a file, put in a forced delay:
-                ##if not self.writer:
-                        ##delta_t = frame_t1 - frame_t0
-                        ##if delta_t < ( 1.0 / 15.0 ): time.sleep( ( 1.0 / 15.0 ) - delta_t )
-                        
-        #t1 = time.time()
-        #time_delta = t1 - t0
-        #processed_fps = float( frame_count ) / time_delta
-        #print "Got %d frames. %.1f s. %f fps." % ( frame_count, time_delta, processed_fps )
-
 ######################################################################################################
 #Set file destination
 fileD="C:/Users/Jorge/Dropbox/Thesis/Maquipucuna_SantaLucia/MotionTest/"
