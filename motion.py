@@ -32,13 +32,16 @@ if(len(sys.argv) >=2):
         print("User defined arguments")
         #first argument is batch or file
         runtype=sys.argv[1]
-        #second argument is filename
-        inDEST=sys.argv[2]
+        #second argument is filename, depending on runtype
+	if runtype=="file":
+		inDEST=sys.argv[2]
+	if runtype=="batch":
+		batchpool=sys.argv[2]	
         #third argument is destination file
         fileD=sys.argv[3]
 	##accumlated averaging, higher values are more sensitive to sudden movements
 	#The accumlated average	
-	accAVG = sys.argv[4]
+	accAVG = float(sys.argv[4])
         
 #########################################
 #Get user inputs if no system arguments
@@ -46,7 +49,7 @@ if(len(sys.argv) >=2):
 
 if(len(sys.argv)<=2):
         fileD=raw_input("File Destination Folder:")
-	accAVG=raw_input("Accumalated averaging (default type 0.35:")
+	accAVG=float(raw_input("Accumalated averaging (default type 0.35:"))
         
         runtype=raw_input("runtype batch or file:")
         if(runtype=="file"):
@@ -63,7 +66,7 @@ frameHIT=.01
 
 ##accumlated averaging, higher values are more sensitive to sudden movements
 #The accumlated average
-accAVG = .35
+
 
 #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
 threshT=100
@@ -649,7 +652,7 @@ if (runtype == "batch"):
         #Create Pool of Videos
         for (root, dirs, files) in os.walk(batchpool):
                 for file in files:
-                        if file.endswith(".TLV") or file.endswith(".AVI"):
+                        if file.endswith(".TLV") or file.endswith(".AVI") or file.endswith(".MPG") or file.endswith(".mp4"):
                                 videoPool.append( os.path.join(root, file))
         
         for vid in videoPool:      
