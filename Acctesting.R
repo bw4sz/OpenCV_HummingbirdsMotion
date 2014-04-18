@@ -1,4 +1,6 @@
 ###Motion Threshold Testing
+
+#load packages
 require(reshape)
 require(pROC)
 require(ggplot2)
@@ -10,12 +12,16 @@ dat<-read.csv(paste(droppath,"Thesis/Automated_Monitering/MotionTest.csv",sep=""
 #Bring in observer reviewed data
 obsdat<-read.csv(paste(droppath,"Thesis/Maquipucuna_SantaLucia/Data2013/csv/FlowerVideo.csv",sep=""))
 
+##############
+  
 ##Total Number of frames need to be entered by hand.
+
 ##Find number of frames
 ###Video FL80 has 14385 frames
-Totalframes<-matrix(nrow=10,ncol=2)
-colnames(Totalframes)<-c("Video","Frames")
-Totalframes[1,]<-c("FL080","14385")
+Totalframes<-data.frame(ID=NA,Total=NA)
+
+Totalframes[1,colnames(Totalframes)]<-c("FL080","14385")
+Totalframes[2,colnames(Totalframes)]<-c("FL081","14386")
 
 ###Find number of returned "positive" frames for each video
 #set file directory. 
@@ -36,7 +42,8 @@ returned<-lapply(FLID,function(x){
   return(filelength)
 })
 
-head(dat)
+frame_count<-melt(returned)
+colnames(frame_count)<-c("ID","Video","AccAVG","variable","frames","L1")
 
 ##Find number of feeding events for automated and reviewed data
 datEvents<-aggregate(dat$Flower,list(dat$ID,dat$Video,dat$AccAVG),length)
@@ -48,4 +55,14 @@ colnames(obsEvents)<-c("ID","Video","Obs_Events")
 #merge frames together
 alld<-merge(obsEvents,datEvents,by=c("ID","Video"))
 
-ggplot(alld,aes(x=AccAVG,y=Auto_Events/Obs_Events,col=ID)) + geom_line(aes(group=ID)) + ylim(0,1.5)
+#merge with positive frame call
+frame_all<-merge(alld,frame_count,by=c("ID","Video","AccAVG"))
+
+#merge with total number of frames in the video
+fdat<-merge(frame_all,Totalframes,by="ID")
+
+require(scales)
+#plot performance
+p<-ggplot(fdat,aes(x=frames/as.numeric(Total),y=Auto_Events/Obs_Events,col=AccAVG)) + geom_point(size=3.5) + geom_line(aes(group=ID)) + ylim(0,1.5) + facet_wrap(~ID,scales="free") + xlab("Percentage of Candidate Images") + ylab("Percetange of Events Captured") + labs(col="AccAVG Parameter") 
+p + scale_y_continuous(labels = percent_format()) + scale_x_continuous(labels = percent_format()) + scale_colour_gradient(low="blue",high="red") + theme_bw()
+ggsave(paste(droppath,"Thesis/Automated_Monitering/Figures/Sensitivity.jpg",sep=""),dpi=300,height=4.5,width=7.5)
