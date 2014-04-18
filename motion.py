@@ -61,6 +61,9 @@ if(len(sys.argv)<=2):
 #################################################
 #Hard coded variables, these could be changed in the future
 
+##adaptively change sensitivity every 15minutes based on a hit rate?
+adapt=False
+
 #Hitrate, the expected 5 of frames per 15 minutes - this is a helpful adaptive setting that helps tune the model
 frameHIT=.01
 
@@ -73,7 +76,8 @@ threshT=100
 
 ##Visualize the frames, this should only be used for testing!
 vis=False
-      
+
+
 """
 Python Motion Tracker
 
@@ -272,30 +276,31 @@ def run(fP,accAvg,threshL):
                 frame_t0 = time.time()
                 
                 ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
-                #Every 15min, reset the agg threshold, depending on expected level of movement
-                #how many frames per fiteen minutes? Open cv seems have 10 frames per second for these videos instead of 1. 
-                fift=15*60*frame_rate/10
-                
-                if frame_count % fift == 0:  
-                        #How many frames have been spit out in the last half hour?
-                        outputs=os.listdir(file_destination)
-                        counter=0
-                        for fil in outputs:
-                                #Split out the fileextensions                                
-                                jpgN =os.path.splitext(fil)[0]
-                                #Just count the frames in the last half hour, ie, between frame count and frame count - 1800
-                                if(frame_count-fift < int(jpgN) < frame_count):
-                                        counter = counter + 1
-                       #If the total base is fift (15min window), then assuming 95% of images are junk the threshold should be
-                        
-                        if counter > (fift*frameHIT) :
-                                accAvg = accAvg + .025
-                        if counter < (fift*frameHIT) :
-                                accAvg = accAvg - .025
-                        #Hard code a .2 limit
-			if accAvg < .2 :
-				accAvg=.2
-			print(fileD+ID+"/"+subD+"/" + str(frame_count) + " accAvg is changed to: " + str(accAvg))
+		if adapt:
+			#Every 15min, reset the agg threshold, depending on expected level of movement
+			#how many frames per fiteen minutes? Open cv seems have 10 frames per second for these videos instead of 1. 
+			fift=15*60*frame_rate/10
+			
+			if frame_count % fift == 0:  
+				#How many frames have been spit out in the last half hour?
+				outputs=os.listdir(file_destination)
+				counter=0
+				for fil in outputs:
+					#Split out the fileextensions                                
+					jpgN =os.path.splitext(fil)[0]
+					#Just count the frames in the last half hour, ie, between frame count and frame count - 1800
+					if(frame_count-fift < int(jpgN) < frame_count):
+						counter = counter + 1
+			       #If the total base is fift (15min window), then assuming 95% of images are junk the threshold should be
+				
+				if counter > (fift*frameHIT) :
+					accAvg = accAvg + .025
+				if counter < (fift*frameHIT) :
+					accAvg = accAvg - .025
+				#Hard code a .2 limit
+				if accAvg < .2 :
+					accAvg=.2
+				print(fileD+ID+"/"+subD+"/" + str(frame_count) + " accAvg is changed to: " + str(accAvg))
 			
                 # Create an image with interactive feedback:
                 display_image = camera_image.copy()
