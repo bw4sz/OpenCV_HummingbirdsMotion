@@ -78,12 +78,6 @@ threshT=100
 vis=False
 
 
-"""
-Python Motion Tracker
-
-Reads an incoming video stream and tracks motion in real time.
-Detected motion events are logged to a text file.  Also has face detection.
-"""
 
 #
 # BBoxes must be in the format:
@@ -320,9 +314,8 @@ def run(fP,accAvg,threshL):
                 #cv2.waitKey(1000)
                 #cv2.destroyWindow("Blur")  
                 
-                # Use the Running Average as the static background                        
-                # a = 0.020 leaves artifacts lingering way too long.
-                # a = 0.320 works well at 320x240, 15fps.  (1/a is roughly num frames.)
+                # Use the Running Average as the static background
+      
                 #This value is very critical.
                                        
                 cv2.accumulateWeighted(color_image,running_average_image,accAvg)
@@ -533,14 +526,6 @@ def run(fP,accAvg,threshL):
                 for center_point in center_points:
                         if (not center_point in trimmed_center_points) and (not center_point in removed_center_points):
                                 trimmed_center_points.append( center_point )
-                
-                # Draw what we found:
-                #for center_point in trimmed_center_points:
-                #        center_point = ( int(center_point[0]), int(center_point[1]) )
-                #        cv2.circle(display_image, center_point, 20, (255, 255,255), 1)
-                #        cv2.circle(display_image, center_point, 15, (100, 255, 255), 1)
-                #        cv2.circle(display_image, center_point, 10, (255, 255, 255), 2)
-                #        cv2.circle(display_image, center_point, 5,(100, 255, 255), 3)
                 
                 # Determine if there are any new (or lost) targets:
                 actual_target_count = len( trimmed_center_points )
