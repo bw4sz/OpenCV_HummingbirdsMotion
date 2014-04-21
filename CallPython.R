@@ -17,7 +17,7 @@ system(commandC,intern=TRUE,show.output.on.console=TRUE)
 ##loop through accAVG
 for (a in seq(.2,.6,.05)){
   runtype<-"file"
-  inDEST<-"F:/Summer2013flowers/Maqui/Flowers/FL049/130705AA.TLV"
+  inDEST<-"F:/Summer2013flowers/SantaLucia/Flowers/FL098/130812AA.TLV"
   fileD<-paste("F:/AutomatedTests/",paste(a,"/",sep=""),sep="")
   accAVG<-a
   commandC<-capture.output(cat("python motion.py",runtype,inDEST,fileD,accAVG))
