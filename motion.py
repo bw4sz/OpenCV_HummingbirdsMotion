@@ -620,7 +620,7 @@ def run(fP,accAvg,threshL):
 		#set seconds
 		sec = timedelta(seconds=int(frame_rate*frame_count))		
 		d = datetime(1,1,1) + sec
-		log_file.write( "%d %d:%d:%d " % ( frame_count, d.hour,d.minute, d.second) )
+		log_file.write( "%d %d:%d:%d " % ( int(frame_count), d.hour,d.minute, d.second) + "\n" )
 		
                 ##################################################
                 
