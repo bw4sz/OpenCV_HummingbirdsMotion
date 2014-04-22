@@ -276,12 +276,11 @@ def run(fP,accAvg,threshL):
                         break    
                 
                 #For now, just cut off the bottom 5% ####NEEDS TO BE CHANGED
-		camera_image = camera_imageO[1:700,1:1280]
                 
-                #to be done. 
-                #if time_bottom:
-		#else:
-			#camera_image = camera_imageO
+                if time_bottom:
+			camera_image = camera_imageO[1:700,1:1280]	
+		else:
+			camera_image = camera_imageO
 		
                 frame_count += 1
                 frame_t0 = time.time()
@@ -291,7 +290,7 @@ def run(fP,accAvg,threshL):
 			#Every 15min, reset the agg threshold, depending on expected level of movement
 			#how many frames per fiteen minutes? Open cv seems have 10 frames per second for these videos instead of 1 (maybe millisecond?) 
 			#Should be a integer, round it
-			fift=round(15*60*frame_rate/10)
+			fift=round(15*60*frame_rate)
 			
 			if frame_count % fift == 0:  
 				#How many frames have been spit out in the last half hour?
