@@ -18,6 +18,8 @@ import sys, os, random, hashlib
 import re
 from math import *
 import glob
+from datetime import datetime, timedelta
+
 
 if len(sys.argv)<2:
         print Usage
@@ -42,6 +44,10 @@ if(len(sys.argv) >=2):
 	##accumlated averaging, higher values are more sensitive to sudden movements
 	#The accumlated average	
 	accAVG = float(sys.argv[4])
+	
+	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean. 
+	#This statement should be True or False
+	plotwatcher="True" == sys.argv[5]	
         
 #########################################
 #Get user inputs if no system arguments
@@ -57,9 +63,12 @@ if(len(sys.argv)<=2):
         
         if(runtype=="batch"):
                 batchpool=raw_input("Enter folder containing videos:")
+	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean	
+	plotwatcher="True" == raw_input("Does this video come from a plotwatcher camera (True/False):")
+	
                 
 #################################################
-#Hard coded variables, these could be changed in the future
+#Hard coded variables
 
 ##adaptively change sensitivity every 15minutes based on a hit rate?
 adapt=True
@@ -67,19 +76,23 @@ adapt=True
 #Hitrate, the expected 5 of frames per 15 minutes - this is a helpful adaptive setting that helps tune the model
 frameHIT=.01
 
-##accumlated averaging, higher values are more sensitive to sudden movements
-#The accumlated average
-
-
 #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
 threshT=100
 
 ##Visualize the frames, this should only be used for testing!
 vis=False
 
+###############Specific to Plotwatcher PRO, unusual camera setup because they are jpegs strung toghether as iamges, the frame_rate needs to be hard coded. 
+#just create a flag that says if Plotwatcher, set these extra conditions
+if plotwatcher: 
+	#Does the video have a timestamp?
+	frame_rate=1
 
-#Does the video have a timestamp?
-time_bottom = False
+	#For the plotwatcher videos there is a time stamp on the bottom, which changes and needs to be ignored in the motion sensing. 
+	time_bottom = False
+
+
+###########Inputs Read in #################
 
 """
 Python Motion Tracker
@@ -87,6 +100,7 @@ Python Motion Tracker
 Reads an incoming video stream and tracks motion in real time.
 Detected motion events are logged to a text file.  Also has face detection.
 """
+
 
 #
 # BBoxes must be in the format:
@@ -145,20 +159,21 @@ def run(fP,accAvg,threshL):
         sys.stderr.write("Processing file %s\n" % (fP))
         
         #Define directories, here assuming that we want to append the file structure of the last three folders to the file destination
-       
-        splitfp =str.split(fP,"/")
-        ID= splitfp[len(splitfp)-3]
-        subD=splitfp[len(splitfp)-2]
-        subDD=str.split(splitfp[len(splitfp)-1],".")[0]
-        
-        print(ID + "/" + subD + "/" + subDD)
-        file_destination = fileD+ID+"/"+subD + "/" + subDD
-        if not os.path.exists(fileD+ID+"/"+subD +"/" + subDD):
-                os.makedirs(fileD+ID+"/"+subD + "/" + subDD)
+
+	normFP=os.path.normpath(fP)
+	(filepath, filename)=os.path.split(normFP)
+	(shortname, extension) = os.path.splitext(filename)
+	
+	#we want to name the output a folder from the output destination with the named extension        
+        print("Output path will be %s/%s" % (fileD,shortname))
+	
+	file_destination=os.path.join(fileD,shortname)
+        if not os.path.exists(file_destination):
+                os.makedirs(file_destination)
                      
-        # Initialize
-        #log_file_name = "tracker_output.log"
-        #log_file = file( log_file_name, 'a' )
+        # Create a log file with each coordinate
+        log_file_name = file_destination + "/" + "tracker_output.log"
+        log_file = file( log_file_name, 'a' )
         
         cap = cv2.VideoCapture(fP)
             
@@ -171,67 +186,31 @@ def run(fP,accAvg,threshL):
         height = np.size(orig_image, 0)
         frame_size=(width, height)
  
-        #For now, just cut off the bottom 5% ####NEEDS TO BE CHANGED
-        display_image = orig_image[1:700,1:1280]
+        #For now, just cut off the bottom 5% if the timing mechanism is on the bottom. 
+	if time_bottom:
+		display_image = orig_image[1:700,1:1280]
+	else:
+		display_image = orig_image
+
 	if vis:
 		cv2.imshow("frame",display_image)
 		cv2.waitKey(1000)
 		cv2.destroyWindow("frame")
-		
-        #Define SubArea Based on Mouse Event   
-	box=[0,0,0,0]
-        
-        ##        creating mouse callback function
-        #def my_mouse_callback(event,x,y,flags,param):
-                #global drawing_box
-                #if event==cv2.EVENT_LBUTTONDOWN:
-                        #drawing_box=True
-                        #[box[0],box[1],box[2],box[3]]=[x,y,0,0]
-                        #print box[0]
-        
-                #if event==cv2.EVENT_LBUTTONUP:
-                        #drawing_box=False
-                        #if box[2]<0:
-                                #box[0]+=box[2]
-                                #box[2]*=-1
-                        #if box[3]<0:
-                                #box[1]+=box[3]
-                                #box[3]*=-1
-                                
-                #if event==cv2.EVENT_MOUSEMOVE:
-                        #if (drawing_box==True):
-                                #box[2]=x-box[0]
-                                #box[3]=y-box[1]        
-                        
-        ## Function to draw the rectangle                
-        #def draw_box(img,box):
-                #cv2.rectangle(img,(box[0],box[1]),(box[0]+box[2],box[1]+box[3]),(255,0,0))
-        
-        ##        main program        
-        #drawing_box=False              
-        #cv2.namedWindow("Box Example")
-        #cv2.setMouseCallback("Box Example",my_mouse_callback,display_image)
-        
-        #while(1):
-                #temp=display_image.copy()
-                #if drawing_box==True:
-                        #draw_box(temp,box)
-                #cv2.imshow("Box Example",temp)
-                #if cv.WaitKey(20)%0x100==27:break
-
-        #cv2.destroyWindow("Box Example")                
-
-##################################################################################################
-#For now, just have it ignore the bottom few rows, since that is where the time diff is being sent.
-##################################################################################################
-
+	
+                    
         width = np.size(display_image, 1)
         height = np.size(display_image, 0)
         frame_size=(width, height)
         
-        #Get frame rate
-        frame_rate=cap.get(cv.CV_CAP_PROP_FPS)        
-        
+        #Get frame rate if the plotwatcher setting hasn't been called
+	if plotwatcher:
+		frame_rate=frame_rate
+	else:
+		frame_rate=cap.get(cv.CV_CAP_PROP_FPS)        
+		
+        #get frame time relative to start
+        frame_time=cap.get(cv.CV_CAP_PROP_POS_MSEC)     
+	
         print("frame rate: " + str(frame_rate))
 	
         # Greyscale image, thresholded to create the motion mask:
@@ -311,7 +290,7 @@ def run(fP,accAvg,threshL):
 				#Hard code a .2 limit
 				if accAvg < .2 :
 					accAvg=.2
-				print(fileD+ID+"/"+subD+"/" + str(frame_count) + " accAvg is changed to: " + str(accAvg))
+				print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg))
 			
                 # Create an image with interactive feedback:
                 display_image = camera_image.copy()
@@ -331,9 +310,8 @@ def run(fP,accAvg,threshL):
                 #cv2.waitKey(1000)
                 #cv2.destroyWindow("Blur")  
                 
-                # Use the Running Average as the static background                        
-                # a = 0.020 leaves artifacts lingering way too long.
-                # a = 0.320 works well at 320x240, 15fps.  (1/a is roughly num frames.)
+                # Use the Running Average as the static background
+      
                 #This value is very critical.
                                        
                 cv2.accumulateWeighted(color_image,running_average_image,accAvg)
@@ -545,14 +523,6 @@ def run(fP,accAvg,threshL):
                         if (not center_point in trimmed_center_points) and (not center_point in removed_center_points):
                                 trimmed_center_points.append( center_point )
                 
-                # Draw what we found:
-                #for center_point in trimmed_center_points:
-                #        center_point = ( int(center_point[0]), int(center_point[1]) )
-                #        cv2.circle(display_image, center_point, 20, (255, 255,255), 1)
-                #        cv2.circle(display_image, center_point, 15, (100, 255, 255), 1)
-                #        cv2.circle(display_image, center_point, 10, (255, 255, 255), 2)
-                #        cv2.circle(display_image, center_point, 5,(100, 255, 255), 3)
-                
                 # Determine if there are any new (or lost) targets:
                 actual_target_count = len( trimmed_center_points )
                 last_target_count = actual_target_count
@@ -597,7 +567,6 @@ def run(fP,accAvg,threshL):
                                 nearest_possible_entity[2] = frame_t0  # Update last_time_seen
                                 nearest_possible_entity[3] = target  # Update the new location
                                 this_frame_entity_list.append( nearest_possible_entity )
-                                #log_file.write( "%.3f MOVED %s %d %d\n" % ( frame_t0, nearest_possible_entity[0], nearest_possible_entity[3][0], nearest_possible_entity[3][1]  ) )
                                 break
                         
                         if entity_found == False:
@@ -608,7 +577,6 @@ def run(fP,accAvg,threshL):
                                 
                                 new_entity = [ name, color, last_time_seen, target ]
                                 this_frame_entity_list.append( new_entity )
-                                #log_file.write( "%.3f FOUND %s %d %d\n" % ( frame_t0, new_entity[0], new_entity[3][0], new_entity[3][1]  ) )
                 
                 # Now "delete" any not-found entities which have expired:
                 entity_ttl = 1.0  # 1 sec.
@@ -617,7 +585,6 @@ def run(fP,accAvg,threshL):
                         last_time_seen = entity[2]
                         if frame_t0 - last_time_seen > entity_ttl:
                                 # It's gone.
-                                #log_file.write( "%.3f STOPD %s %d %d\n" % ( frame_t0, entity[0], entity[3][0], entity[3][1]  ) )
                                 pass
                         else:
                                 # Save it for next time... not expired yet:
@@ -650,9 +617,16 @@ def run(fP,accAvg,threshL):
 			cv2.destroyWindow("frame")                        
                 
                 ##################################################
-                #To Do, write to file if the center is in the box?
-                #If it makes it to here, write an image
+                #Write image to file
                 cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",camera_imageO)
+		
+		#Log the frame count and the time in video, in case user wants to check in the original
+		#create a time object, this relies on the frame_rate being correct!
+		#set seconds
+		sec = timedelta(seconds=int(frame_rate*frame_count))		
+		d = datetime(1,1,1) + sec
+		log_file.write( "%f %d:%d:%d " % ( frame_count, d.hour,d.minute, d.sec) )
+		
                 ##################################################
                 
                 
@@ -693,3 +667,48 @@ if (runtype == "file"):
 ##Destroy Windows
 cv2.destroyAllWindows()
 
+##To do
+
+#add in mousecall event
+#Define SubArea Based on Mouse Event   
+	#box=[0,0,0,0]
+        
+        ##        creating mouse callback function
+        #def my_mouse_callback(event,x,y,flags,param):
+                #global drawing_box
+                #if event==cv2.EVENT_LBUTTONDOWN:
+                        #drawing_box=True
+                        #[box[0],box[1],box[2],box[3]]=[x,y,0,0]
+                        #print box[0]
+        
+                #if event==cv2.EVENT_LBUTTONUP:
+                        #drawing_box=False
+                        #if box[2]<0:
+                                #box[0]+=box[2]
+                                #box[2]*=-1
+                        #if box[3]<0:
+                                #box[1]+=box[3]
+                                #box[3]*=-1
+                                
+                #if event==cv2.EVENT_MOUSEMOVE:
+                        #if (drawing_box==True):
+                                #box[2]=x-box[0]
+                                #box[3]=y-box[1]        
+                        
+        ## Function to draw the rectangle                
+        #def draw_box(img,box):
+                #cv2.rectangle(img,(box[0],box[1]),(box[0]+box[2],box[1]+box[3]),(255,0,0))
+        
+        ##        main program        
+        #drawing_box=False              
+        #cv2.namedWindow("Box Example")
+        #cv2.setMouseCallback("Box Example",my_mouse_callback,display_image)
+        
+        #while(1):
+                #temp=display_image.copy()
+                #if drawing_box==True:
+                        #draw_box(temp,box)
+                #cv2.imshow("Box Example",temp)
+                #if cv.WaitKey(20)%0x100==27:break
+
+        #cv2.destroyWindow("Box Example")    
