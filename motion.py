@@ -19,7 +19,7 @@ import re
 from math import *
 import glob
 from datetime import datetime, timedelta
-
+import csv
 
 if len(sys.argv)<2:
         print Usage
@@ -85,12 +85,7 @@ vis=False
 ###############Specific to Plotwatcher PRO, unusual camera setup because they are jpegs strung toghether as iamges, the frame_rate needs to be hard coded. 
 #just create a flag that says if Plotwatcher, set these extra conditions
 if plotwatcher: 
-	#Does the video have a timestamp?
-	frame_rate=1
-
-	#For the plotwatcher videos there is a time stamp on the bottom, which changes and needs to be ignored in the motion sensing. 
-	time_bottom = False
-
+	print("Plotwatcher rates set")
 
 ###########Inputs Read in #################
 
@@ -187,7 +182,7 @@ def run(fP,accAvg,threshL):
         frame_size=(width, height)
  
         #For now, just cut off the bottom 5% if the timing mechanism is on the bottom. 
-	if time_bottom:
+	if plotwatcher:
 		display_image = orig_image[1:700,1:1280]
 	else:
 		display_image = orig_image
@@ -204,7 +199,7 @@ def run(fP,accAvg,threshL):
         
         #Get frame rate if the plotwatcher setting hasn't been called
 	if plotwatcher:
-		frame_rate=frame_rate
+		frame_rate=1
 	else:
 		frame_rate=cap.get(cv.CV_CAP_PROP_FPS)        
 		
@@ -256,7 +251,7 @@ def run(fP,accAvg,threshL):
                 
                 #For now, just cut off the bottom 5% ####NEEDS TO BE CHANGED
                 
-                if time_bottom:
+                if plotwatcher:
 			camera_image = camera_imageO[1:700,1:1280]	
 		else:
 			camera_image = camera_imageO
@@ -625,7 +620,7 @@ def run(fP,accAvg,threshL):
 		#set seconds
 		sec = timedelta(seconds=int(frame_rate*frame_count))		
 		d = datetime(1,1,1) + sec
-		log_file.write( "%f %d:%d:%d " % ( frame_count, d.hour,d.minute, d.sec) )
+		log_file.write( "%d %d:%d:%d " % ( frame_count, d.hour,d.minute, d.second) )
 		
                 ##################################################
                 
