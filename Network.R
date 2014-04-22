@@ -17,16 +17,14 @@ require(maptools)
 require(taxize)
 
 #Set droppath
-droppath<-"C:/Users/Jorge/Dropbox/"
+droppath<-"C:/Users/Ben/Dropbox/"
 
 #Set Gitpath
-gitpath<-"C:/Users/Jorge/Documents/OpenCV_HummingbirdsMotion/"
+gitpath<-"C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/"
 
 ###################
 #Source Functions
 ###################
-
-source(paste(gitpath,"NetworkSource.R",sep=""))
 
 ############################################
 ##############Read In Data##################
@@ -42,7 +40,7 @@ dat<-dat[,colnames(dat) %in% c("ID","Video","Date","Iplant_Double","Time","Hummi
 dat$Month<-as.numeric(format(as.Date(dat$Date,"%m/%d/%Y"),"%m"))
 
 #bring in clade data
-clades<-read.csv("C:/Users/Jorge/Documents/Maquipicuna/InputData//CladeList.txt",header=FALSE)[,-1]
+clades<-read.csv("C:/Users/Ben/Documents/Maquipicuna/InputData//CladeList.txt",header=FALSE)[,-1]
 colnames(clades)<-c("Clade","Genus","Species","double","English")
 clades<-clades[,1:5]
 
@@ -70,7 +68,7 @@ missp<-h[!h %in% clades$English]
 paste("misspelled levels",missp)
 h[h %in% missp]
 
-spellC<-c("Booted Racket-tail","Green-crowned Woodnymph","Fawn-breasted Brilliant","Gorgeted Sunangel","Tyrian Metaltail","UKWN","UKWN","Violet-tailed Sylph")
+spellC<-c("Fawn-breasted Brilliant","Gorgeted Sunangel","Tyrian Metaltail","UKWN","Violet-tailed Sylph")
 
 paste("Spelling Correction",spellC)
 
@@ -88,6 +86,7 @@ dat_e<-droplevels(dat[!dat$Hummingbird %in% c("","NANA","UKWN","Ukwn","Western E
 table(dat$Piercing)
 datPierce<-dat_e[dat_e$Piercing %in% c("Yes","YES"),]
 dat_e<-dat_e[!dat_e$Piercing %in% c("Yes","YES"),]
+
 
 #################Data Cleaning Complete################
 
@@ -230,7 +229,7 @@ a$Flowers<-factor(a$Flowers,levels=orderflowers)
 a$Birds<-factor(a$Birds,levels=orderbirds)
 
 ggplot(a[a$value>0,],aes(x=Birds,y=Flowers,fill=value)) + geom_tile()+ theme_bw() + scale_fill_continuous(low="blue",high="red") + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-ggsave("Results/MatrixPlot.jpeg",dpi=300)
+ggsave("Results/MatrixPlot.jpeg",dpi=300,height=6.5,width=7)
 ##################################
 #Retrieve Classes, name them, melt 
 #Start with networkwide properties
