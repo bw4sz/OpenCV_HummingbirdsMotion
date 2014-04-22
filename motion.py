@@ -168,7 +168,7 @@ def run(fP,accAvg,threshL):
                      
         # Create a log file with each coordinate
         log_file_name = file_destination + "/" + "tracker_output.log"
-        log_file = file( log_file_name, 'a' )
+        log_file = file(log_file_name, 'a' )
         
         cap = cv2.VideoCapture(fP)
             
@@ -618,8 +618,9 @@ def run(fP,accAvg,threshL):
 		#Log the frame count and the time in video, in case user wants to check in the original
 		#create a time object, this relies on the frame_rate being correct!
 		#set seconds
-		sec = timedelta(seconds=int(frame_rate*frame_count))		
+		sec = timedelta(seconds=int(frame_rate/frame_count))		
 		d = datetime(1,1,1) + sec
+		
 		log_file.write( "%d %d:%d:%d " % ( int(frame_count), d.hour,d.minute, d.second) + "\n" )
 		
                 ##################################################
@@ -636,9 +637,9 @@ if (runtype == "batch"):
         videoPool= []
         #Create Pool of Videos
         for (root, dirs, files) in os.walk(batchpool):
-                for file in files:
-                        if file.endswith(".TLV") or file.endswith(".AVI") or file.endswith(".MPG") or file.endswith(".mp4"):
-                                videoPool.append( os.path.join(root, file))
+                for files in files:
+                        if files.endswith(".TLV") or files.endswith(".AVI") or files.endswith(".MPG") or files.endswith(".mp4"):
+                                videoPool.append(os.path.join(root, files))
         
         for vid in videoPool:      
              
