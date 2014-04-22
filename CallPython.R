@@ -1,12 +1,12 @@
 ##Call python from R
 
-list.files("C:/Users/Jorge/Dropbox/VideosforBen/")
+list.files("C:/Users/Office653-1/Dropbox/VideosforBen/NRPLOTS/OBS18")
 runtype<-"file"
-inDEST<-"C:/Users/Jorge/Dropbox/VideosforBen/OBS_22.mp4"
+inDEST<-"C:/Users/Office653-1/Dropbox/VideosforBen/NRPLOTS/OBS18/18B.MPG"
 fileD<-"C:/Users/Jorge/Dropbox/VideosforBen/"
 accAVG<-0.5
 
-commandC<-capture.output(cat("python motion.py",runtype,inDEST,fileD,accAVG))
+commandC<-capture.output(cat("python motion.py",runtype,inDEST,fileD,accAVG,'False'))
 
 system(commandC,intern=TRUE,show.output.on.console=TRUE)
 
@@ -15,12 +15,12 @@ system(commandC,intern=TRUE,show.output.on.console=TRUE)
 
 
 ##loop through accAVG
-for (a in seq(.2,.6,.05)){
+for (a in seq(.3,.6,.1)){
   runtype<-"file"
-  inDEST<-"F:/Summer2013flowers/SantaLucia/Flowers/FL098/130812AA.TLV"
-  fileD<-paste("F:/AutomatedTests/",paste(a,"/",sep=""),sep="")
+  inDEST<-"C:/Users/Office653-1/Dropbox/VideosforBen/NRPLOTS/OBS18/18B.MPG"
+  fileD<-paste("C:/Users/Jorge/Dropbox/VideosforBen/",paste(a,"/",sep=""),sep="")
   accAVG<-a
-  commandC<-capture.output(cat("python motion.py",runtype,inDEST,fileD,accAVG))
+  commandC<-capture.output(cat("python motion.py",runtype,inDEST,fileD,accAVG,'False'))
   system(commandC,intern=TRUE,show.output.on.console=TRUE)
 }
 
