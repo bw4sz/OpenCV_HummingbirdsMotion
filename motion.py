@@ -49,7 +49,7 @@ if(len(sys.argv) >=2):
 
 if(len(sys.argv)<=2):
         fileD=raw_input("File Destination Folder:")
-	accAVG=float(raw_input("Accumalated averaging (default type 0.35:"))
+	accAVG=float(raw_input("Accumalated averaging (default type 0.35 : "))
         
         runtype=raw_input("runtype batch or file:")
         if(runtype=="file"):
@@ -62,7 +62,7 @@ if(len(sys.argv)<=2):
 #Hard coded variables, these could be changed in the future
 
 ##adaptively change sensitivity every 15minutes based on a hit rate?
-adapt=False
+adapt=True
 
 #Hitrate, the expected 5 of frames per 15 minutes - this is a helpful adaptive setting that helps tune the model
 frameHIT=.01
@@ -77,6 +77,9 @@ threshT=100
 ##Visualize the frames, this should only be used for testing!
 vis=False
 
+
+#Does the video have a timestamp?
+time_bottom = False
 
 """
 Python Motion Tracker
@@ -229,6 +232,8 @@ def run(fP,accAvg,threshL):
         #Get frame rate
         frame_rate=cap.get(cv.CV_CAP_PROP_FPS)        
         
+        print("frame rate: " + str(frame_rate))
+	
         # Greyscale image, thresholded to create the motion mask:
         grey_image = np.uint8(display_image)
         
@@ -271,15 +276,22 @@ def run(fP,accAvg,threshL):
                         break    
                 
                 #For now, just cut off the bottom 5% ####NEEDS TO BE CHANGED
-                camera_image = camera_imageO[1:700,1:1280]                
+		camera_image = camera_imageO[1:700,1:1280]
+                
+                #to be done. 
+                #if time_bottom:
+		#else:
+			#camera_image = camera_imageO
+		
                 frame_count += 1
                 frame_t0 = time.time()
                 
                 ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
 		if adapt:
 			#Every 15min, reset the agg threshold, depending on expected level of movement
-			#how many frames per fiteen minutes? Open cv seems have 10 frames per second for these videos instead of 1. 
-			fift=15*60*frame_rate/10
+			#how many frames per fiteen minutes? Open cv seems have 10 frames per second for these videos instead of 1 (maybe millisecond?) 
+			#Should be a integer, round it
+			fift=round(15*60*frame_rate/10)
 			
 			if frame_count % fift == 0:  
 				#How many frames have been spit out in the last half hour?
