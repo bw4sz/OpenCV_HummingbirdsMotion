@@ -2,7 +2,7 @@
 
 list.files("C:/Users/Office653-1/Dropbox/VideosforBen/NRPLOTS/OBS18")
 runtype<-"batch"
-inDEST<-"C:/Users/Office653-1/Dropbox/VideosforBen/NRPLOTS"
+inDEST<-"C:/Users/Office653-1/Dropbox/VideosforBen/"
 fileD<-"C:/Users/Office653-1/Dropbox/VideosforBen/"
 accAVG<-0.05
 

@@ -73,7 +73,7 @@ if(len(sys.argv)<=2):
 ##adaptively change sensitivity every 15minutes based on a hit rate?
 adapt=True
 
-#Hitrate, the expected 5 of frames per 15 minutes - this is a helpful adaptive setting that helps tune the model
+#Hitrate, the expected # of frames per 15 minutes - this is a helpful adaptive setting that helps tune the model
 frameHIT=.01
 
 #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
@@ -169,7 +169,10 @@ def run(fP,accAvg,threshL):
         # Create a log file with each coordinate
         log_file_name = file_destination + "/" + "tracker_output.log"
         log_file = file(log_file_name, 'a' )
-        
+
+        #create hit counter to track number of outputs
+	hitcounter=0
+	
         cap = cv2.VideoCapture(fP)
             
         # Capture the first frame from file for image properties
@@ -201,12 +204,13 @@ def run(fP,accAvg,threshL):
 	if plotwatcher:
 		frame_rate=1
 	else:
-		frame_rate=cap.get(cv.CV_CAP_PROP_FPS)        
+		round(frame_rate=cap.get(cv.CV_CAP_PROP_FPS))
 		
         #get frame time relative to start
         frame_time=cap.get(cv.CV_CAP_PROP_POS_MSEC)     
 	
         print("frame rate: " + str(frame_rate))
+        sys.stderr.write("frame rate: " + str(frame_rate))
 	
         # Greyscale image, thresholded to create the motion mask:
         grey_image = np.uint8(display_image)
@@ -282,11 +286,11 @@ def run(fP,accAvg,threshL):
 					accAvg = accAvg + .025
 				if counter < (fift*frameHIT) :
 					accAvg = accAvg - .025
-				#Hard code a .2 limit
-				if accAvg < .2 :
-					accAvg=.2
+				
 				print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg))
-			
+				#Write change to log file
+				log_file.write( file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg) + "\n" )
+				
                 # Create an image with interactive feedback:
                 display_image = camera_image.copy()
                 
@@ -618,13 +622,13 @@ def run(fP,accAvg,threshL):
 		#Log the frame count and the time in video, in case user wants to check in the original
 		#create a time object, this relies on the frame_rate being correct!
 		#set seconds
-		sec = timedelta(seconds=int(frame_rate/frame_count))		
+		sec = timedelta(seconds=int(frame_count/frame_rate))		
 		d = datetime(1,1,1) + sec
-		
 		log_file.write( "%d %d:%d:%d " % ( int(frame_count), d.hour,d.minute, d.second) + "\n" )
 		
                 ##################################################
-                
+                #Have a returned counter to balance hitRate
+		hitcounter=hitcounter+1
                 
 ######################################################################################################
 
