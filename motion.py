@@ -68,7 +68,7 @@ if(len(sys.argv)<=2):
 	
                 
 #################################################
-#Hard coded variables
+#Hard coded variables, these could be added as user arguments. 
 
 ##adaptively change sensitivity every 15minutes based on a hit rate?
 adapt=True
@@ -204,7 +204,7 @@ def run(fP,accAvg,threshL):
 	if plotwatcher:
 		frame_rate=1
 	else:
-		round(frame_rate=cap.get(cv.CV_CAP_PROP_FPS))
+		frame_rate=round(cap.get(cv.CV_CAP_PROP_FPS))
 		
         #get frame time relative to start
         frame_time=cap.get(cv.CV_CAP_PROP_POS_MSEC)     
@@ -253,7 +253,7 @@ def run(fP,accAvg,threshL):
                 if not ret:
                         break    
                 
-                #For now, just cut off the bottom 5% ####NEEDS TO BE CHANGED
+                #For now, just cut off the bottom 5% if the plotwatcher option is called. 
                 
                 if plotwatcher:
 			camera_image = camera_imageO[1:700,1:1280]	
@@ -266,31 +266,30 @@ def run(fP,accAvg,threshL):
                 ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
 		if adapt:
 			#Every 15min, reset the agg threshold, depending on expected level of movement
-			#how many frames per fiteen minutes? Open cv seems have 10 frames per second for these videos instead of 1 (maybe millisecond?) 
+			#how many frames per fiteen minutes? 
+			
 			#Should be a integer, round it
-			fift=round(15*60*frame_rate)
+			fift=round(10*60*frame_rate)
 			
 			if frame_count % fift == 0:  
-				#How many frames have been spit out in the last half hour?
-				outputs=os.listdir(file_destination)
-				counter=0
-				for fil in outputs:
-					#Split out the fileextensions                                
-					jpgN =os.path.splitext(fil)[0]
-					#Just count the frames in the last half hour, ie, between frame count and frame count - 1800
-					if(frame_count-fift < int(jpgN) < frame_count):
-						counter = counter + 1
-			       #If the total base is fift (15min window), then assuming 95% of images are junk the threshold should be
 				
-				if counter > (fift*frameHIT) :
-					accAvg = accAvg + .025
-				if counter < (fift*frameHIT) :
-					accAvg = accAvg - .025
+								
+			       #If the total base is fift (15min window), then assuming 99% of images are junk the threshold should be
+				#We've been counting frames output to file in the hitcounter
+				
+				if hitcounter > (fift*frameHIT) :
+					accAvg = accAvg + .05
+				if hitcounter < (fift*frameHIT) :
+					accAvg = accAvg - .05
 				
 				print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg))
 				#Write change to log file
 				log_file.write( file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg) + "\n" )
 				
+				#reset hitcoutner for another fifteen minutes
+				hitcounter=0
+		########################################################
+		
                 # Create an image with interactive feedback:
                 display_image = camera_image.copy()
                 
@@ -667,7 +666,7 @@ if (runtype == "file"):
 ##Destroy Windows
 cv2.destroyAllWindows()
 
-##To do
+##To do, not included right now. 
 
 #add in mousecall event
 #Define SubArea Based on Mouse Event   
