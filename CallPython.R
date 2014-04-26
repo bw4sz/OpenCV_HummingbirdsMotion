@@ -1,14 +1,15 @@
 ##Call python from R
 
-list.files("C:/Users/Office653-1/Dropbox/VideosforBen/NRPLOTS/OBS18")
+list.files("C:/Users/Office653-1/Dropbox/VideosforBen/")
 runtype<-"batch"
 inDEST<-"C:/Users/Office653-1/Dropbox/VideosforBen/"
 fileD<-"C:/Users/Office653-1/Dropbox/VideosforBen/"
-accAVG<-0.05
+accAVG<-0.4
 
 commandC<-capture.output(cat("python motion.py",runtype,inDEST,fileD,accAVG,'False'))
 
-system(commandC,intern=TRUE,show.output.on.console=TRUE)
+system.time(outC<-system(commandC,intern=TRUE,show.output.on.console=TRUE))
+outC
 
 #If you need to kill
 @system("TASKKILL /IM python*")

@@ -73,8 +73,8 @@ if(len(sys.argv)<=2):
 ##adaptively change sensitivity every 15minutes based on a hit rate?
 adapt=True
 
-#Hitrate, the expected # of frames per 15 minutes - this is a helpful adaptive setting that helps tune the model
-frameHIT=.01
+#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
+frameHIT=.005
 
 #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
 threshT=100
@@ -173,6 +173,7 @@ def run(fP,accAvg,threshL):
         #create hit counter to track number of outputs
 	hitcounter=0
 	
+	
         cap = cv2.VideoCapture(fP)
             
         # Capture the first frame from file for image properties
@@ -205,7 +206,7 @@ def run(fP,accAvg,threshL):
 		frame_rate=1
 	else:
 		frame_rate=round(cap.get(cv.CV_CAP_PROP_FPS))
-		
+	
         #get frame time relative to start
         frame_time=cap.get(cv.CV_CAP_PROP_POS_MSEC)     
 	
@@ -281,7 +282,10 @@ def run(fP,accAvg,threshL):
 					accAvg = accAvg + .05
 				if hitcounter < (fift*frameHIT) :
 					accAvg = accAvg - .05
+				#Build in a floor, the value can't be negative.
 				
+				if accAVG < 0.5:
+					accAVG=.5
 				print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg))
 				#Write change to log file
 				log_file.write( file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg) + "\n" )
