@@ -43,7 +43,7 @@ if(len(sys.argv) >=2):
         fileD=sys.argv[3]
 	##accumlated averaging, higher values are more sensitive to sudden movements
 	#The accumlated average	
-	accAVG = float(sys.argv[4])
+	accAvg = float(sys.argv[4])
 	
 	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean. 
 	#This statement should be True or False
@@ -55,7 +55,7 @@ if(len(sys.argv) >=2):
 
 if(len(sys.argv)<=2):
         fileD=raw_input("File Destination Folder:")
-	accAVG=float(raw_input("Accumalated averaging (default type 0.35 : "))
+	accAvg=float(raw_input("Accumalated averaging (default type 0.35 : "))
         
         runtype=raw_input("runtype batch or file:")
         if(runtype=="file"):
@@ -74,7 +74,7 @@ if(len(sys.argv)<=2):
 adapt=True
 
 #Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
-frameHIT=.005
+frameHIT=.01
 
 #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
 threshT=100
@@ -150,6 +150,7 @@ def merge_collided_bboxes( bbox_list ):
             
 def run(fP,accAvg,threshL):
         
+	
         #Report name of file
         sys.stderr.write("Processing file %s\n" % (fP))
         
@@ -158,11 +159,14 @@ def run(fP,accAvg,threshL):
 	normFP=os.path.normpath(fP)
 	(filepath, filename)=os.path.split(normFP)
 	(shortname, extension) = os.path.splitext(filename)
+	(_,IDFL) = os.path.split(filepath)
 	
 	#we want to name the output a folder from the output destination with the named extension        
-        print("Output path will be %s/%s" % (fileD,shortname))
+        print("Output path will be %s/%s/%s" % (fileD,IDFL,shortname))
+        print("AccAvg begin value is: %s" % (accAvg))
 	
-	file_destination=os.path.join(fileD,shortname)
+		
+	file_destination=os.path.join(fileD,IDFL,shortname)
         if not os.path.exists(file_destination):
                 os.makedirs(file_destination)
                      
@@ -265,7 +269,10 @@ def run(fP,accAvg,threshL):
                 frame_t0 = time.time()
                 
                 ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
+		#set floor flag, we can't have negative accAVG
+		floor=0
 		if adapt:
+				
 			#Every 15min, reset the agg threshold, depending on expected level of movement
 			#how many frames per fiteen minutes? 
 			
@@ -274,7 +281,6 @@ def run(fP,accAvg,threshL):
 			
 			if frame_count % fift == 0:  
 				
-								
 			       #If the total base is fift (15min window), then assuming 99% of images are junk the threshold should be
 				#We've been counting frames output to file in the hitcounter
 				
@@ -282,16 +288,28 @@ def run(fP,accAvg,threshL):
 					accAvg = accAvg + .05
 				if hitcounter < (fift*frameHIT) :
 					accAvg = accAvg - .05
-				#Build in a floor, the value can't be negative.
+					
+				#This is super ugly code, but i'm having trouble changing it!
 				
-				if accAVG < 0.5:
-					accAVG=.5
+			
 				print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg))
 				#Write change to log file
 				log_file.write( file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg) + "\n" )
 				
 				#reset hitcoutner for another fifteen minutes
 				hitcounter=0
+				
+				#Build in a floor, the value can't be negative.
+				if accAvg < 0.05:
+					floor=floor + 1
+				
+				
+			#Reset if needed.
+				if floor == 1 :
+					accAvg=.5
+					print(file_destination + str(frame_count) + " accAvg is reset to: " + str(accAvg))
+					#Write change to log file
+					log_file.write( file_destination + str(frame_count) + " accAvg is reset to: " + str(accAvg) + "\n" )
 		########################################################
 		
                 # Create an image with interactive feedback:
@@ -656,7 +674,7 @@ if (runtype == "batch"):
                 ##The second argument is the accumlated averaging, higher values are more sensitive to sudden movements
                 ##The third value is the thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
                 try:
-                        run(vid,accAVG,threshT)
+                        run(fP=vid,accAvg=accAvg,threshL=threshT)
                 except Exception, e:
                         print 'Error:',e
                         print 'Video:',vid
@@ -664,7 +682,7 @@ if (runtype == "batch"):
 
 ###If runtype is a single file - run file destination        
 if (runtype == "file"):
-        run(inDEST,accAVG,threshT)
+        run(inDEST,accAvg,threshT)
 
 
 ##Destroy Windows
