@@ -1,4 +1,4 @@
-#!C:\Anaconda\python.exe
+#!C:/Python27/python.exe
 
 Usage = """
 
@@ -54,15 +54,24 @@ if(len(sys.argv) >=2):
 #########################################
 
 if(len(sys.argv)<=2):
+	
+	#Destination of file
         fileD=raw_input("File Destination Folder:")
-	accAvg=float(raw_input("Accumalated averaging (default type 0.35 : "))
-        
+
+        #Batch or single file
         runtype=raw_input("runtype batch or file:")
+	
+	print(str(runtype))
+
         if(runtype=="file"):
                 inDEST=raw_input("Enter video input:")
         
         if(runtype=="batch"):
                 batchpool=raw_input("Enter folder containing videos:")
+	
+	#Sensitivity to movement
+	accAvg=float(raw_input("Accumalated averaging (default type 0.35 : "))
+	
 	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean	
 	plotwatcher="True" == raw_input("Does this video come from a plotwatcher camera (True/False):")
 	
@@ -283,6 +292,8 @@ def run(fP,accAvg,threshL):
 				
 			       #If the total base is fift (15min window), then assuming 99% of images are junk the threshold should be
 				#We've been counting frames output to file in the hitcounter
+				log_file.write(str(hitcounter) + "files written in last 10minutes" + "\n" )
+				print(str(hitcounter) + " files written in last 10minutes" + "\n" )
 				
 				if hitcounter > (fift*frameHIT) :
 					accAvg = accAvg + .05
@@ -298,6 +309,8 @@ def run(fP,accAvg,threshL):
 				
 				#reset hitcoutner for another fifteen minutes
 				hitcounter=0
+				
+				
 				
 				#Build in a floor, the value can't be negative.
 				if accAvg < 0.05:
@@ -646,6 +659,9 @@ def run(fP,accAvg,threshL):
 		sec = timedelta(seconds=int(frame_count/frame_rate))		
 		d = datetime(1,1,1) + sec
 		log_file.write( "%d %d:%d:%d " % ( int(frame_count), d.hour,d.minute, d.second) + "\n" )
+		#If a file has been written, flush the log to read
+		sys.stdout.flush()
+		
 		
                 ##################################################
                 #Have a returned counter to balance hitRate
