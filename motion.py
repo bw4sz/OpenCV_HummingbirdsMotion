@@ -82,6 +82,10 @@ if(len(sys.argv)<=2):
 ##adaptively change sensitivity every 15minutes based on a hit rate?
 adapt=True
 
+#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
+
+floorvalue=.15
+
 #Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
 frameHIT=.01
 
@@ -298,9 +302,9 @@ def run(fP,accAvg,threshL):
 				if hitcounter > (fift*frameHIT) :
 					accAvg = accAvg + .05
 				if hitcounter < (fift*frameHIT) :
-					accAvg = accAvg - .05
+					accAvg = accAvg - .025
 					
-				#This is super ugly code, but i'm having trouble changing it!
+				#In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
 				
 			
 				print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg))
@@ -313,13 +317,13 @@ def run(fP,accAvg,threshL):
 				
 				
 				#Build in a floor, the value can't be negative.
-				if accAvg < 0.05:
+				if accAvg < floorvalue:
 					floor=floor + 1
 				
 				
 			#Reset if needed.
 				if floor == 1 :
-					accAvg=.5
+					accAvg=floorvalue
 					print(file_destination + str(frame_count) + " accAvg is reset to: " + str(accAvg))
 					#Write change to log file
 					log_file.write( file_destination + str(frame_count) + " accAvg is reset to: " + str(accAvg) + "\n" )
