@@ -14,12 +14,11 @@ outC
 #If you need to kill
 @system("TASKKILL /IM python*")
 
-
 ##loop through accAVG
-for (a in seq(.01,.03,.005)){
+for (a in seq(.2,.6,.05)){
   runtype<-"file"
-  inDEST<-"C:/Users/Office653-1/Dropbox/VideosforBen/NRPLOTS/OBS18/18C.MPG"
-  fileD<-paste("C:/Users/Office653-1/Dropbox/VideosforBen/",paste(a,"/",sep=""),sep="")
+  inDEST<-"F:/Summer2013flowers/Maqui/Flowers/FL103/130815AA.TLV"
+  fileD<-paste("F:/AutomatedTests/",paste(a,"/",sep=""),sep="")
   accAVG<-a
   commandC<-capture.output(cat("python motion.py",runtype,inDEST,fileD,accAVG,'False'))
   system(commandC,intern=TRUE,show.output.on.console=TRUE)

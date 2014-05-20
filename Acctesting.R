@@ -22,12 +22,18 @@ Totalframes<-data.frame(ID=NA,Total=NA)
 
 Totalframes[1,colnames(Totalframes)]<-c("FL080","14385")
 Totalframes[2,colnames(Totalframes)]<-c("FL081","14386")
+Totalframes[3,colnames(Totalframes)]<-c("FL049","14385")
+Totalframes[4,colnames(Totalframes)]<-c("FL049","14385")
+Totalframes[5,colnames(Totalframes)]<-c("FL098","14385")
+Totalframes[6,colnames(Totalframes)]<-c("FL061","14384")
+Totalframes[7,colnames(Totalframes)]<-c("FL060","14386")
 
 ###Find number of returned "positive" frames for each video
 #set file directory. 
 
 #add directory to this list
-FLID<-c("FL080/130727AA/","FL081/130727AA")
+FLID<-unique(paste(dat$ID,dat$Video,sep="/"))
+
 
 ##loop through outputs from video
 returned<-lapply(FLID,function(x){
@@ -63,6 +69,7 @@ fdat<-merge(frame_all,Totalframes,by="ID")
 
 require(scales)
 #plot performance
-p<-ggplot(fdat,aes(x=frames/as.numeric(Total),y=Auto_Events/Obs_Events,col=AccAVG)) + geom_point(size=3.5) + geom_line(aes(group=ID)) + ylim(0,1.5) + facet_wrap(~ID,scales="free") + xlab("Percentage of Candidate Images") + ylab("Percetange of Events Captured") + labs(col="AccAVG Parameter") 
-p + scale_y_continuous(labels = percent_format()) + scale_x_continuous(labels = percent_format()) + scale_colour_gradient(low="blue",high="red") + theme_bw()
+p<-ggplot(fdat,aes(x=frames/as.numeric(Total),y=Auto_Events/Obs_Events,col=AccAVG)) + geom_point(size=3.5) + geom_line(aes(group=ID)) + ylim(0,1.5) + facet_wrap(~ID,scales="free_x") + xlab("Percentage of Total Images Returned") + ylab("Percetange of Events Captured") + labs(col="AccAVG Parameter") 
+p + scale_y_continuous(labels = percent_format()) + scale_x_continuous(labels = percent_format()) + scale_colour_gradient(low="blue",high="red",limits=c(.2,.6),breaks=seq(.2,.6,.05)) + theme_bw() 
 ggsave(paste(droppath,"Thesis/Automated_Monitering/Figures/Sensitivity.jpg",sep=""),dpi=300,height=4.5,width=7.5)
+ggsave(paste(droppath,"Thesis/Automated_Monitering/Figures/Sensitivity.eps",sep=""),dpi=300,height=4.5,width=7.5)
