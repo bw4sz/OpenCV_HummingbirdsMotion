@@ -20,7 +20,7 @@ for (a in seq(.2,.6,.05)){
   inDEST<-"F:/Summer2013flowers/Maqui/Flowers/FL103/130815AA.TLV"
   fileD<-paste("F:/AutomatedTests/",paste(a,"/",sep=""),sep="")
   accAVG<-a
-  commandC<-capture.output(cat("python motion.py",runtype,inDEST,fileD,accAVG,'False'))
+  commandC<-capture.output(cat("python motion.py",runtype,inDEST,fileD,accAVG,'True','False'))
   system(commandC,intern=TRUE,show.output.on.console=TRUE)
 }
 
