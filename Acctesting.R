@@ -71,5 +71,5 @@ require(scales)
 #plot performance
 p<-ggplot(fdat,aes(x=frames/as.numeric(Total),y=Auto_Events/Obs_Events,col=AccAVG)) + geom_point(size=3.5) + geom_line(aes(group=ID)) + ylim(0,1.5) + facet_wrap(~ID,scales="free_x") + xlab("Percentage of Total Images Returned") + ylab("Percetange of Events Captured") + labs(col="AccAVG Parameter") 
 p + scale_y_continuous(labels = percent_format()) + scale_x_continuous(labels = percent_format()) + scale_colour_gradient(low="blue",high="red",limits=c(.2,.6),breaks=seq(.2,.6,.05)) + theme_bw() 
-ggsave(paste(droppath,"Thesis/Automated_Monitering/Figures/Sensitivity.jpg",sep=""),dpi=300,height=4.5,width=7.5)
+ggsave(paste(droppath,"Thesis/Automated_Monitering/Figures/Sensitivity.jpg",sep=""),dpi=300,height=6,width=10)
 ggsave(paste(droppath,"Thesis/Automated_Monitering/Figures/Sensitivity.eps",sep=""),dpi=300,height=4.5,width=7.5)
