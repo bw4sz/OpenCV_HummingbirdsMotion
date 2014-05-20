@@ -52,7 +52,11 @@ if(len(sys.argv) >=2):
 	#Should we use adaptive averaging for hit rate?
 	adapt="True" == sys.argv[6]
 	if adapt:
+			#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
 			frameHIT=sys.argv[7]
+			
+			#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
+			floorvalue=sys.argv[8]
 
 #########################################
 #Get user inputs if no system arguments
@@ -75,7 +79,7 @@ if(len(sys.argv)<=2):
                 batchpool=raw_input("Enter folder containing videos:")
 	
 	#Sensitivity to movement
-	accAvg=float(raw_input("Accumalated averaging (default type 0.35 : "))
+	accAvg=float(raw_input("Sensitivity (default type 0.35 : "))
 	
 	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean	
 	plotwatcher="True" == raw_input("Does this video come from a plotwatcher camera (True/False):")
@@ -83,7 +87,10 @@ if(len(sys.argv)<=2):
 	#Should accAVG be adapted every 10minutes based on an estimated hitrate
 	adapt="True" == raw_input("Adapt the sensitivity based on hitrate? (True/False)")
 	if adapt:
+			#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
 			frameHIT=raw_input("Expected percentage of frames with motion (0-1 decimal, eg.  1% is 0.01)")
+			#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
+			floorvalue=raw_input("Minimum allowed sensitivity (default type=.05")
 
 	
 		
@@ -303,9 +310,9 @@ def run(fP,accAvg,threshL):
 				if hitcounter > (fift*frameHIT) :
 					accAvg = accAvg + .05
 				if hitcounter < (fift*frameHIT) :
-					accAvg = accAvg - .05
+					accAvg = accAvg - .025
 					
-				#This is super ugly code, but i'm having trouble changing it!
+				#In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
 				
 			
 				print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg))
@@ -318,13 +325,14 @@ def run(fP,accAvg,threshL):
 				
 				
 				#Build in a floor, the value can't be negative.
-				if accAvg < 0.05:
+				if accAvg < floorvalue:
 					floor=floor + 1
 				
 				
 			#Reset if needed.
 				if floor == 1 :
-					accAvg=.05
+					accAvg=floorvalue
+
 					print(file_destination + str(frame_count) + " accAvg is reset to: " + str(accAvg))
 					#Write change to log file
 					log_file.write( file_destination + str(frame_count) + " accAvg is reset to: " + str(accAvg) + "\n" )
