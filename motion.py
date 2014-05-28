@@ -53,10 +53,10 @@ if(len(sys.argv) >=2):
 	adapt="True" == sys.argv[6]
 	if adapt:
 			#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
-			frameHIT=sys.argv[7]
+			frameHIT=float(sys.argv[7])
 			
 			#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
-			floorvalue=sys.argv[8]
+			floorvalue=float(sys.argv[8])
 
 #########################################
 #Get user inputs if no system arguments
@@ -88,9 +88,9 @@ if(len(sys.argv)<=2):
 	adapt="True" == raw_input("Adapt the sensitivity based on hitrate? (True/False)")
 	if adapt:
 			#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
-			frameHIT=raw_input("Expected percentage of frames with motion (0-1 decimal, eg.  1% is 0.01)")
+			frameHIT=float(raw_input("Expected percentage of frames with motion (0-1 decimal, eg.  1% is 0.01)"))
 			#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
-			floorvalue=raw_input("Minimum allowed sensitivity (default type=.05")
+			floorvalue=float(raw_input("Minimum allowed sensitivity (default type=.05"))
 
 	
 		
