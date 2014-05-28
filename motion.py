@@ -1,4 +1,4 @@
-#!C:/Python27/python.exe
+#!C:/Anaconda/python.exe
 
 Usage = """
 
@@ -48,7 +48,16 @@ if(len(sys.argv) >=2):
 	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean. 
 	#This statement should be True or False
 	plotwatcher="True" == sys.argv[5]	
-        
+    
+	#Should we use adaptive averaging for hit rate?
+	adapt="True" == sys.argv[6]
+	if adapt:
+			#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
+			frameHIT=float(sys.argv[7])
+			
+			#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
+			floorvalue=float(sys.argv[8])
+
 #########################################
 #Get user inputs if no system arguments
 #########################################
@@ -70,24 +79,23 @@ if(len(sys.argv)<=2):
                 batchpool=raw_input("Enter folder containing videos:")
 	
 	#Sensitivity to movement
-	accAvg=float(raw_input("Accumalated averaging (default type 0.35 : "))
+	accAvg=float(raw_input("Sensitivity (default type 0.35 : "))
 	
 	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean	
 	plotwatcher="True" == raw_input("Does this video come from a plotwatcher camera (True/False):")
 	
+	#Should accAVG be adapted every 10minutes based on an estimated hitrate
+	adapt="True" == raw_input("Adapt the sensitivity based on hitrate? (True/False)")
+	if adapt:
+			#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
+			frameHIT=float(raw_input("Expected percentage of frames with motion (0-1 decimal, eg.  1% is 0.01)"))
+			#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
+			floorvalue=float(raw_input("Minimum allowed sensitivity (default type=.05"))
+
+	
+		
                 
 #################################################
-#Hard coded variables, these could be added as user arguments. 
-
-##adaptively change sensitivity every 15minutes based on a hit rate?
-adapt=True
-
-#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
-
-floorvalue=.15
-
-#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
-frameHIT=.01
 
 #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
 threshT=100
@@ -324,6 +332,7 @@ def run(fP,accAvg,threshL):
 			#Reset if needed.
 				if floor == 1 :
 					accAvg=floorvalue
+
 					print(file_destination + str(frame_count) + " accAvg is reset to: " + str(accAvg))
 					#Write change to log file
 					log_file.write( file_destination + str(frame_count) + " accAvg is reset to: " + str(accAvg) + "\n" )
