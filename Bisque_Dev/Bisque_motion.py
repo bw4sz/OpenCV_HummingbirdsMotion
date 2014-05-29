@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-Usage = """
+"""
 
 Automated capture of motion frames from a video file. Must have python, open CV and ffmpeg set up and stored in PATH variable
 
-Enter name of video file, and the program will either ask you for a destination file, or guess at the place to put the file based on the input name. 
+Enter name of video file, destination, and sensitivity to movement
 
 """
+
 import cv2
 import cv2.cv as cv
 import numpy as np
@@ -76,14 +77,6 @@ if plotwatcher:
 
 ###########Inputs Read in #################
 
-"""
-Python Motion Tracker
-
-Reads an incoming video stream and tracks motion in real time.
-Detected motion events are logged to a text file.  Also has face detection.
-"""
-
-
 #
 # BBoxes must be in the format:
 # ( (topleft_x), (topleft_y) ), ( (bottomright_x), (bottomright_y) ) )
@@ -141,7 +134,7 @@ def run(fP,accAvg,threshL):
         #Report name of file
         sys.stderr.write("Processing file %s\n" % (fP))
         
-        #Define directories, here assuming that we want to append the file structure of the last three folders to the file destination
+    #Define directories, here assuming that we want to append the file structure of the last three folders to the file destination
 
 	normFP=os.path.normpath(fP)
 	(filepath, filename)=os.path.split(normFP)
