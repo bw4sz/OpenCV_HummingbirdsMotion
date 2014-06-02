@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<module name="Motion" type="runtime">
+<module name="MotionMeerkat" type="runtime">
 
     <!-- Comments are OK -->  
     <tag name="inputs">

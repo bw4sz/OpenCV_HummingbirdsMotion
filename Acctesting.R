@@ -3,6 +3,7 @@
 #load packages
 require(reshape)
 require(pROC)
+require(plyr)
 require(ggplot2)
 
 ###read in data
@@ -92,7 +93,7 @@ fdat_all<-merge(fdat,frame_countAdapt,by=c("ID","Video"))
 require(scales)
 
 #plot performance
-p<-ggplot(fdat_all,aes(x=frames/as.numeric(Total),y=Auto_Events/Obs_Events,col=AccAVG)) + geom_point(size=3) + geom_line(aes(group=ID)) + ylim(0,1.5) + facet_wrap(~ID,scales="free_x") + xlab("Percentage of Total Images Returned") + ylab("Percetange of Events Captured") + labs(col="AccAVG Parameter") 
+p<-ggplot(fdat_all,aes(x=frames/as.numeric(Total),y=Auto_Events/Obs_Events,col=AccAVG)) + geom_point(size=3) + geom_line(aes(group=ID)) + ylim(0,1.5) + facet_wrap(~ID,scales="free_x") + xlab("Percentage of Total Images Returned") + ylab("Percentage of Direct Review Events Captured") + labs(col="AccAVG Parameter") 
 p<-p + scale_y_continuous(labels = percent_format()) + scale_x_continuous(labels = percent_format()) + scale_colour_gradient(low="blue",high="red",limits=c(.2,.6),breaks=seq(.2,.6,.05)) + theme_bw()
 
 #add adapt events, make two color object
@@ -100,3 +101,52 @@ p<- p + geom_point(aes(x=framesAdapt/as.numeric(Total),y=Adapt_Events/Obs_Events
 p
 ggsave(paste(droppath,"Thesis/Automated_Monitering/Figures/Sensitivity.jpg",sep=""),dpi=300,height=6,width=10)
 ggsave(paste(droppath,"Thesis/Automated_Monitering/Figures/Sensitivity.eps",sep=""),dpi=300,height=4.5,width=7.5)
+
+
+############Sensitviity and Specificity
+
+#Non-adapt
+#Sensitivity
+Auto<-list()
+for (x in 1:nrow(fdat_all)){
+#True Positive Rate
+TPR<-fdat_all[x,]$Auto_Events/fdat_all[x,]$Obs_Events
+
+#Specificity
+#True negative rate
+TNR<-(as.numeric(fdat_all[x,]$Total)-fdat_all[x,]$frames)/(as.numeric(fdat_all[x,]$Total)-fdat_all[x,]$frames+(fdat_all[x,]$frames - fdat_all[x,]$Auto_Events))
+
+Auto[[x]]<-data.frame(TPR,TNR,AccAVG=fdat_all[x,]$AccAVG)
+}
+
+Auto<-rbind.fill(Auto)
+
+
+
+#Adaptive
+
+#Sensitivity
+Adapt<-list()
+for (x in 1:nrow(fdat_all)){
+  #True Positive Rate
+  TPR<-fdat_all[x,]$Adapt_Events/fdat_all[x,]$Obs_Events
+  
+  #Specificity
+  #True negative rate
+  TNR<-(as.numeric(fdat_all[x,]$Total)-fdat_all[x,]$framesAdapt)/(as.numeric(fdat_all[x,]$Total)-fdat_all[x,]$framesAdapt+(fdat_all[x,]$framesAdapt - fdat_all[x,]$Adapt_Events))
+precision<-fdat_all[x,]$Adapt_Events/(fdat_all[x,]$framesAdapt)
+  Adapt[[x]]<-data.frame(TPR,TNR,precision,AccAVG=0.35)
+}
+
+Adapt<-rbind.fill(Adapt)
+
+#True Positive Rate
+AdaptSS<-Adapt[!duplicated(Adapt),]
+#
+
+
+
+#False negative rates
+
+
+plot(roc(control=fdat_all$Adapt_Events,cases=fdat_all$Obs_Events,smooth=FALSE),print.thres.pch=20,print.thres=TRUE)
