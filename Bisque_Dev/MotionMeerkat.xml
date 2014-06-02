@@ -61,11 +61,7 @@
             </template>             
          </tag>   
     </tag>
-    
-    <tag name="execute_options">
-        <tag name="iterable" value="image_url" type="dataset" />
-    </tag>    
-    
+  
     <tag name="module_options" >
         <tag name="version" value="3" />
     </tag>
@@ -82,4 +78,8 @@
     <tag name="description" type="string" value="This module extracts potential motion events from video files" />
     <tag name="citation" type="string" value="Please cite this resource as XXX" /> 
 	
+	<tag name="execute_options">
+		<tag name="argument_style" value="positional"/>
+		<tag name="iterable" value="resource_url" type="dataset"/>
+	</tag>
 </module>
