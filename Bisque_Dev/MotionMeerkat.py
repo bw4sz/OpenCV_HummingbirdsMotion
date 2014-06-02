@@ -76,8 +76,6 @@ if plotwatcher:
 	print("Plotwatcher rates set")
 
 ###########Inputs Read in #################
-
-#
 # BBoxes must be in the format:
 # ( (topleft_x), (topleft_y) ), ( (bottomright_x), (bottomright_y) ) )
 top = 0
@@ -157,8 +155,7 @@ def run(fP,accAvg,threshL):
         #create hit counter to track number of outputs
 	hitcounter=0
 	
-	
-        cap = cv2.VideoCapture(fP)
+	    cap = cv2.VideoCapture(fP)
             
         # Capture the first frame from file for image properties
         orig_image = cap.read()[1]  
@@ -268,7 +265,6 @@ def run(fP,accAvg,threshL):
 					
 				#In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
 				
-			
 				print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg))
 				#Write change to log file
 				log_file.write( file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg) + "\n" )
@@ -276,14 +272,11 @@ def run(fP,accAvg,threshL):
 				#reset hitcoutner for another fifteen minutes
 				hitcounter=0
 				
-				
-				
 				#Build in a floor, the value can't be negative.
 				if accAvg < floorvalue:
 					floor=floor + 1
 				
-				
-			#Reset if needed.
+				#Reset if needed.
 				if floor == 1 :
 					accAvg=floorvalue
 
@@ -578,7 +571,8 @@ def run(fP,accAvg,threshL):
 		hitcounter=hitcounter+1
                 
 ######################################################################################################
-
+#Running in the bisque environment!
+#
 import optparse
 parser = optparse.OptionParser()
 parser.add_option("-c", "--credentials", dest="credentials",
@@ -590,14 +584,12 @@ parser.add_option("-c", "--credentials", dest="credentials",
 (options, args) = parser.parse_args()
 
 #This needs to be changed here!
-M = MetaData()
-
 M=run()
 ######################
 
 if options.credentials is None:
 	image_url, mex_url,  auth_token  = args[:3]
-	M.main(image_url, mex_url, auth_token)
+	M(image_url, mex_url, auth_token)
 else:
 	image_url = args.pop(0)
 
@@ -606,10 +598,6 @@ else:
 	user,pwd = options.credentials.split(':')
 
 	bq = BQSession().init_local(user, pwd)
-	M.main(image_url, bq=bq)
-
-###If runtype is a single file - run file destination        
-if (runtype == "file"):
-        run(image_url,accAvg,threshT)
+	run(image_url,accAvg,threshT, bq=bq)
 
 
