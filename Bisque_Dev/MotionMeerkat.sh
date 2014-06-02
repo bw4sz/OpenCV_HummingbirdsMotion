@@ -6,7 +6,7 @@ echo "ENV"
 printenv
 
 echo "command"
-echo "./dist/Motion $@"
+echo "./dist/MotionMeerkat $@"
 
-exec ./dist/Motion $@
+exec ./dist/MotionMeerkat $@
 
