@@ -26,43 +26,31 @@ import csv
 print Usage
 ####################
 
-if len(sys.argv)<2:
-        print("Insufficient arguments specified")
-		
-else:
-        FileList=sys.argv[1:]
-        for infileName in FileList:
-                print infileName
 ##########################################
 #System arguments
 ##########################################
-if(len(sys.argv) >=2):
-        print("User defined arguments")
-        #first argument is batch or file
-        runtype=sys.argv[1]
-        #second argument is filename, depending on runtype
-	if runtype=="file":
-		inDEST=sys.argv[2]
-	if runtype=="batch":
-		batchpool=sys.argv[2]	
-        #third argument is destination file
-        fileD=sys.argv[3]
-	##accumlated averaging, higher values are more sensitive to sudden movements
-	#The accumlated average	
-	accAvg = float(sys.argv[4])
-	
-	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean. 
-	#This statement should be True or False
-	plotwatcher="True" == sys.argv[5]	
-    
-	#Should we use adaptive averaging for hit rate?
-	adapt="True" == sys.argv[6]
-	if adapt:
-			#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
-			frameHIT=float(sys.argv[7])
-			
-			#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
-			floorvalue=float(sys.argv[8])
+
+#Name of the input data
+inDEST=sys.argv[1]
+
+#third argument is destination file
+fileD=sys.argv[2]
+##accumlated averaging, higher values are more sensitive to sudden movements
+#The accumlated average	
+accAvg = float(sys.argv[3])
+
+#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean. 
+#This statement should be True or False
+plotwatcher="True" == sys.argv[4]	
+
+#Should we use adaptive averaging for hit rate?
+adapt="True" == sys.argv[5]
+if adapt:
+		#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
+		frameHIT=float(sys.argv[6])
+		
+		#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
+		floorvalue=float(sys.argv[7])
 
                 
 #################################################

@@ -17,12 +17,17 @@
 		<tag name="accAvg" value="0.35" type="number">
 			<template>
 			<tag name="label" value="Sensitivity to motion"/>
-			<tag name="reference" value="resource_url"/>
 			<tag name="allowNone" value="true" type="boolean"/>
 			<tag name="description" value="The sensitivity to motion controls the accumulated weighted average of the previous frames using the OpenCV::cv2.accumlateWeighted function. For each pixel (x,y) in a frame, this function calculates the weighted averages of the current frame (src) with the previous frames, and returns a running average of the frame sequence (dst). Higher values make the algorithm less sensitive to motion "/>
 			</template>
 		</tag>
-		<tag name="plotwatcher" value="true" type="boolean" >
+		<tag name="fileD" type="string">
+			<template>
+			<tag name="label" value="Output folder name"/>
+			<tag name="description" value="The name of the folder of candidate motion frames returned by MotionMeerkat"/>
+			</template>
+		</tag>
+		<tag name="plotwatcher" value="false" type="boolean" >
 83	            <template>
 84	                <tag name="label" value="Does this video come from a plotwatcher camera (True/False)" />
 85	            </template>           
@@ -36,7 +41,6 @@
 		<tag name="frameHIT" value="0.01" type="number">
 			<template>
 			<tag name="label" value="Expected frames with motion"/>
-			<tag name="reference" value="resource_url"/>
 			<tag name="allowNone" value="true" type="boolean"/>
 			<tag name="description" value="An optional adaptive accAVG setting which attenuates the sensitivity during the video run based on a user specified hit rate. Every ten minutes, the algorithm evaluates the number of photos returned in a ten minute window, and increase the sensitivity if the value was less than the expected hit rate, or decrease the value if it was greater than the expected hit rate."/>
 			</template>
@@ -44,7 +48,6 @@
 		<tag name="floorvalue" value="0.05" type="number">
 			<template>
 			<tag name="label" value="Minimum sensitivity"/>
-			<tag name="reference" value="resource_url"/>
 			<tag name="allowNone" value="true" type="boolean"/>
 			<tag name="description" value="Used in conjunction with the adaptive accAVG, this value provides a minimum sensitivity, which is critical for videos with little background motion."/>
 			</template>
