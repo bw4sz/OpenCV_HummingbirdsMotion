@@ -116,10 +116,6 @@ def merge_collided_bboxes( bbox_list ):
             
 def run(fP,accAvg,threshL):
         
-	
-        #Report name of file
-        sys.stderr.write("Processing file %s\n" % (fP))
-        
     #Define directories, here assuming that we want to append the file structure of the last three folders to the file destination
 
 	normFP=os.path.normpath(fP)
@@ -320,11 +316,9 @@ def run(fP,accAvg,threshL):
                 #print(len(contours))
                 cnt=contours[0]
                 len(cnt)
-                        
-                        
+                              
                 drawing = np.uint8(display_image)
-                
- 
+                 
                 for cnt in contours:
                         
                         bounding_rect = cv2.boundingRect( cnt )
@@ -346,7 +340,6 @@ def run(fP,accAvg,threshL):
                         box_height = box[bottom][0] - box[top][0]
                         box_areas.append( box_width * box_height )
                         
-                
                 average_box_area = 0.0
                 if len(box_areas): average_box_area = float( sum(box_areas) ) / len(box_areas)
                 
