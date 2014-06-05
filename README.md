@@ -45,3 +45,37 @@ Python executable - can be run from shell, takes in arguments file/batch mode, f
 If not system arguments, they will be asked for direct input.
 
 *Please check paths depending on your cloned git library - they are not relative.*
+
+Task List
+=============
+
+Welcome to the OpenCV_HummingbirdsMotion wiki!
+
+Here i'm keeping track of steps needed to get the MotionMeerkat module on to the bisque platform
+
+To do
+=========
+
+Engine server
+-------------
+
+- [] Connect to atmosphere node
+- [] General review of the flow ( xml -> runtime -> python)
+- [] Initialize local instant of engine server 
+    - [] Example test run using engine server
+    - [] Where are error files saved?
+
+XML
+-------
+1. View tags on module definition file
+1. Name for the folder path for output directories?
+
+Runtime
+------
+1. Confirm argument passing using positional naming
+
+Python
+----
+1. Confirm opts parses statement
+1. Folder directory naming
+1. Can i create folders, do all modules have write permission within users folders?
