@@ -77,6 +77,6 @@
 	
 	<tag name="execute_options">
 		<tag name="argument_style" value="positional"/>
-		<tag name="iterable" value="resource_url" type="dataset"/>
+		<tag name="iterable" value="image_url" type="dataset"/>
 	</tag>
 </module>
