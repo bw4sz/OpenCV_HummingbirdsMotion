@@ -21,6 +21,7 @@ from math import *
 import glob
 from datetime import datetime, timedelta
 import csv
+from lmxl import etree as ET
 
 #Declare the program
 print Usage
@@ -580,5 +581,21 @@ else:
 
 	bq = BQSession().init_local(user, pwd)
 	run(image_url,accAvg,threshT, bq=bq)
+
+####Need to tell bisque where the dataset is!
+###get list of output frames from the directory on the harddrive
+##upload each frame to bisque!
+
+#save image pixels, local file and any image tags, and the graphical annotation of the bulleseye 
+#an array of xml fragments! 
+
+#save.blob code instead of upload image pixels, bqaqpi.bqapi.util.py
+#load in the etree library?
+
+#ET.XML ("<gobject type='bird'><point name='centroid' > <vertex x="10" y="20" /> </point> <gobject/>"
+
+
+
+# go to ef save_blob(session,  localfile, resource=None) in http://biodev.ece.ucsb.edu/projects/bisquik/browser/bisque/bqapi/bqapi/util.py
 
 
