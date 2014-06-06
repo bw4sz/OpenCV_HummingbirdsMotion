@@ -28,15 +28,15 @@
 			</template>
 		</tag>
 		<tag name="plotwatcher" value="false" type="boolean" >
-83	            <template>
-84	                <tag name="label" value="Does this video come from a plotwatcher camera (True/False)" />
-85	            </template>           
-86	    </tag>
+	            <template>
+	                <tag name="label" value="Does this video come from a plotwatcher camera (True/False)" />
+	            </template>           
+	    </tag>
 		<tag name="adapt" value="true" type="boolean" >
-83	            <template>
-84	                <tag name="label" value="Adaptive averaging of the motion sensitivity?" />
-85	            </template>           
-86	    </tag>
+	            <template>
+	                <tag name="label" value="Adaptive averaging of the motion sensitivity?" />
+	            </template>           
+	    </tag>
 
 		<tag name="frameHIT" value="0.01" type="number">
 			<template>
