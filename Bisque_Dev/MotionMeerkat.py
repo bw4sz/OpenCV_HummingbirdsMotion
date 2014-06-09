@@ -54,12 +54,12 @@ def merge_collided_bboxes( bbox_list ):
                                 bbox_list.append( new_bbox )
                                 # Start over with the new list:
                                 return merge_collided_bboxes( bbox_list )
-        # When there are no collions between boxes, return that list:
+        # When there are no collisions between boxes, return that list:
         return bbox_list
 	
 #Global Run Function	
 def run(fP,accAvg,threshL):
-    
+    collions
         print("AccAvg begin value is: %s" % (accAvg))
         # Create a log file with each coordinate
         log_file_name = "tracker_output.log"
@@ -404,6 +404,7 @@ accAvg = float(args[2])
 #There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean. 
 #This statement should be True or False
 plotwatcher="True" == args[3]	
+
 #Should we use adaptive averaging for hit rate?
 adapt="True" == args[4]
 if adapt:
@@ -443,6 +444,8 @@ else:
 	bq = BQSession().init_local(user, pwd)
 	run(image_url,accAvg,threshT, bq=bq)
 
+#Post Run 
+
 ####Need to tell bisque where the dataset is!
 ###get list of output frames from the directory on the harddrive
 ##upload each frame to bisque!
@@ -450,5 +453,5 @@ else:
 #an array of xml fragments! 
 #save.blob code instead of upload image pixels, bqaqpi.bqapi.util.py
 #load in the etree library?
-#ET.XML ("<gobject type='bird'><point name='centroid' > <vertex x="10" y="20" /> </point> <gobject/>"
+#ET.XML("<gobject type='bird'><point name='centroid' > <vertex x="10" y="20" /> </point> <gobject/>"
 # go to ef save_blob(session,  localfile, resource=None) in http://biodev.ece.ucsb.edu/projects/bisquik/browser/bisque/bqapi/bqapi/util.py
