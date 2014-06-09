@@ -1,4 +1,4 @@
-#!C:/Anaconda/python.exe
+#!C:/Python27/python.exe
 
 Usage = """
 
@@ -79,18 +79,18 @@ if(len(sys.argv)<=2):
                 batchpool=raw_input("Enter folder containing videos:")
 	
 	#Sensitivity to movement
-	accAvg=float(raw_input("Sensitivity (default type 0.35 : "))
+	accAvg=float(raw_input("Sensitivity (default = 0.35) : "))
 	
 	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean	
-	plotwatcher="True" == raw_input("Does this video come from a plotwatcher camera (True/False):")
+	plotwatcher="True" == raw_input("Does this video come from a plotwatcher camera (True/False): ")
 	
 	#Should accAVG be adapted every 10minutes based on an estimated hitrate
-	adapt="True" == raw_input("Adapt the sensitivity based on hitrate? (True/False)")
+	adapt="True" == raw_input("Adapt the sensitivity based on hitrate? (True/False): ")
 	if adapt:
 			#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
-			frameHIT=float(raw_input("Expected percentage of frames with motion (0-1 decimal, eg.  1% is 0.01)"))
+			frameHIT=float(raw_input("Expected percentage of frames with motion (0-1 decimal, eg.  1% is 0.01): "))
 			#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
-			floorvalue=float(raw_input("Minimum allowed sensitivity (default type=.05"))
+			floorvalue=float(raw_input("Minimum allowed sensitivity (default=.05): "))
 
 	
 		
@@ -198,6 +198,8 @@ def run(fP,accAvg,threshL):
         #create hit counter to track number of outputs
 	hitcounter=0
 	
+	#Create a counter for total frames
+	frameCOUNT=0
 	
         cap = cv2.VideoCapture(fP)
             
@@ -277,8 +279,12 @@ def run(fP,accAvg,threshL):
                 # Capture frame from file
                 ret,camera_imageO = cap.read()
                 if not ret:
+			log_file.write(str(frameCOUNT) + "Total frames in file:" + "\n" )
                         break    
                 
+                #Add to the total frame count
+		frameCOUNT=frameCOUNT+1
+		
                 #For now, just cut off the bottom 5% if the plotwatcher option is called. 
                 
                 if plotwatcher:
@@ -411,7 +417,7 @@ def run(fP,accAvg,threshL):
                         
                 drawing = np.uint8(display_image)
                 
-                ##Draw the initial contours?
+                ##Draw the initial contours
                 #for cnt in contours:
 		if vis:
                         bx,by,bw,bh = cv2.boundingRect(cnt)
