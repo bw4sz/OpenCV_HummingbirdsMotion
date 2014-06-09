@@ -70,7 +70,6 @@ if(len(sys.argv)<=2):
         #Batch or single file
         runtype=raw_input("runtype batch or file:")
 	
-	print(str(runtype))
 
         if(runtype=="file"):
                 inDEST=raw_input("Enter video input:")
