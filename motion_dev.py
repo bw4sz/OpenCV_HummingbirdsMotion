@@ -1,4 +1,4 @@
-#!C:/Python27/python.exe
+#!/usr/bin/env python
 
 Usage = """
 
@@ -72,8 +72,6 @@ if(len(sys.argv)<=2):
         #Batch or single file
         runtype=raw_input("runtype batch or file:")
 	
-	print(str(runtype))
-
         if(runtype=="file"):
                 inDEST=raw_input("Enter video input:")
         
@@ -97,6 +95,8 @@ if(len(sys.argv)<=2):
 	#thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
 	threshT=float(raw_input("Threshold for movement tolerance , ranging from 0 (all movement) to 255 (no movement) (default = 100) : "))
 	minSIZE = float( raw_input (" Minimize contour size, expressed as a percentage of the total frame (e.g 0.1 means that contours must fill a tenth of the frame to be considered) :"))
+	burnin= float(raw_input("Burn in, skip initial minutes of video: "))
+	frame_rate= raw_input("Frame Rate in frames per second (If blank, program will try to guess (results can be mixed) : ")
 	
 
 ##Visualize the frames, this should only be used for testing!
@@ -196,9 +196,6 @@ def run(fP,accAvg,threshL):
         #create hit counter to track number of outputs
 	hitcounter=0
 	
-	#Create a counter for total frames
-	frameCOUNT=0
-	
         cap = cv2.VideoCapture(fP)
             
         # Capture the first frame from file for image properties
@@ -218,19 +215,19 @@ def run(fP,accAvg,threshL):
 
 	if vis:
 		cv2.imshow("frame",display_image)
-		cv2.waitKey(1000)
+		cv2.waitKey(1500)
 		cv2.destroyWindow("frame")
-	
-                    
+	          
         width = np.size(display_image, 1)
         height = np.size(display_image, 0)
         frame_size=(width, height)
         
         #Get frame rate if the plotwatcher setting hasn't been called
-	if plotwatcher:
-		frame_rate=1
-	else:
-		frame_rate=round(cap.get(cv.CV_CAP_PROP_FPS))
+	if frame_rate=='':
+		if plotwatcher:
+			frame_rate=1
+		else:
+			frame_rate=round(cap.get(cv2.cv.CV_CAP_PROP_FPS))
 	
         #get frame time relative to start
         frame_time=cap.get(cv.CV_CAP_PROP_POS_MSEC)     
@@ -273,17 +270,20 @@ def run(fP,accAvg,threshL):
         max_targets = 1
                 
         while True:
-                
+		
+		#apply burn in, skip the the first X frames according to user input
+		for x in range(1,burnin * frame_rate * 60): 
+			frame_count=frame_count+1
+			cap.grab()
+					
                 # Capture frame from file
                 ret,camera_imageO = cap.read()
                 if not ret:
-			log_file.write(str(frameCOUNT) + "Total frames in file:" + "\n" )
+			log_file.write(str(frame_count) + "Total frames in file:" + "\n" )
                         break    
                 
-                #Add to the total frame count
-		frameCOUNT=frameCOUNT+1
-		
-                #For now, just cut off the bottom 5% if the plotwatcher option is called. 
+              
+		#Cut off the bottom 5% if the plotwatcher option is called. 
                 
                 if plotwatcher:
 			camera_image = camera_imageO[1:700,1:1280]	
@@ -318,7 +318,6 @@ def run(fP,accAvg,threshL):
 					
 				#In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
 				
-			
 				print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg))
 				#Write change to log file
 				log_file.write( file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg) + "\n" )
@@ -458,7 +457,7 @@ def run(fP,accAvg,threshL):
                         # Only keep the box if it's not a tiny noise box:
 						#Altered to be relative to the entire frame, only keep box if its larger than 1/20 of the frame
                         #if (box_width * box_height) > average_box_area*.3: trimmed_box_list.append( box )
-						if (box_width * box_height) > (width * height) * minSIZE: trimmed_box_list.append( box )
+			if (box_width * box_height) > (width * height) * minSIZE: trimmed_box_list.append( box )
 
                 ## Draw the trimmed box list:
                 #print(len(trimmed_box_list))
@@ -680,8 +679,7 @@ def run(fP,accAvg,threshL):
 		#If a file has been written, flush the log to read
 		sys.stdout.flush()
 		
-		
-                ##################################################
+		##################################################
                 #Have a returned counter to balance hitRate
 		hitcounter=hitcounter+1
                 
@@ -697,7 +695,7 @@ if (runtype == "batch"):
         #Create Pool of Videos
         for (root, dirs, files) in os.walk(batchpool):
                 for files in files:
-                        if files.endswith(".TLV") or files.endswith(".AVI") or files.endswith(".MPG") or files.endswith(".mp4"):
+                        if files.endswith(".TLV") or files.endswith(".AVI") or files.endswith(".MPG") or files.endswith(".mp4") or files.endswith(".MOD") or files.endswith(".MTS"):
                                 videoPool.append(os.path.join(root, files))
         
         for vid in videoPool:      

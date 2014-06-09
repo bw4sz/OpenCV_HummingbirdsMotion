@@ -66,9 +66,11 @@ def run(fP,accAvg,threshL):
         log_file = file(log_file_name, 'a' )
         #create hit counter to track number of outputs
 	hitcounter=0
-	    cap = cv2.VideoCapture(fP)
+	
+	#Open Video Capture
+	cap = cv2.VideoCapture(fP)
         
-		# Capture the first frame from file for image properties
+	# Capture the first frame from file for image properties
         orig_image = cap.read()[1]  
         
 		###Get information about camera and image
