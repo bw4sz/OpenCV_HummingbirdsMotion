@@ -4,8 +4,6 @@ Usage = """
 
 Automated capture of motion frames from a video file. Must have python, open CV and ffmpeg set up and stored in PATH variable
 
-Enter name of video file, and the program will either ask you for a destination file, or guess at the place to put the file based on the input name. 
-
 """
 import cv2
 import cv2.cv as cv
@@ -94,9 +92,14 @@ if(len(sys.argv)<=2):
 
 	#thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
 	threshT=float(raw_input("Threshold for movement tolerance , ranging from 0 (all movement) to 255 (no movement) (default = 100) : "))
+	
 	minSIZE = float( raw_input (" Minimize contour size, expressed as a percentage of the total frame (e.g 0.1 means that contours must fill a tenth of the frame to be considered) :"))
+	
 	burnin= float(raw_input("Burn in, skip initial minutes of video: "))
-	frame_rate= raw_input("Frame Rate in frames per second (If blank, program will try to guess (results can be mixed) : ")
+	
+	frameSET= "True" == raw_input("Set frame rate in frames per second? (True or False) (If False, program will try to look at metadata): ")
+	
+	frame_rate = raw_input("Frame rate in frames per second (If frameSET was False, type any number, the program will ignore and try to guess (results can be mixed)) : ")
 	
 
 ##Visualize the frames, this should only be used for testing!
@@ -168,7 +171,7 @@ def merge_collided_bboxes( bbox_list ):
         # When there are no collions between boxes, return that list:
         return bbox_list   
             
-def run(fP,accAvg,threshL):
+def run(fP,accAvg,threshL,frame_rate):
 	
         #Report name of file
         sys.stderr.write("Processing file %s\n" % (fP))
@@ -184,7 +187,6 @@ def run(fP,accAvg,threshL):
         print("Output path will be %s/%s/%s" % (fileD,IDFL,shortname))
         print("AccAvg begin value is: %s" % (accAvg))
 	
-		
 	file_destination=os.path.join(fileD,IDFL,shortname)
         if not os.path.exists(file_destination):
                 os.makedirs(file_destination)
@@ -197,33 +199,10 @@ def run(fP,accAvg,threshL):
 	hitcounter=0
 	
         cap = cv2.VideoCapture(fP)
-            
-        # Capture the first frame from file for image properties
-        orig_image = cap.read()[1]  
-        
-        ###Get information about camera and image
-
-        width = np.size(orig_image, 1)
-        height = np.size(orig_image, 0)
-        frame_size=(width, height)
- 
-        #For now, just cut off the bottom 5% if the timing mechanism is on the bottom. 
-	if plotwatcher:
-		display_image = orig_image[1:700,1:1280]
-	else:
-		display_image = orig_image
-
-	if vis:
-		cv2.imshow("frame",display_image)
-		cv2.waitKey(1500)
-		cv2.destroyWindow("frame")
-	          
-        width = np.size(display_image, 1)
-        height = np.size(display_image, 0)
-        frame_size=(width, height)
         
         #Get frame rate if the plotwatcher setting hasn't been called
-	if frame_rate=='':
+	# not the most elegant solution, but get global frame_rate
+	if not frameSET:
 		if plotwatcher:
 			frame_rate=1
 		else:
@@ -235,6 +214,36 @@ def run(fP,accAvg,threshL):
         print("frame rate: " + str(frame_rate))
         sys.stderr.write("frame rate: " + str(frame_rate))
 	
+	####Burnin and first image
+	
+	#apply burn in, skip the the first X frames according to user input
+	for x in range(1,int(burnin * int(frame_rate) * 60)): 
+		cap.grab()	
+		
+	# Capture the first frame from file for image properties
+	orig_image = cap.read()[1]  
+	
+	###Get information about camera and image
+
+	width = np.size(orig_image, 1)
+	height = np.size(orig_image, 0)
+	frame_size=(width, height)
+ 
+	#For now, just cut off the bottom 5% if the timing mechanism is on the bottom. 
+	if plotwatcher:
+		display_image = orig_image[1:700,1:1280]
+	else:
+		display_image = orig_image
+
+	if vis:
+		cv2.namedWindow('frame', cv2.WINDOW_NORMAL)		
+		cv2.imshow("frame",display_image)
+		cv2.waitKey(1500)
+		cv2.destroyWindow("frame")
+		  
+	width = np.size(display_image, 1)
+	height = np.size(display_image, 0)
+	frame_size=(width, height)	
         # Greyscale image, thresholded to create the motion mask:
         grey_image = np.uint8(display_image)
         
@@ -270,11 +279,6 @@ def run(fP,accAvg,threshL):
         max_targets = 1
                 
         while True:
-		
-		#apply burn in, skip the the first X frames according to user input
-		for x in range(1,burnin * frame_rate * 60): 
-			frame_count=frame_count+1
-			cap.grab()
 					
                 # Capture frame from file
                 ret,camera_imageO = cap.read()
@@ -298,8 +302,8 @@ def run(fP,accAvg,threshL):
 		floor=0
 		if adapt:
 				
-			#Every 15min, reset the agg threshold, depending on expected level of movement
-			#how many frames per fiteen minutes? 
+			#Every 10min, reset the agg threshold, depending on expected level of movement
+			#how many frames per minute? 
 			
 			#Should be a integer, round it
 			fift=round(10*60*frame_rate)
@@ -347,51 +351,48 @@ def run(fP,accAvg,threshL):
                 color_image =  display_image.copy()\
 		
 		if vis:
-		
+			cv2.namedWindow('Initial', cv2.WINDOW_NORMAL)		
 			cv2.imshow("Initial",color_image)
-			cv2.waitKey(1000)
-			cv2.destroyWindow("Initial")                        
+			cv2.waitKey(2000)
+			cv2.destroyAllWindows()                        
 
                 # Smooth to get rid of false positives
                 color_image = cv2.GaussianBlur(color_image,(9,9),0)
-                #cv2.imshow("Blur",color_image)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("Blur")  
+                if vis:
+			cv2.namedWindow('Blur', cv2.WINDOW_NORMAL)		
+			cv2.imshow("Blur",color_image)
+			cv2.waitKey(3000)
+			cv2.destroyWindow("Blur")  
                 
                 # Use the Running Average as the static background
       
                 #This value is very critical.
                                        
-                cv2.accumulateWeighted(color_image,running_average_image,accAvg)
-                if vis:
-			cv2.imshow("frame",running_average_image)
-			cv2.waitKey(1000)
-			cv2.destroyWindow("frame")                                       
+                cv2.accumulateWeighted(color_image,running_average_image,accAvg)                                    
                                        
                 running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
                 if vis:
+			cv2.namedWindow('runnAVG', cv2.WINDOW_NORMAL)					
 			cv2.imshow("runnAVG",running_average_in_display_color_depth)
-			cv2.waitKey(1000)
+			cv2.waitKey(5000)
 			cv2.destroyWindow("runnAVG")                        
                 
                 # Subtract the current frame from the moving average.
                 difference=cv2.absdiff( color_image, running_average_in_display_color_depth)
                 if vis:
 			cv2.imshow("diff",difference)
-			cv2.waitKey(1000)
+			cv2.waitKey(3000)
 			cv2.destroyWindow("diff")
                 
                 # Convert the image to greyscale.
                 grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
-                #cv2.imshow("Convertgray",grey_image)
-                #cv2.waitKey(1000)
-                #cv2.destroyWindow("Convertgray")
                 
                 # Threshold the image to a black and white motion mask:
                 ret,grey_image = cv2.threshold(grey_image, threshL, 255, cv2.THRESH_BINARY )
 		if vis:
+			cv2.namedWindow('Threshold', cv2.WINDOW_NORMAL)				
 			cv2.imshow("Threshold",grey_image)
-			cv2.waitKey(1000)
+			cv2.waitKey(3000)
 			cv2.destroyWindow("Threshold")
                               
                 non_black_coords_array = numpy.where( grey_image > 3 )
@@ -414,13 +415,13 @@ def run(fP,accAvg,threshL):
                 drawing = np.uint8(display_image)
                 
                 ##Draw the initial contours
-                #for cnt in contours:
-		if vis:
-                        bx,by,bw,bh = cv2.boundingRect(cnt)
-                        cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw contours in green color
-                        cv2.imshow('output',drawing)
-                        ##cv2.waitKey(100)
-                        
+                for cnt in contours:
+			if vis:
+				cv2.namedWindow('output', cv2.WINDOW_NORMAL)
+				bx,by,bw,bh = cv2.boundingRect(cnt)
+				cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw #contours in green color
+				cv2.imshow('output',drawing)
+				cv2.waitKey(3000)
     
                 cv2.destroyWindow("output")
                 
@@ -455,7 +456,7 @@ def run(fP,accAvg,threshL):
                         box_height = box[bottom][0] - box[top][0]
                         
                         # Only keep the box if it's not a tiny noise box:
-						#Altered to be relative to the entire frame, only keep box if its larger than 1/20 of the frame
+			#Altered to be relative to the entire frame, only keep box if its larger than 1/20 of the frame
                         #if (box_width * box_height) > average_box_area*.3: trimmed_box_list.append( box )
 			if (box_width * box_height) > (width * height) * minSIZE: trimmed_box_list.append( box )
 
@@ -463,9 +464,10 @@ def run(fP,accAvg,threshL):
                 #print(len(trimmed_box_list))
                 for box in trimmed_box_list:
 			if vis:
+				cv2.namedWindow('output', cv2.WINDOW_NORMAL)			
 				cv2.rectangle( display_image, box[0], box[1], (0,255,0), 3 )
 				cv2.imshow('output',display_image)
-				cv2.waitKey(100)    
+				cv2.waitKey(10000)    
 				cv2.destroyWindow("output")
                 
                 try:       
@@ -480,7 +482,7 @@ def run(fP,accAvg,threshL):
                         cv2.rectangle( display_image, box[0], box[1], (0,255,0), 1 )
 			if vis: 
 				cv2.imshow('output',orig_image)
-				cv2.waitKey(1000)  
+				cv2.waitKey(10000)  
 				cv2.destroyWindow("output")
                         
                 # Here are our estimate points to track, based on merged & trimmed boxes:
@@ -706,7 +708,7 @@ if (runtype == "batch"):
                 ##The second argument is the accumulated averaging, higher values are more sensitive to sudden movements
                 ##The third value is the thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
                 try:
-                        run(fP=vid,accAvg=accAvg,threshL=threshT)
+                        run(fP=vid,accAvg=accAvg,threshL=threshT,frame_rate=frame_rate)
                 except Exception, e:
                         print 'Error:',e
                         print 'Video:',vid
@@ -714,7 +716,7 @@ if (runtype == "batch"):
 
 ###If runtype is a single file - run file destination        
 if (runtype == "file"):
-        run(inDEST,accAvg,threshT)
+        run(inDEST,accAvg,threshT,frame_rate)
 
 
 ##Destroy Windows
