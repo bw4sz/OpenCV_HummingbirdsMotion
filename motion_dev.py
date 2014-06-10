@@ -306,7 +306,7 @@ def run(fP,accAvg,threshL,frame_rate):
 			#how many frames per minute? 
 			
 			#Should be a integer, round it
-			fift=round(10*60*frame_rate)
+			fift=round(10*60*float(frame_rate))
 			
 			if frame_count % fift == 0:  
 				
