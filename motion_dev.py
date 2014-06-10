@@ -56,7 +56,6 @@ if(len(sys.argv) >=2):
 			#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
 			floorvalue=float(sys.argv[8])
 	threshT=float(sys.argv[9])
-	minSIZE = float(sys.argv[10])
 	
 #########################################
 #Get user inputs if no system arguments
@@ -80,30 +79,31 @@ if(len(sys.argv)<=2):
 	accAvg=float(raw_input("Sensitivity (default = 0.35) : "))
 	
 	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean	
-	plotwatcher="True" == raw_input("Does this video come from a plotwatcher camera (True/False): ")
+	plotwatcher="True" == raw_input("Does this video come from a plotwatcher camera? (True/False): ")
 	
 	#Should accAVG be adapted every 10minutes based on an estimated hitrate
 	adapt="True" == raw_input("Adapt the sensitivity based on hitrate? (True/False): ")
 	if adapt:
 			#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
-			frameHIT=float(raw_input("Expected percentage of frames with motion (0-1 decimal, eg.  1% is 0.01): "))
+			frameHIT=float(raw_input("Expected percentage of frames with motion (decimal, 1% is 0.01): "))
 			#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
 			floorvalue=float(raw_input("Minimum allowed sensitivity (default=.05): "))
 
 	#thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
-	threshT=float(raw_input("Threshold for movement tolerance , ranging from 0 (all movement) to 255 (no movement) (default = 100) : "))
-	
-	minSIZE = float( raw_input (" Minimize contour size, expressed as a percentage of the total frame (e.g 0.1 means that contours must fill a tenth of the frame to be considered) :"))
-	
+	threshT=float(raw_input("Threshold for movement tolerance , ranging from 0 (all) to 255 (no movement) : "))
+		
 	burnin= float(raw_input("Burn in, skip initial minutes of video: "))
 	
-	frameSET= "True" == raw_input("Set frame rate in frames per second? (True or False) (If False, program will try to look at metadata): ")
+	frameSET= "True" == raw_input("Set frame rate in frames per second? (True/False) (If False, program will try to look at metadata): ")
 	
-	frame_rate = raw_input("Frame rate in frames per second (If frameSET was False, type any number, the program will ignore and try to guess (results can be mixed)) : ")
+	frame_rate = raw_input("Frame rate in frames per second (If frameSET was False, type 0, and the program will ignore and try to guess (results can be mixed)) : ")
 	
+	set_ROI= "True" == raw_input("Do you want to subsect the image by selecting a rectangle?")
 
 ##Visualize the frames, this should only be used for testing!
 vis=True
+
+
 
 ###############Specific to Plotwatcher PRO, unusual camera setup because they are jpegs strung toghether as iamges, the frame_rate needs to be hard coded. 
 #just create a flag that says if Plotwatcher, set these extra conditions
@@ -119,7 +119,6 @@ Reads an incoming video stream and tracks motion in real time.
 Detected motion events are logged to a text file.  Also has face detection.
 """
 
-
 #
 # BBoxes must be in the format:
 # ( (topleft_x), (topleft_y) ), ( (bottomright_x), (bottomright_y) ) )
@@ -127,6 +126,10 @@ top = 0
 bottom = 1
 left = 0
 right = 1
+
+
+		     
+
 
 def merge_collided_bboxes( bbox_list ):
         # For every bbox...
@@ -211,14 +214,16 @@ def run(fP,accAvg,threshL,frame_rate):
         #get frame time relative to start
         frame_time=cap.get(cv.CV_CAP_PROP_POS_MSEC)     
 	
-        print("frame rate: " + str(frame_rate))
         sys.stderr.write("frame rate: " + str(frame_rate))
 	
 	####Burnin and first image
+        frame_count=0
 	
 	#apply burn in, skip the the first X frames according to user input
 	for x in range(1,int(burnin * int(frame_rate) * 60)): 
-		cap.grab()	
+		cap.grab()
+		frame_count=frame_count+1
+		
 		
 	# Capture the first frame from file for image properties
 	orig_image = cap.read()[1]  
@@ -228,22 +233,69 @@ def run(fP,accAvg,threshL,frame_rate):
 	width = np.size(orig_image, 1)
 	height = np.size(orig_image, 0)
 	frame_size=(width, height)
- 
-	#For now, just cut off the bottom 5% if the timing mechanism is on the bottom. 
+	
+	#Have to set global for the callback, feedback welcome. 
+	global orig
+	
 	if plotwatcher:
-		display_image = orig_image[1:700,1:1280]
+		#cut off the bottom 5% if the timing mechanism is on the bottom. 
+		orig = orig_image[1:700,1:1280]
 	else:
-		display_image = orig_image
-
+		orig = orig_image
+	
 	if vis:
 		cv2.namedWindow('frame', cv2.WINDOW_NORMAL)		
-		cv2.imshow("frame",display_image)
-		cv2.waitKey(1500)
+		cv2.imshow("frame",orig)
+		cv2.waitKey(10000)
 		cv2.destroyWindow("frame")
-		  
+
+	#Set region of interest	
+	if set_ROI:
+		#set callback states
+		drawing = False # true if mouse is pressed
+		ix,iy = -1,-1
+		roi=[]			
+		# mouse callback function
+		def draw_ROI(event,x,y,flags,param):
+			global ix,iy,drawing,mode
+			if event == cv2.EVENT_LBUTTONDOWN:
+				drawing = True
+				ix,iy = x,y
+			
+			elif event == cv2.EVENT_MOUSEMOVE:
+				if drawing == True:
+					cv2.rectangle(orig,(ix,iy),(x,y),(0,255,0),2)
+			
+			elif event == cv2.EVENT_LBUTTONUP:
+				drawing = False
+				box=cv2.rectangle(orig,(ix,iy),(x,y),(0,255,0),2)
+				roi_pts=ix,iy,x,y
+				roi.extend(roi_pts)
+					
+		cv2.namedWindow('image')
+		cv2.setMouseCallback('image',draw_ROI)
+		while(1):
+			cv2.imshow('image',orig)
+			k = cv2.waitKey(1000)
+			if k == 27:
+				break
+		    
+		cv2.destroyAllWindows()				
+			
+		#Subset by the specified rectangle
+		display_image=orig[roi[1]:roi[3], roi[0]:roi[2]]
+		
+		#show the subset
+		cv2.imshow('ROI',display_image)
+		cv2.waitKey(1000)
+		cv2.destroyAllWindows()		
+	else:
+		display_image=orig		
+		
 	width = np.size(display_image, 1)
 	height = np.size(display_image, 0)
 	frame_size=(width, height)	
+        
         # Greyscale image, thresholded to create the motion mask:
         grey_image = np.uint8(display_image)
         
@@ -264,7 +316,6 @@ def run(fP,accAvg,threshL,frame_rate):
         last_target_change_t = 0.0
         k_or_guess = 1
         codebook=[]
-        frame_count=0
         last_frame_entity_list = []
         
         #Set time
@@ -285,10 +336,8 @@ def run(fP,accAvg,threshL,frame_rate):
                 if not ret:
 			log_file.write(str(frame_count) + "Total frames in file:" + "\n" )
                         break    
-                
-              
+                              
 		#Cut off the bottom 5% if the plotwatcher option is called. 
-                
                 if plotwatcher:
 			camera_image = camera_imageO[1:700,1:1280]	
 		else:
@@ -323,17 +372,16 @@ def run(fP,accAvg,threshL,frame_rate):
 				#In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
 				
 				print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg))
+				
 				#Write change to log file
 				log_file.write( file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg) + "\n" )
 				
 				#reset hitcoutner for another fifteen minutes
 				hitcounter=0
-				
-							
+										
 				#Build in a floor, the value can't be negative.
 				if accAvg < floorvalue:
 					floor=floor + 1
-				
 				
 			#Reset if needed.
 				if floor == 1 :
@@ -353,7 +401,7 @@ def run(fP,accAvg,threshL,frame_rate):
 		if vis:
 			cv2.namedWindow('Initial', cv2.WINDOW_NORMAL)		
 			cv2.imshow("Initial",color_image)
-			cv2.waitKey(2000)
+			cv2.waitKey(800)
 			cv2.destroyAllWindows()                        
 
                 # Smooth to get rid of false positives
@@ -361,27 +409,23 @@ def run(fP,accAvg,threshL,frame_rate):
                 if vis:
 			cv2.namedWindow('Blur', cv2.WINDOW_NORMAL)		
 			cv2.imshow("Blur",color_image)
-			cv2.waitKey(3000)
+			cv2.waitKey(800)
 			cv2.destroyWindow("Blur")  
                 
-                # Use the Running Average as the static background
-      
-                #This value is very critical.
-                                       
-                cv2.accumulateWeighted(color_image,running_average_image,accAvg)                                    
-                                       
+                # Use the Running Average as the static background                                       
+                cv2.accumulateWeighted(color_image,running_average_image,accAvg)                                  
                 running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
                 if vis:
 			cv2.namedWindow('runnAVG', cv2.WINDOW_NORMAL)					
 			cv2.imshow("runnAVG",running_average_in_display_color_depth)
-			cv2.waitKey(5000)
+			cv2.waitKey(800)
 			cv2.destroyWindow("runnAVG")                        
                 
                 # Subtract the current frame from the moving average.
                 difference=cv2.absdiff( color_image, running_average_in_display_color_depth)
                 if vis:
 			cv2.imshow("diff",difference)
-			cv2.waitKey(3000)
+			cv2.waitKey(800)
 			cv2.destroyWindow("diff")
                 
                 # Convert the image to greyscale.
@@ -390,9 +434,9 @@ def run(fP,accAvg,threshL,frame_rate):
                 # Threshold the image to a black and white motion mask:
                 ret,grey_image = cv2.threshold(grey_image, threshL, 255, cv2.THRESH_BINARY )
 		if vis:
-			cv2.namedWindow('Threshold', cv2.WINDOW_NORMAL)				
+			cv2.namedWindow('Threshold', cv2.WINDOW_NORMAL)			
 			cv2.imshow("Threshold",grey_image)
-			cv2.waitKey(3000)
+			cv2.waitKey(800)
 			cv2.destroyWindow("Threshold")
                               
                 non_black_coords_array = numpy.where( grey_image > 3 )
@@ -411,18 +455,18 @@ def run(fP,accAvg,threshL,frame_rate):
                 cnt=contours[0]
                 len(cnt)
                         
-                        
                 drawing = np.uint8(display_image)
                 
                 ##Draw the initial contours
+                #if vis:
+		cv2.namedWindow('output', cv2.WINDOW_NORMAL)
+                cv2.imshow('output',drawing)
                 for cnt in contours:
-			if vis:
-				cv2.namedWindow('output', cv2.WINDOW_NORMAL)
-				bx,by,bw,bh = cv2.boundingRect(cnt)
-				cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw #contours in green color
-				cv2.imshow('output',drawing)
-				cv2.waitKey(3000)
-    
+			
+			bx,by,bw,bh = cv2.boundingRect(cnt)
+			cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw #contours in green color
+		
+		cv2.waitKey(1000)
                 cv2.destroyWindow("output")
                 
                 for cnt in contours:
@@ -435,7 +479,6 @@ def run(fP,accAvg,threshL,frame_rate):
                         polygon_points = cv2.approxPolyDP( cnt,0.1*cv2.arcLength(cnt,True),True)
                         approx = cv2.approxPolyDP(cnt,0.1*cv2.arcLength(cnt,True),True)
                         
-                
                 # Find the average size of the bbox (targets), then
                 # remove any tiny bboxes (which are probably just noise).
                 # "Tiny" is defined as any box with 1/10th the area of the average box.
@@ -446,7 +489,6 @@ def run(fP,accAvg,threshL,frame_rate):
                         box_height = box[bottom][0] - box[top][0]
                         box_areas.append( box_width * box_height )
                         
-                
                 average_box_area = 0.0
                 if len(box_areas): average_box_area = float( sum(box_areas) ) / len(box_areas)
                 
@@ -456,34 +498,41 @@ def run(fP,accAvg,threshL,frame_rate):
                         box_height = box[bottom][0] - box[top][0]
                         
                         # Only keep the box if it's not a tiny noise box:
-			#Altered to be relative to the entire frame, only keep box if its larger than 1/20 of the frame
-                        #if (box_width * box_height) > average_box_area*.3: trimmed_box_list.append( box )
-			if (box_width * box_height) > (width * height) * minSIZE: trimmed_box_list.append( box )
-
+                        if (box_width * box_height) > average_box_area*.3:
+				if (box_width * box_height) > (width * height) * .001: 
+					trimmed_box_list.append( box )
+		
+		#Relative to the entire frame, only keep box if its larger than .001 of the frame, reduces the number of tiny blips
+		
+		## If there are no boxes left at that size, skip to new frame
+		if len(trimmed_box_list) == 0:
+			continue
                 ## Draw the trimmed box list:
                 #print(len(trimmed_box_list))
-                for box in trimmed_box_list:
-			if vis:
+                if vis:
+			for box in trimmed_box_list:
 				cv2.namedWindow('output', cv2.WINDOW_NORMAL)			
 				cv2.rectangle( display_image, box[0], box[1], (0,255,0), 3 )
-				cv2.imshow('output',display_image)
-				cv2.waitKey(10000)    
-				cv2.destroyWindow("output")
+		cv2.imshow('output',display_image)
+		cv2.waitKey(1000)    
+		cv2.destroyWindow("output")
                 
                 try:       
-                        bounding_box_list = merge_collided_bboxes( trimmed_box_list )
+			bounding_box_list = merge_collided_bboxes( trimmed_box_list )
                 except Exception, e:
                         print 'Error:',e
                         print 'Box Merge Fail:'
                         continue                
                 # Draw the merged box list:
-                
-                for box in bounding_box_list:
-                        cv2.rectangle( display_image, box[0], box[1], (0,255,0), 1 )
-			if vis: 
-				cv2.imshow('output',orig_image)
-				cv2.waitKey(10000)  
-				cv2.destroyWindow("output")
+                if vis:
+			cv2.namedWindow('output', cv2.WINDOW_NORMAL)			
+			
+			for box in bounding_box_list:
+				cv2.rectangle( display_image, box[0], box[1], (0,255,0), 1 )
+			 
+			cv2.imshow('output',orig_image)
+			cv2.waitKey(1000)  
+			cv2.destroyWindow("output")				
                         
                 # Here are our estimate points to track, based on merged & trimmed boxes:
                 estimated_target_count = len( bounding_box_list )
@@ -719,51 +768,3 @@ if (runtype == "file"):
         run(inDEST,accAvg,threshT,frame_rate)
 
 
-##Destroy Windows
-cv2.destroyAllWindows()
-
-##To do, not included right now. 
-
-#add in mousecall event
-#Define SubArea Based on Mouse Event   
-	#box=[0,0,0,0]
-        
-        ##        creating mouse callback function
-        #def my_mouse_callback(event,x,y,flags,param):
-                #global drawing_box
-                #if event==cv2.EVENT_LBUTTONDOWN:
-                        #drawing_box=True
-                        #[box[0],box[1],box[2],box[3]]=[x,y,0,0]
-                        #print box[0]
-        
-                #if event==cv2.EVENT_LBUTTONUP:
-                        #drawing_box=False
-                        #if box[2]<0:
-                                #box[0]+=box[2]
-                                #box[2]*=-1
-                        #if box[3]<0:
-                                #box[1]+=box[3]
-                                #box[3]*=-1
-                                
-                #if event==cv2.EVENT_MOUSEMOVE:
-                        #if (drawing_box==True):
-                                #box[2]=x-box[0]
-                                #box[3]=y-box[1]        
-                        
-        ## Function to draw the rectangle                
-        #def draw_box(img,box):
-                #cv2.rectangle(img,(box[0],box[1]),(box[0]+box[2],box[1]+box[3]),(255,0,0))
-        
-        ##        main program        
-        #drawing_box=False              
-        #cv2.namedWindow("Box Example")
-        #cv2.setMouseCallback("Box Example",my_mouse_callback,display_image)
-        
-        #while(1):
-                #temp=display_image.copy()
-                #if drawing_box==True:
-                        #draw_box(temp,box)
-                #cv2.imshow("Box Example",temp)
-                #if cv.WaitKey(20)%0x100==27:break
-
-        #cv2.destroyWindow("Box Example")    
