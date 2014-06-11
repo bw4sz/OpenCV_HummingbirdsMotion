@@ -19,6 +19,10 @@ import glob
 from datetime import datetime, timedelta
 import csv
 
+#for py2exe needs manual
+from scipy.sparse.csgraph import _validation
+
+
 if len(sys.argv)<2:
         print Usage
 else:
@@ -454,6 +458,7 @@ def run(fP,accAvg,threshL,frame_rate):
                 contours,hierarchy = cv2.findContours(grey_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
                 
                 if len(contours) == 0 :
+			print("No contours")
                         continue                        
                 #print(len(contours))
                 cnt=contours[0]
@@ -462,16 +467,16 @@ def run(fP,accAvg,threshL,frame_rate):
                 drawing = np.uint8(display_image)
                 
                 ##Draw the initial contours
-                #if vis:
-		cv2.namedWindow('contour', cv2.WINDOW_NORMAL)
-                cv2.imshow('contour',drawing)
-                for cnt in contours:
+                if vis:
+			cv2.namedWindow('contour', cv2.WINDOW_NORMAL)
+			cv2.imshow('contour',drawing)
+			for cnt in contours:
+				
+				bx,by,bw,bh = cv2.boundingRect(cnt)
+				cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw #contours in green color
 			
-			bx,by,bw,bh = cv2.boundingRect(cnt)
-			cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw #contours in green color
-		
-		cv2.waitKey(1000)
-                cv2.destroyWindow("contour")
+			cv2.waitKey(1000)
+			cv2.destroyWindow("contour")
                 
                 for cnt in contours:
                         
@@ -502,13 +507,15 @@ def run(fP,accAvg,threshL,frame_rate):
                         box_height = box[bottom][0] - box[top][0]
                         
                         # Only keep the box if it's not a tiny noise box:
+			#Relative to the entire frame, only keep box if its larger 
+			#than .001 of the frame, reduces the number of tiny blips
                         if (box_width * box_height) > average_box_area*.3:
 				if (box_width * box_height) > (width * height) * .001: 
 					trimmed_box_list.append( box )
 		
-		#Relative to the entire frame, only keep box if its larger than .001 of the frame, reduces the number of tiny blips
 		## If there are no boxes left at that size, skip to new frame
 		if len(trimmed_box_list) == 0:
+			print("No trimmed boxes")			
 			continue
                 ## Draw the trimmed box list:
                 #print(len(trimmed_box_list))
@@ -516,9 +523,9 @@ def run(fP,accAvg,threshL,frame_rate):
 			for box in trimmed_box_list:
 				cv2.namedWindow('trimmed_box', cv2.WINDOW_NORMAL)			
 				cv2.rectangle( display_image, box[0], box[1], (0,255,0), 3 )
-		cv2.imshow('trimmed_box',display_image)
-		cv2.waitKey(1000)    
-		cv2.destroyWindow("trimmed_box")
+			cv2.imshow('trimmed_box',display_image)
+			cv2.waitKey(1000)    
+			cv2.destroyWindow("trimmed_box")
                 
                 try:       
 			bounding_box_list = merge_collided_bboxes( trimmed_box_list )
@@ -581,7 +588,8 @@ def run(fP,accAvg,threshL,frame_rate):
 				if vis:
 					cv2.imshow('output',display_image)
 					cv2.waitKey(1000)  
-					cv2.destroyWindow("output")                        
+					cv2.destroyWindow("output") 
+					
                 # Now we have targets that are NOT computed from bboxes -- just
                 # movement weights (according to kmeans).  If any two targets are
                 # within the same "bbox count", average them into a single target.  
@@ -662,6 +670,7 @@ def run(fP,accAvg,threshL,frame_rate):
                                 # Don't consider entities that are already claimed:
                                 if nearest_possible_entity in this_frame_entity_list:
                                         #print "Target %s: Skipping the one iwth distance: %d at %s, C:%s" % (target, distance, nearest_possible_entity[3], nearest_possible_entity[1] )
+					print("target already claimed")
                                         continue
                                 
                                 #print "Target %s: USING the one with distance: %d at %s, C:%s" % (target, distance, nearest_possible_entity[3] , nearest_possible_entity[1])
@@ -726,7 +735,7 @@ def run(fP,accAvg,threshL,frame_rate):
 		#Log the frame count and the time in video, in case user wants to check in the original
 		#create a time object, this relies on the frame_rate being correct!
 		#set seconds
-		sec = timedelta(seconds=int(frame_count/frame_rate))		
+		sec = timedelta(seconds=int(frame_count/float(frame_rate)))		
 		d = datetime(1,1,1) + sec
 		log_file.write( "%d %d:%d:%d " % ( int(frame_count), d.hour,d.minute, d.second) + "\n" )
 		#If a file has been written, flush the log to read
@@ -770,3 +779,4 @@ if (runtype == "file"):
         run(inDEST,accAvg,threshT,frame_rate)
 
 
+time.sleep(10)
