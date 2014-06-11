@@ -96,9 +96,9 @@ if(len(sys.argv)<=2):
 	
 	frameSET= "True" == raw_input("Set frame rate in frames per second? (True/False) (If False, program will try to look at metadata): ")
 	
-	frame_rate = raw_input("Frame rate in frames per second (If frameSET was False, type 0, and the program will ignore and try to guess (results can be mixed)) : ")
+	frame_rate = raw_input("Set frames per second (If frameSET was False, type 0, and the program will ignore and try to guess (results can be mixed)) : ")
 	
-	set_ROI= "True" == raw_input("Do you want to subsect the image by selecting a rectangle?")
+	set_ROI= "True" == raw_input("Subsect the image by selecting a region of interest (ROI) (True of False)? : ")
 
 ##Visualize the frames, this should only be used for testing!
 vis=True
@@ -109,6 +109,11 @@ vis=True
 #just create a flag that says if Plotwatcher, set these extra conditions
 if plotwatcher: 
 	print("Plotwatcher rates set")
+
+#Set globals for mouse map, callback has unique syntax
+drawing = False # true if mouse is pressed
+roi=[]	
+ix,iy = -1,-1
 
 ###########Inputs Read in #################
 
@@ -246,49 +251,51 @@ def run(fP,accAvg,threshL,frame_rate):
 	if vis:
 		cv2.namedWindow('frame', cv2.WINDOW_NORMAL)		
 		cv2.imshow("frame",orig)
-		cv2.waitKey(10000)
+		cv2.waitKey(1000)
 		cv2.destroyWindow("frame")
+	
+	#make a copy of the image
+	orig_ROI=orig.copy()
+		
 
 	#Set region of interest	
 	if set_ROI:
-		#set callback states
-		drawing = False # true if mouse is pressed
-		ix,iy = -1,-1
-		roi=[]			
+		
 		# mouse callback function
-		def draw_ROI(event,x,y,flags,param):
-			global ix,iy,drawing,mode
+		def draw_circle(event,x,y,flags,param):
+			global ix,iy,mode,roi,drawing
 			if event == cv2.EVENT_LBUTTONDOWN:
 				drawing = True
 				ix,iy = x,y
-			
+		
 			elif event == cv2.EVENT_MOUSEMOVE:
 				if drawing == True:
-					cv2.rectangle(orig,(ix,iy),(x,y),(0,255,0),2)
-			
+					cv2.rectangle(orig,(ix,iy),(x,y),(0,255,0),-2)
+		
 			elif event == cv2.EVENT_LBUTTONUP:
-				drawing = False
-				box=cv2.rectangle(orig,(ix,iy),(x,y),(0,255,0),2)
-				roi_pts=ix,iy,x,y
-				roi.extend(roi_pts)
-					
+					drawing = False
+					box=cv2.rectangle(orig,(ix,iy),(x,y),(0,255,0),-2)
+					roi_pts=ix,iy,x,y
+					roi.extend(roi_pts)
+					print(roi)
+					k=27
+			     
 		cv2.namedWindow('image')
-		cv2.setMouseCallback('image',draw_ROI)
+		cv2.setMouseCallback('image',draw_circle)
+		
 		while(1):
 			cv2.imshow('image',orig)
-			k = cv2.waitKey(1000)
+			k = cv2.waitKey(1) & 0xFF
 			if k == 27:
 				break
-		    
-		cv2.destroyAllWindows()				
-			
-		#Subset by the specified rectangle
-		display_image=orig[roi[1]:roi[3], roi[0]:roi[2]]
 		
-		#show the subset
-		cv2.imshow('ROI',display_image)
-		cv2.waitKey(1000)
-		cv2.destroyAllWindows()		
+		cv2.destroyAllWindows()
+		
+		print(roi)
+		display_image=orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]
+		cv2.imshow('newImage',display_image)
+		cv2.waitKey(10000)
+		cv2.destroyAllWindows()
 	else:
 		display_image=orig		
 		
@@ -343,6 +350,12 @@ def run(fP,accAvg,threshL,frame_rate):
 		else:
 			camera_image = camera_imageO
 		
+		#If set roi, subset the image
+		if set_ROI:
+			camera_imageROI=camera_image[roi[1]:roi[3], roi[0]:roi[2]]
+		else:
+			camera_imageROI=camera_image
+			
                 frame_count += 1
                 frame_t0 = time.time()
                 
@@ -393,7 +406,7 @@ def run(fP,accAvg,threshL,frame_rate):
 		########################################################
 		
                 # Create an image with interactive feedback:
-                display_image = camera_image.copy()
+                display_image = camera_imageROI.copy()
                 
                 # Create a working "color image" to modify / blur
                 color_image =  display_image.copy()\
