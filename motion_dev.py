@@ -96,14 +96,12 @@ if(len(sys.argv)<=2):
 	
 	frameSET= "True" == raw_input("Set frame rate in frames per second? (True/False) (If False, program will try to look at metadata): ")
 	
-	frame_rate = raw_input("Set frames per second (If frameSET was False, type 0, and the program will ignore and try to guess (results can be mixed)) : ")
+	frame_rate = raw_input("Set frames per second (If frameSET was False, type 0, program will ignore and try to guess (results can be mixed)) : ")
 	
 	set_ROI= "True" == raw_input("Subsect the image by selecting a region of interest (ROI) (True of False)? : ")
 
 ##Visualize the frames, this should only be used for testing!
-vis=True
-
-
+vis=False
 
 ###############Specific to Plotwatcher PRO, unusual camera setup because they are jpegs strung toghether as iamges, the frame_rate needs to be hard coded. 
 #just create a flag that says if Plotwatcher, set these extra conditions
@@ -131,10 +129,6 @@ top = 0
 bottom = 1
 left = 0
 right = 1
-
-
-		     
-
 
 def merge_collided_bboxes( bbox_list ):
         # For every bbox...
@@ -206,6 +200,7 @@ def run(fP,accAvg,threshL,frame_rate):
         #create hit counter to track number of outputs
 	hitcounter=0
 	
+	#Begin video capture
         cap = cv2.VideoCapture(fP)
         
         #Get frame rate if the plotwatcher setting hasn't been called
@@ -229,12 +224,10 @@ def run(fP,accAvg,threshL,frame_rate):
 		cap.grab()
 		frame_count=frame_count+1
 		
-		
 	# Capture the first frame from file for image properties
 	orig_image = cap.read()[1]  
 	
 	###Get information about camera and image
-
 	width = np.size(orig_image, 1)
 	height = np.size(orig_image, 0)
 	frame_size=(width, height)
@@ -256,7 +249,6 @@ def run(fP,accAvg,threshL,frame_rate):
 	
 	#make a copy of the image
 	orig_ROI=orig.copy()
-		
 
 	#Set region of interest	
 	if set_ROI:
@@ -383,7 +375,6 @@ def run(fP,accAvg,threshL,frame_rate):
 					accAvg = accAvg - .025
 					
 				#In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
-				
 				print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg))
 				
 				#Write change to log file
@@ -403,7 +394,7 @@ def run(fP,accAvg,threshL,frame_rate):
 					print(file_destination + str(frame_count) + " accAvg is reset to: " + str(accAvg))
 					#Write change to log file
 					log_file.write( file_destination + str(frame_count) + " accAvg is reset to: " + str(accAvg) + "\n" )
-		########################################################
+		#######################
 		
                 # Create an image with interactive feedback:
                 display_image = camera_imageROI.copy()
@@ -418,7 +409,7 @@ def run(fP,accAvg,threshL,frame_rate):
 			cv2.destroyAllWindows()                        
 
                 # Smooth to get rid of false positives
-                color_image = cv2.GaussianBlur(color_image,(9,9),0)
+                color_image = cv2.GaussianBlur(color_image,(5,5),0)
                 if vis:
 			cv2.namedWindow('Blur', cv2.WINDOW_NORMAL)		
 			cv2.imshow("Blur",color_image)
@@ -472,15 +463,15 @@ def run(fP,accAvg,threshL,frame_rate):
                 
                 ##Draw the initial contours
                 #if vis:
-		cv2.namedWindow('output', cv2.WINDOW_NORMAL)
-                cv2.imshow('output',drawing)
+		cv2.namedWindow('contour', cv2.WINDOW_NORMAL)
+                cv2.imshow('contour',drawing)
                 for cnt in contours:
 			
 			bx,by,bw,bh = cv2.boundingRect(cnt)
 			cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw #contours in green color
 		
 		cv2.waitKey(1000)
-                cv2.destroyWindow("output")
+                cv2.destroyWindow("contour")
                 
                 for cnt in contours:
                         
@@ -516,7 +507,6 @@ def run(fP,accAvg,threshL,frame_rate):
 					trimmed_box_list.append( box )
 		
 		#Relative to the entire frame, only keep box if its larger than .001 of the frame, reduces the number of tiny blips
-		
 		## If there are no boxes left at that size, skip to new frame
 		if len(trimmed_box_list) == 0:
 			continue
@@ -524,11 +514,11 @@ def run(fP,accAvg,threshL,frame_rate):
                 #print(len(trimmed_box_list))
                 if vis:
 			for box in trimmed_box_list:
-				cv2.namedWindow('output', cv2.WINDOW_NORMAL)			
+				cv2.namedWindow('trimmed_box', cv2.WINDOW_NORMAL)			
 				cv2.rectangle( display_image, box[0], box[1], (0,255,0), 3 )
-		cv2.imshow('output',display_image)
+		cv2.imshow('trimmed_box',display_image)
 		cv2.waitKey(1000)    
-		cv2.destroyWindow("output")
+		cv2.destroyWindow("trimmed_box")
                 
                 try:       
 			bounding_box_list = merge_collided_bboxes( trimmed_box_list )
@@ -538,17 +528,16 @@ def run(fP,accAvg,threshL,frame_rate):
                         continue                
                 # Draw the merged box list:
                 if vis:
-			cv2.namedWindow('output', cv2.WINDOW_NORMAL)			
-			
+			cv2.namedWindow('merged_box', cv2.WINDOW_NORMAL)			
 			for box in bounding_box_list:
-				cv2.rectangle( display_image, box[0], box[1], (0,255,0), 1 )
+				cv2.rectangle(display_image, box[0], box[1], (0,255,0), 1 )
 			 
-			cv2.imshow('output',orig_image)
-			cv2.waitKey(1000)  
-			cv2.destroyWindow("output")				
+			cv2.imshow('merged_box',display_image)
+			cv2.waitKey(10000)  
+			cv2.destroyWindow("merged_box")				
                         
                 # Here are our estimate points to track, based on merged & trimmed boxes:
-                estimated_target_count = len( bounding_box_list )
+                estimated_target_count = len(bounding_box_list)
                 
                 # Don't allow target "jumps" from few to many or many to few.
                 # Only change the number of targets up to one target per n seconds.
@@ -590,8 +579,8 @@ def run(fP,accAvg,threshL,frame_rate):
                                 cv2.circle(display_image, center_point, 10, (255, 0, 0), 2)
                                 cv2.circle(display_image, center_point, 5, (255, 0, 0), 3)
 				if vis:
-					cv2.imshow('output',orig_image)
-					cv2.waitKey(500)  
+					cv2.imshow('output',display_image)
+					cv2.waitKey(1000)  
 					cv2.destroyWindow("output")                        
                 # Now we have targets that are NOT computed from bboxes -- just
                 # movement weights (according to kmeans).  If any two targets are
@@ -711,13 +700,13 @@ def run(fP,accAvg,threshL,frame_rate):
                 for entity in this_frame_entity_list:
                         center_point = entity[3]
                         c = entity[1]  # RGB color tuple
-                        cv2.circle(camera_imageO, center_point, 20, (c[0], c[1], c[2]), 1)
-                        cv2.circle(camera_imageO, center_point, 15, (c[0], c[1], c[2]), 1)
-                        cv2.circle(camera_imageO, center_point, 10, (c[0], c[1], c[2]), 2)
-                        cv2.circle(camera_imageO, center_point,  5, (c[0], c[1], c[2]), 3)
+                        cv2.circle(display_image, center_point, 20, (c[0], c[1], c[2]), 1)
+                        cv2.circle(display_image, center_point, 15, (c[0], c[1], c[2]), 1)
+                        cv2.circle(display_image, center_point, 10, (c[0], c[1], c[2]), 2)
+                        cv2.circle(display_image, center_point,  5, (c[0], c[1], c[2]), 3)
 		if vis:
 				
-			cv2.imshow('output',camera_imageO)
+			cv2.imshow('output',display_image)
 			cv2.waitKey(1000)  
 			cv2.destroyWindow("output")                                     
                       
