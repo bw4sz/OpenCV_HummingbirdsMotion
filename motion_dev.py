@@ -68,41 +68,42 @@ if(len(sys.argv) >=2):
 if(len(sys.argv)<=2):
 	
 	#Destination of file
-        fileD=raw_input("File Destination Folder:")
+        fileD=raw_input("File Destination Folder:\n")
 
         #Batch or single file
-        runtype=raw_input("runtype batch or file:")
+        runtype=raw_input("runtype batch or file:\n")
 	
         if(runtype=="file"):
-                inDEST=raw_input("Enter video input:")
+                inDEST=raw_input("Enter video input:\n")
         
         if(runtype=="batch"):
-                batchpool=raw_input("Enter folder containing videos:")
+                batchpool=raw_input("Enter folder containing videos:\n")
 	
 	#Sensitivity to movement
-	accAvg=float(raw_input("Sensitivity (default = 0.35) : "))
+	accAvg=float(raw_input("Sensitivity (default = 0.35) :\n"))
 	
 	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean	
-	plotwatcher="True" == raw_input("Does this video come from a plotwatcher camera? (True/False): ")
+	plotwatcher="True" == raw_input("Does this video come from a plotwatcher camera? (True/False):\n")
 	
 	#Should accAVG be adapted every 10minutes based on an estimated hitrate
-	adapt="True" == raw_input("Adapt the sensitivity based on hitrate? (True/False): ")
+	adapt="True" == raw_input("Adapt the sensitivity based on hitrate? (True/False):\n")
 	if adapt:
 			#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
-			frameHIT=float(raw_input("Expected percentage of frames with motion (decimal, 1% is 0.01): "))
+			frameHIT=float(raw_input("Expected percentage of frames with motion (decimal, 1% is 0.01):\n"))
+			
 			#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
-			floorvalue=float(raw_input("Minimum allowed sensitivity (default=.05): "))
+			floorvalue=float(raw_input("Minimum allowed sensitivity (default=0.05):\n"))
 
 	#thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
-	threshT=float(raw_input("Threshold for movement tolerance , ranging from 0 (all) to 255 (no movement) : "))
+	threshT=float(raw_input("Threshold for movement tolerance , ranging from 0 (all) to 255 (no movement):\n "))
 		
-	burnin= float(raw_input("Burn in, skip initial minutes of video: "))
+	burnin= float(raw_input("Burn in, skip initial minutes of video:\n "))
 	
-	frameSET= "True" == raw_input("Set frame rate in frames per second? (True/False) (If False, program will try to look at metadata): ")
+	frameSET= "True" == raw_input("Set frame rate in frames per second? (True/False) (If False, program will try to look at metadata):\n ")
 	
-	frame_rate = raw_input("Set frames per second (If frameSET was False, type 0, program will ignore and try to guess (results can be mixed)) : ")
+	frame_rate = raw_input("Set frames per second (If frameSET was False, type 0, program will ignore and try to guess (results can be mixed)):\n ")
 	
-	set_ROI= "True" == raw_input("Subsect the image by selecting a region of interest (ROI) (True of False)? : ")
+	set_ROI= "True" == raw_input("Subsect the image by selecting a region of interest (ROI) (True/False)?:\n ")
 
 ##Visualize the frames, this should only be used for testing!
 vis=False
