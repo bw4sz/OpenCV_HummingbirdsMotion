@@ -118,6 +118,8 @@ if(len(sys.argv)<=2):
 ##Visualize the frames, this should only be used for testing!
 vis=False
 
+#Hardcoded minimum size of contour
+minSIZE=.001
 ###############Specific to Plotwatcher PRO, unusual camera setup because they are jpegs strung toghether as iamges, the frame_rate needs to be hard coded. 
 #just create a flag that says if Plotwatcher, set these extra conditions
 if plotwatcher: 
@@ -521,7 +523,7 @@ def run(fP,accAvg,threshL,frame_rate=0):
 			#Relative to the entire frame, only keep box if its larger 
 			#than .001 of the frame, reduces the number of tiny blips
                         if (box_width * box_height) > average_box_area*.3:
-				if (box_width * box_height) > (width * height) * .001: 
+				if (box_width * box_height) > (width * height) * minSIZE: 
 					trimmed_box_list.append( box )
 		
 		## If there are no boxes left at that size, skip to new frame
@@ -532,7 +534,7 @@ def run(fP,accAvg,threshL,frame_rate=0):
                 #print(len(trimmed_box_list))
                 if vis:
 			for box in trimmed_box_list:
-				cv2.namedWindow('trimmed_box', cv2.WINDOW_NORMAL)			
+				#cv2.namedWindow('trimmed_box', cv2.WINDOW_NORMAL)			
 				cv2.rectangle( display_image, box[0], box[1], (0,255,0), 3 )
 			cv2.imshow('trimmed_box',display_image)
 			cv2.waitKey(1000)    
