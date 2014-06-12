@@ -8,3 +8,4 @@ setup(
     console=['motion_dev.py'],
     data_files=[('data', ['testing/PlotwatcherTest.TLV'])]
 )
+

@@ -16,7 +16,7 @@ AppUpdatesURL=benweinstein.weebly.com
 DefaultDirName={pf}\MotionMeerkat
 DefaultGroupName=MotionMeerkat
 LicenseFile=C:\Users\Ben\Documents\OpenCV_HummingbirdsMotion\dist\License.txt
-OutputBaseFilename=setup
+OutputBaseFilename=MotionMeerkatsetup
 Compression=lzma
 SolidCompression=yes
 
@@ -31,8 +31,8 @@ Source: "C:\Users\Ben\Documents\OpenCV_HummingbirdsMotion\dist\*"; DestDir: "{ap
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\MotionMeerkat"; Filename: "{app}\motion_dev.exe"
-Name: "{commondesktop}\MotionMeerkat"; Filename: "{app}\motion_dev.exe"; Tasks: desktopicon
+Name: "{group}\MotionMeerkat"; Filename: "{app}\motion_dev.exe"; IconFileName: "C:\Users\Jorge\Documents\OpenCV_HummingbirdsMotion\Bisque_DEV\public\thumbnail.ico"
+Name: "{commondesktop}\MotionMeerkat"; IconFileName: "C:\Users\Jorge\Documents\OpenCV_HummingbirdsMotion\Bisque_DEV\public\thumbnail.ico"; Filename: "{app}\motion_dev.exe"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\motion_dev.exe"; Description: "{cm:LaunchProgram,MotionMeerkat}"; Flags: nowait postinstall skipifsilent
