@@ -2,7 +2,11 @@
 
 Usage = """
 
-Automated capture of motion frames from a video file. Must have python, open CV and ffmpeg set up and stored in PATH variable
+Welcome to MotionMeerkat!
+
+Automated capture of motion frames from a video file.
+
+For help, see the wiki: https://github.com/bw4sz/OpenCV_HummingbirdsMotion/wiki
 
 """
 import cv2
@@ -67,11 +71,8 @@ if(len(sys.argv) >=2):
 
 if(len(sys.argv)<=2):
 	
-	#Destination of file
-        fileD=raw_input("File Destination Folder:\n")
-
-        #Batch or single file
-        runtype=raw_input("runtype batch or file:\n")
+	#Batch or single file
+	runtype=raw_input("runtype batch or file:\n")	
 	
         if(runtype=="file"):
                 inDEST=raw_input("Enter video input:\n")
@@ -79,8 +80,11 @@ if(len(sys.argv)<=2):
         if(runtype=="batch"):
                 batchpool=raw_input("Enter folder containing videos:\n")
 	
+	#Destination of file
+	fileD=raw_input("File Destination Folder:\n")	
+	
 	#Sensitivity to movement
-	accAvg=float(raw_input("Sensitivity (default = 0.35) :\n"))
+	accAvg=float(raw_input("Accumulated averaging (accAvg) sensitivity to motion (default = 0.35) :\n"))
 	
 	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean	
 	plotwatcher="True" == raw_input("Does this video come from a plotwatcher camera? (True/False):\n")
@@ -96,13 +100,19 @@ if(len(sys.argv)<=2):
 
 	#thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
 	threshT=float(raw_input("Threshold for movement tolerance , ranging from 0 (all) to 255 (no movement):\n "))
-		
+	
+	#Skip initial frames of video, in case of camera setup and shake. 	
 	burnin= float(raw_input("Burn in, skip initial minutes of video:\n "))
 	
 	frameSET= "True" == raw_input("Set frame rate in frames per second? (True/False) (If False, program will try to look at metadata):\n ")
 	
-	frame_rate = raw_input("Set frames per second (If frameSET was False, type 0, program will ignore and try to guess (results can be mixed)):\n ")
+	#Set frame rate?
+	if not plotwatcher:
+		if frameSET:
+			frame_rate = raw_input("Set frames per second (If frameSET was False, type 0, program will ignore and try to guess (results can be mixed)):\n ")
+	else: frame_rate=0
 	
+	#set ROI
 	set_ROI= "True" == raw_input("Subsect the image by selecting a region of interest (ROI) (True/False)?:\n ")
 
 ##Visualize the frames, this should only be used for testing!
@@ -178,7 +188,7 @@ def merge_collided_bboxes( bbox_list ):
         # When there are no collions between boxes, return that list:
         return bbox_list   
             
-def run(fP,accAvg,threshL,frame_rate):
+def run(fP,accAvg,threshL,frame_rate=0):
 	
         #Report name of file
         sys.stderr.write("Processing file %s\n" % (fP))
