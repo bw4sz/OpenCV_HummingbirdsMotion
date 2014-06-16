@@ -134,14 +134,6 @@ ix,iy = -1,-1
 
 ###########Inputs Read in #################
 
-"""
-Python Motion Tracker
-
-Reads an incoming video stream and tracks motion in real time.
-Detected motion events are logged to a text file.  Also has face detection.
-"""
-
-#
 # BBoxes must be in the format:
 # ( (topleft_x), (topleft_y) ), ( (bottomright_x), (bottomright_y) ) )
 top = 0
@@ -234,7 +226,9 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
         sys.stderr.write("frame rate: " + str(frame_rate))
 	
 	####Burnin and first image
+	#Count the number of frames returned
         frame_count=0
+	total_count=0
 	
 	#apply burn in, skip the the first X frames according to user input
 	for x in range(1,int(float(burnin) * int(frame_rate) * 60)): 
@@ -351,6 +345,17 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 ret,camera_imageO = cap.read()
                 if not ret:
 			log_file.write(str(frame_count) + "Total frames in file:" + "\n" )
+			#End of program, report some statistic
+			print("	Thank you for using MotionMeerkat! \n")
+			
+			print("Candidate motion events: %.0f \n " % total_count )
+			
+			print("Total frames in files: %.0f \n " % frame_count)
+			
+			rate=float(total_count)/frame_count*100
+			print("Hitrate: %.2f %% \n" % rate)
+			print("Exiting")
+			time.sleep(10000)
                         break    
                               
 		#Cut off the bottom 5% if the plotwatcher option is called. 
@@ -411,7 +416,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 					print(file_destination + str(frame_count) + " accAvg is reset to: " + str(accAvg))
 					#Write change to log file
 					log_file.write( file_destination + str(frame_count) + " accAvg is reset to: " + str(accAvg) + "\n" )
-		#######################
+
 		
                 # Create an image with interactive feedback:
                 display_image = camera_imageROI.copy()
@@ -754,9 +759,8 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		##################################################
                 #Have a returned counter to balance hitRate
 		hitcounter=hitcounter+1
-                
-######################################################################################################
-
+                total_count=total_count+1
+		
 ######################################################################################################
 ###Run Analysis on a Pool of videos
 ######################################################################################################
@@ -774,9 +778,7 @@ if (runtype == "batch"):
              
                 #Place run inside try catch loop; in case of error, step to next video
                 ##Run Motion Function
-                ##The first argument is the filepath of the video
-                ##The second argument is the accumulated averaging, higher values are more sensitive to sudden movements
-                ##The third value is the thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
+               
                 try:
                         run(fP=vid,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
                 except Exception, e:
@@ -788,4 +790,3 @@ if (runtype == "batch"):
 if (runtype == "file"):
 	run(fP=inDEST,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
 
-time.sleep(5000)
