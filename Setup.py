@@ -6,6 +6,6 @@ sys.argv.append('py2exe')
 
 setup(
     console=['motion_dev.py'],
-    data_files=[('data', ['testing/PlotwatcherTest.TLV'])]
+    data_files=[('data', ['testing/PlotwatcherTest.TLV',"Bisque_DEV/public/thumbnail.ico"])]
 )
 

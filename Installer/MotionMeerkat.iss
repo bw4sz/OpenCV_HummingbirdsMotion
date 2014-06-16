@@ -15,8 +15,8 @@ AppSupportURL=benweinstein.weebly.com
 AppUpdatesURL=benweinstein.weebly.com
 DefaultDirName={pf}\MotionMeerkat
 DefaultGroupName=MotionMeerkat
-LicenseFile=C:\Users\Ben\Documents\OpenCV_HummingbirdsMotion\dist\License.txt
-OutputBaseFilename=MotionMeerkatsetup
+LicenseFile=C:\Users\Jorge\Documents\OpenCV_HummingbirdsMotion\dist\License.txt
+OutputBaseFilename=MotionMeerkatSetup
 Compression=lzma
 SolidCompression=yes
 
@@ -27,13 +27,15 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\Ben\Documents\OpenCV_HummingbirdsMotion\dist\*"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Jorge\Documents\OpenCV_HummingbirdsMotion\dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\MotionMeerkat"; Filename: "{app}\motion_dev.exe"; IconFileName: "C:\Users\Ben\Documents\OpenCV_HummingbirdsMotion\Bisque_DEV\public\thumbnail.ico"
-Name: "{commondesktop}\MotionMeerkat"; IconFileName: "C:\Users\Ben\Documents\OpenCV_HummingbirdsMotion\Bisque_DEV\public\thumbnail.ico"; Filename: "{app}\motion_dev.exe"; Tasks: desktopicon
+Name: "{group}\MotionMeerkat"; Filename: "{app}\motion_dev.exe"; IconFileName: "{app}\data\thumbnail.ico"
+Name: "{commondesktop}\MotionMeerkat"; IconFileName: "{app}\data\thumbnail.ico"; Filename: "{app}\motion_dev.exe"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\motion_dev.exe"; Description: "{cm:LaunchProgram,MotionMeerkat}"; Flags: nowait postinstall skipifsilent
+Filename: "https://github.com/bw4sz/OpenCV_HummingbirdsMotion/wiki"; Flags: shellexec runasoriginaluser postinstall; Description: "Open the url."
+
 
