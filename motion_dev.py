@@ -48,7 +48,7 @@ else:
 if(len(sys.argv)<=2):
 	
 	#Batch or single file
-	runtype=raw_input("'batch' run or singe 'file'?:\n")	
+	runtype=raw_input("'batch' run or single 'file'?:\n")	
 	
         if(runtype=="file"):
                 inDEST=raw_input("Enter video input:\n")
@@ -102,7 +102,7 @@ if(len(sys.argv)<=2):
 	else: burnin=float(burnin)	
 	
 	#Manually set framerate
-	frameSET= "True" == raw_input("Set frame rate in frames per second? (If 'n', program will look at metadata -\n Depending on encoding this can be incorrect):\n ")
+	frameSET= "y" == raw_input("Set frame rate in frames per second? (If 'n', program will look at metadata -\n Depending on encoding this can be incorrect):\n ")
 	
 	#Set frame rate?
 	if frameSET:
@@ -355,7 +355,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 			rate=float(total_count)/frame_count*100
 			print("Hitrate: %.2f %% \n" % rate)
 			print("Exiting")
-			time.sleep(10000)
+			time.sleep(5)
                         break    
                               
 		#Cut off the bottom 5% if the plotwatcher option is called. 
@@ -790,3 +790,4 @@ if (runtype == "batch"):
 if (runtype == "file"):
 	run(fP=inDEST,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
 
+time.sleep(5)
