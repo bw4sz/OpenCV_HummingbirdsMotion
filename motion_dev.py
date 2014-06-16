@@ -8,6 +8,14 @@ Automated capture of motion frames from a video file.
 
 For help, see the wiki: https://github.com/bw4sz/OpenCV_HummingbirdsMotion/wiki
 
+Default values for parameters are in parenthesis. To select default hit enter.
+
+Affirmative answers to questions are 'y', negative answers 'n'
+
+If set_ROI is 'y', the program will load the first frame of the image.
+To select the region of interest, left clicking on one corner and grab to create rectangle
+When complete hit escape. The new region of interest will flash once.
+
 """
 import cv2
 import cv2.cv as cv
@@ -26,44 +34,12 @@ import csv
 #for py2exe needs manual
 from scipy.sparse.csgraph import _validation
 
-
 if len(sys.argv)<2:
         print Usage
 else:
         FileList=sys.argv[1:]
         for infileName in FileList:
                 print infileName
-##########################################
-#System arguments
-##########################################
-if(len(sys.argv) >=2):
-        print("User defined arguments")
-        #first argument is batch or file
-        runtype=sys.argv[1]
-        #second argument is filename, depending on runtype
-	if runtype=="file":
-		inDEST=sys.argv[2]
-	if runtype=="batch":
-		batchpool=sys.argv[2]	
-        #third argument is destination file
-        fileD=sys.argv[3]
-	##accumulated averaging, higher values are more sensitive to sudden movements
-	#The accumulated average	
-	accAvg = float(sys.argv[4])
-	
-	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean. 
-	#This statement should be True or False
-	plotwatcher="True" == sys.argv[5]	
-    
-	#Should we use adaptive averaging for hit rate?
-	adapt="True" == sys.argv[6]
-	if adapt:
-			#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
-			frameHIT=float(sys.argv[7])
-			
-			#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
-			floorvalue=float(sys.argv[8])
-	threshT=float(sys.argv[9])
 	
 #########################################
 #Get user inputs if no system arguments
@@ -72,7 +48,7 @@ if(len(sys.argv) >=2):
 if(len(sys.argv)<=2):
 	
 	#Batch or single file
-	runtype=raw_input("runtype batch or file:\n")	
+	runtype=raw_input("'batch' run or singe 'file'?:\n")	
 	
         if(runtype=="file"):
                 inDEST=raw_input("Enter video input:\n")
@@ -84,42 +60,68 @@ if(len(sys.argv)<=2):
 	fileD=raw_input("File Destination Folder:\n")	
 	
 	#Sensitivity to movement
-	accAvg=float(raw_input("Accumulated averaging (accAvg) sensitivity to motion (default = 0.35) :\n"))
-	
-	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean	
-	plotwatcher="True" == raw_input("Does this video come from a plotwatcher camera? (True/False):\n")
-	
 	#Should accAVG be adapted every 10minutes based on an estimated hitrate
-	adapt="True" == raw_input("Adapt the sensitivity based on hitrate? (True/False):\n")
+	adapt= 'y'==raw_input("Adapt the motion sensitivity based on hitrate?:\n")	
+		
 	if adapt:
-			#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
-			frameHIT=float(raw_input("Expected percentage of frames with motion (decimal, 1% is 0.01):\n"))
-			
-			#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
-			floorvalue=float(raw_input("Minimum allowed sensitivity (default=0.05):\n"))
-
+		accAvg=raw_input("Accumulated averaging (accAvg) sensitivity to motion starting value (0.35):\n")
+		if not accAvg: accAvg = 0.35
+		else: accAvg=float(accAvg)
+		
+		#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
+		frameHIT=raw_input("Expected percentage of frames with motion (decimal 0.01):\n")
+		if not frameHIT: frameHIT = 0.01
+		else: frameHIT=float(frameHIT)
+		
+		#Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
+		floorvalue=raw_input("Minimum allowed sensitivity (0.05):\n")
+		if not floorvalue: floorvalue = 0.05
+		else: floorvalue=float(floorvalue)
+	else:
+		accAvg=raw_input("Fixed accumulated averaging (accAvg) sensitivity to motion (0.35):\n")
+		if not accAvg: accAvg = 0.35
+		else: accAvg=float(accAvg)
+		
+		#set dummy variable for no adapt
+		floorvalue=0
+		frameHIT=0
+		
 	#thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
-	threshT=float(raw_input("Threshold for movement tolerance , ranging from 0 (all) to 255 (no movement):\n "))
+	threshT=raw_input("Threshold for movement tolerance,/n ranging from 0 [all] to 255 [no movement] (50):\n")
+	if not threshT: threshT = 50
+	else: threshT=float(threshT)
+	
+	#minimum size - use with caution
+	minSIZE=raw_input("Minimum motion contour size (0.001):\n")
+	if not minSIZE: minSIZE = 0.001
+	else: minSIZE=float(minSIZE)
 	
 	#Skip initial frames of video, in case of camera setup and shake. 	
-	burnin= float(raw_input("Burn in, skip initial minutes of video:\n "))
+	burnin= raw_input("Burn in, skip initial minutes of video (0):\n")
+	if not burnin: burnin = 0
+	else: burnin=float(burnin)	
 	
-	frameSET= "True" == raw_input("Set frame rate in frames per second? (True/False) (If False, program will try to look at metadata):\n ")
+	#Manually set framerate
+	frameSET= "True" == raw_input("Set frame rate in frames per second? (If 'n', program will look at metadata -\n Depending on encoding this can be incorrect):\n ")
 	
 	#Set frame rate?
-	if not plotwatcher:
-		if frameSET:
-			frame_rate = raw_input("Set frames per second (If frameSET was False, type 0, program will ignore and try to guess (results can be mixed)):\n ")
+	if frameSET:
+		frame_rate = raw_input("Set frames per second):\n ")
+		
 	else: frame_rate=0
 	
+	#There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean	
+	plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera?:\n")
+	
 	#set ROI
-	set_ROI= "True" == raw_input("Subsect the image by selecting a region of interest (ROI) (True/False)?:\n ")
-
+	set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest (ROI)?:\n ")
+	
 ##Visualize the frames, this should only be used for testing!
 vis=False
 
-#Hardcoded minimum size of contour
-minSIZE=.001
+#Set defaults
+
+
 ###############Specific to Plotwatcher PRO, unusual camera setup because they are jpegs strung toghether as iamges, the frame_rate needs to be hard coded. 
 #just create a flag that says if Plotwatcher, set these extra conditions
 if plotwatcher: 
@@ -190,7 +192,7 @@ def merge_collided_bboxes( bbox_list ):
         # When there are no collions between boxes, return that list:
         return bbox_list   
             
-def run(fP,accAvg,threshL,frame_rate=0):
+def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT,floorvalue,adapt):
 	
         #Report name of file
         sys.stderr.write("Processing file %s\n" % (fP))
@@ -223,10 +225,8 @@ def run(fP,accAvg,threshL,frame_rate=0):
         #Get frame rate if the plotwatcher setting hasn't been called
 	# not the most elegant solution, but get global frame_rate
 	if not frameSET:
-		if plotwatcher:
-			frame_rate=1
-		else:
-			frame_rate=round(cap.get(cv2.cv.CV_CAP_PROP_FPS))
+			
+		frame_rate=round(cap.get(cv2.cv.CV_CAP_PROP_FPS))
 	
         #get frame time relative to start
         frame_time=cap.get(cv.CV_CAP_PROP_POS_MSEC)     
@@ -237,7 +237,7 @@ def run(fP,accAvg,threshL,frame_rate=0):
         frame_count=0
 	
 	#apply burn in, skip the the first X frames according to user input
-	for x in range(1,int(burnin * int(frame_rate) * 60)): 
+	for x in range(1,int(float(burnin) * int(frame_rate) * 60)): 
 		cap.grab()
 		frame_count=frame_count+1
 		
@@ -303,7 +303,7 @@ def run(fP,accAvg,threshL,frame_rate=0):
 		print(roi)
 		display_image=orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]
 		cv2.imshow('newImage',display_image)
-		cv2.waitKey(10000)
+		cv2.waitKey(2000)
 		cv2.destroyAllWindows()
 	else:
 		display_image=orig		
@@ -453,7 +453,7 @@ def run(fP,accAvg,threshL,frame_rate=0):
                 grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
                 
                 # Threshold the image to a black and white motion mask:
-                ret,grey_image = cv2.threshold(grey_image, threshL, 255, cv2.THRESH_BINARY )
+                ret,grey_image = cv2.threshold(grey_image, threshT, 255, cv2.THRESH_BINARY )
 		if vis:
 			cv2.namedWindow('Threshold', cv2.WINDOW_NORMAL)			
 			cv2.imshow("Threshold",grey_image)
@@ -523,7 +523,7 @@ def run(fP,accAvg,threshL,frame_rate=0):
 			#Relative to the entire frame, only keep box if its larger 
 			#than .001 of the frame, reduces the number of tiny blips
                         if (box_width * box_height) > average_box_area*.3:
-				if (box_width * box_height) > (width * height) * minSIZE: 
+				if (box_width * box_height) > (width * height) * float(minSIZE): 
 					trimmed_box_list.append( box )
 		
 		## If there are no boxes left at that size, skip to new frame
@@ -534,7 +534,7 @@ def run(fP,accAvg,threshL,frame_rate=0):
                 #print(len(trimmed_box_list))
                 if vis:
 			for box in trimmed_box_list:
-				#cv2.namedWindow('trimmed_box', cv2.WINDOW_NORMAL)			
+				cv2.namedWindow('trimmed_box', cv2.WINDOW_NORMAL)			
 				cv2.rectangle( display_image, box[0], box[1], (0,255,0), 3 )
 			cv2.imshow('trimmed_box',display_image)
 			cv2.waitKey(1000)    
@@ -722,17 +722,14 @@ def run(fP,accAvg,threshL,frame_rate=0):
                 for entity in this_frame_entity_list:
                         center_point = entity[3]
                         c = entity[1]  # RGB color tuple
-                        cv2.circle(display_image, center_point, 20, (c[0], c[1], c[2]), 1)
-                        cv2.circle(display_image, center_point, 15, (c[0], c[1], c[2]), 1)
-                        cv2.circle(display_image, center_point, 10, (c[0], c[1], c[2]), 2)
-                        cv2.circle(display_image, center_point,  5, (c[0], c[1], c[2]), 3)
+                        cv2.circle(camera_imageO, center_point, 15, (c[0], c[1], c[2]), 1)
+                        cv2.circle(camera_imageO, center_point, 10, (c[0], c[1], c[2]), 2)
+                        cv2.circle(camera_imageO, center_point,  5, (c[0], c[1], c[2]), 3)
 		if vis:
 				
 			cv2.imshow('output',display_image)
 			cv2.waitKey(1000)  
 			cv2.destroyWindow("output")                                     
-                      
-                #Show final image
                 
                 ##cv2.ShowImage( "Target", image )
 		
@@ -781,7 +778,7 @@ if (runtype == "batch"):
                 ##The second argument is the accumulated averaging, higher values are more sensitive to sudden movements
                 ##The third value is the thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
                 try:
-                        run(fP=vid,accAvg=accAvg,threshL=threshT,frame_rate=frame_rate)
+                        run(fP=vid,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
                 except Exception, e:
                         print 'Error:',e
                         print 'Video:',vid
@@ -789,7 +786,6 @@ if (runtype == "batch"):
 
 ###If runtype is a single file - run file destination        
 if (runtype == "file"):
-        run(inDEST,accAvg,threshT,frame_rate)
+	run(fP=inDEST,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
 
-
-time.sleep(10)
+time.sleep(5000)
