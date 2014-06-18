@@ -1,10 +1,10 @@
-OpenCV_HummingbirdsMotion
+MotionMeerkat
 -----------------------------
 
-Technical Aim: Identify which frames in a video have motion and save them to file.
-Use: We have been studying hummingbird plant pollination in North Ecuador. Using innovative camera traps that record images once per second, we have developed a databank of 3.5 tb of flower videos. On average, 3-5 birds visit the flowers every 6 hours. Instead of manually reviewing the videos, we are designing software using python and open_CV to analyse the videos
+MotionMeerkat is a standalone python executable that identifies candidate motion events of interest from an extensive video stream. After running a video through MotionMeerkat, the user can review a folder of candidate motion frames for the target organism. This tool greatly reduces the time needed to review videos and is flexible to a variety of video inputs.  The python source code is also available online for more advanced users.  
 
-If you have ideas about how to do this, i'd love feedback! Please fork and try it yourself, test files are included in this repository, as well as still frame image ("17") about the desired output
+
+Executable can be found here: http://benweinstein.weebly.com/motionmeerkat.html
 
 Approach
 -------------
@@ -21,23 +21,11 @@ Contents
 /Bisque_Dev: Module for Iplant's BISQUE Bio-image analysis center. This code cannot be run from source, and is only to connect to the BISQUE API
 /Ranalysis: R scripts to process and make figures for publication
 /Results: Folder to hold all the figures made in R
-Motion.py: Core function. A Python script which takes in video file and parameters, and returns candidate motion frames.
+Motion_dev.py: Core function. A Python script which takes in video file and parameters, and returns candidate motion frames.
 
-Motion.py
+Motion_dev.py
 -----------
 Python executable - can be run from shell or IDLE, first time users should just open .py file up in IDLE (or any python interpreter)
-
-When run inline, program will ask for the arguments:
-
-Arguments:
-File/batch mode,
-file input, 
-file destination, 
-sensitivity parameter, 
-True/False whether the cameras were taken from the plotwatcher pro camera series (recommended), which need a specific parameter set.
-Adapt:
-HitRate:
-Minimum sensitivity:
 
 Source Installation 
 ---------------
