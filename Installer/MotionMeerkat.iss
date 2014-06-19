@@ -15,7 +15,7 @@ AppSupportURL=benweinstein.weebly.com
 AppUpdatesURL=benweinstein.weebly.com
 DefaultDirName={pf}\MotionMeerkat
 DefaultGroupName=MotionMeerkat
-LicenseFile=C:\Users\Jorge\Documents\OpenCV_HummingbirdsMotion\dist\License.txt
+LicenseFile=C:\Users\Ben\Documents\OpenCV_HummingbirdsMotion\dist\License.txt
 OutputBaseFilename=MotionMeerkatSetup
 Compression=lzma
 SolidCompression=yes
@@ -27,7 +27,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\Jorge\Documents\OpenCV_HummingbirdsMotion\dist\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
+Source: "C:\Users\Ben\Documents\OpenCV_HummingbirdsMotion\dist\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
 Source: "C:\FFmpeg\bin\ffmpeg.exe";DestDir: "{app}\FFmpeg"; Flags: ignoreversion
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
@@ -42,7 +42,7 @@ Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environmen
 [Run]
 Filename: "{app}\motion_dev.exe"; Description: "{cm:LaunchProgram,MotionMeerkat}"; Flags: nowait postinstall skipifsilent
 Filename: "https://github.com/bw4sz/OpenCV_HummingbirdsMotion/wiki"; Flags: shellexec runasoriginaluser postinstall; Description: "Open the Wiki."
-
+             
 [Code]
 function NeedsAddPath(Param: string): boolean;
 var

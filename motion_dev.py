@@ -223,6 +223,10 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
         #get frame time relative to start
         frame_time=cap.get(cv.CV_CAP_PROP_POS_MSEC)     
 	
+	#get total number of frames
+        total_frameC=cap.get(cv.CV_CAP_PROP_FRAME_COUNT)     
+	
+	
         sys.stderr.write("frame rate: " + str(frame_rate))
 	
 	####Burnin and first image
@@ -373,6 +377,13 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 frame_count += 1
                 frame_t0 = time.time()
                 
+		#Print trackbar
+		if(frame_count/total_frameC*100 %5 == 0):
+			fc=frame_count/total_frameC*100
+			print("%.0f %% completed" % fc)
+			print( "%.0f candidate motion frames" % total_count)
+		
+                
                 ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
 		#set floor flag, we can't have negative accAVG
 		floor=0
@@ -476,7 +487,6 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 contours,hierarchy = cv2.findContours(grey_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
                 
                 if len(contours) == 0 :
-			print("No contours")
                         continue                        
                 #print(len(contours))
                 cnt=contours[0]
@@ -533,7 +543,6 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		
 		## If there are no boxes left at that size, skip to new frame
 		if len(trimmed_box_list) == 0:
-			print("No trimmed boxes")			
 			continue
                 ## Draw the trimmed box list:
                 #print(len(trimmed_box_list))
@@ -782,9 +791,9 @@ if (runtype == "batch"):
                 try:
                         run(fP=vid,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
                 except Exception, e:
-			raw_input("\nError: Hit any key to exit:")			
-                        print 'Error:',e
-                        print 'Video:',vid
+			print( "Error %s " % e + "\n" )
+			time.sleep(10)
+                        print 'Error in Video:',vid
                      
 
 ###If runtype is a single file - run file destination        
@@ -792,9 +801,9 @@ if (runtype == "file"):
 	try:
 		run(fP=inDEST,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
 	except Exception, e:
-		raw_input("\nError, Hit any key to exit:")		
-		print 'Error:',e
-		print 'Video:',vid		
-
+		print( "Error %s " % e + "\n" )
+		time.sleep(10)
+		print 'Error in Video:',inDEST
+		
 raw_input("Hit any key to exit:")	
 time.sleep(2)
