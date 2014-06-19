@@ -782,12 +782,19 @@ if (runtype == "batch"):
                 try:
                         run(fP=vid,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
                 except Exception, e:
+			raw_input("\nError: Hit any key to exit:")			
                         print 'Error:',e
                         print 'Video:',vid
-                        continue  ##    
+                     
 
 ###If runtype is a single file - run file destination        
 if (runtype == "file"):
-	run(fP=inDEST,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
+	try:
+		run(fP=inDEST,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
+	except Exception, e:
+		raw_input("\nError, Hit any key to exit:")		
+		print 'Error:',e
+		print 'Video:',vid		
 
-time.sleep(5)
+raw_input("Hit any key to exit:")	
+time.sleep(2)
