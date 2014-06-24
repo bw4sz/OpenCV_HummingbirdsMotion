@@ -87,7 +87,7 @@ if(len(sys.argv)<=2):
 		frameHIT=0
 		
 	#thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
-	threshT=raw_input("Threshold for movement tolerance\n ranging from 0 [all] to 255 [no movement] (50):\n")
+	threshT=raw_input("Threshold for movement tolerance\nranging from 0 [all] to 255 [no movement] (50):\n")
 	if not threshT: threshT = 50
 	else: threshT=float(threshT)
 	
@@ -102,11 +102,11 @@ if(len(sys.argv)<=2):
 	else: burnin=float(burnin)	
 	
 	#Manually set framerate
-	frameSET= "y" == raw_input("Set frame rate in frames per second?\n(If 'n', program will look at metadata -\n Depending on encoding this can be incorrect):\n ")
+	frameSET= "y" == raw_input("Set frame rate in fps?:\n")
 	
 	#Set frame rate?
 	if frameSET:
-		frame_rate = raw_input("Set frames per second):\n")
+		frame_rate = raw_input("frames per second:\n")
 		
 	else: frame_rate=0
 	
@@ -193,6 +193,66 @@ def getint(name):
 	(shortname, extension) = os.path.splitext(f[-1]) 
 	return int(shortname)
 
+#define video function
+#Find path of jpegs
+def videoM(x):
+	normFP=os.path.normpath(x)
+	(filepath, filename)=os.path.split(normFP)
+	(shortname, extension) = os.path.splitext(filename)
+	(_,IDFL) = os.path.split(filepath)
+		
+	#we want to name the output a folder from the output destination with the named extension 
+	if runtype == 'batch':
+		file_destination=os.path.join(fileD,IDFL,shortname)
+        else:
+		file_destination=os.path.join(fileD,shortname)
+
+	if fileD =='':
+		vidDEST=os.path.join(filepath, shortname,shortname +'.avi')
+	else:
+		vidDEST=os.path.join(fileD, shortname,shortname +'.avi')
+	
+	print("Video output path will be %s" % (vidDEST))
+	
+	if not os.path.exists(file_destination):
+		os.makedirs(file_destination)
+		
+	#Find all jpegs
+	jpgs=glob.glob(os.path.join(file_destination,"*.jpg"))			
+	
+	#Get frame rate and size of images
+	cap = cv2.VideoCapture(x)
+		
+		#Get frame rate if the plotwatcher setting hasn't been called
+		# not the most elegant solution, but get global frame_rate
+	if not frameSET:
+		fr=round(cap.get(cv2.cv.CV_CAP_PROP_FPS))
+	else:
+		fr=frame_rate
+	
+	orig_image = cap.read()[1]  
+		
+	###Get information about camera and image
+	width = np.size(orig_image, 1)
+	height = np.size(orig_image, 0)
+	frame_size=(width, height)			
+	
+	# Define the codec and create VideoWriter object
+	fourcc = cv2.cv.CV_FOURCC(*'XVID')
+	out = cv2.VideoWriter(vidDEST,fourcc, float(fr), frame_size)			
+	
+	#split and sort the jpg names
+	jpgs.sort(key=getint)
+	
+	#Loop through every frame and write video
+	for f in jpgs:
+		fr=cv2.imread(f)
+		out.write(fr)
+	
+	# Release everything if job is finished
+	cap.release()
+	out.release()
+
 #Define the run function
 def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT,floorvalue,adapt):
 	
@@ -210,7 +270,12 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
         print("Output path will be %s/%s/%s" % (fileD,IDFL,shortname))
         print("AccAvg begin value is: %s" % (accAvg))
 	
-	file_destination=os.path.join(fileD,IDFL,shortname)
+	#If its batch, give an extra folder
+	if runtype == 'batch':
+		file_destination=os.path.join(fileD,IDFL,shortname)
+        else:
+		file_destination=os.path.join(fileD,shortname)
+	
         if not os.path.exists(file_destination):
                 os.makedirs(file_destination)
                      
@@ -236,8 +301,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 	#get total number of frames
         total_frameC=cap.get(cv.CV_CAP_PROP_FRAME_COUNT)     
 	
-	
-        sys.stderr.write("frame rate: " + str(frame_rate))
+        sys.stderr.write("frame rate: %s\n" % frame_rate)
 	
 	####Burnin and first image
 	#Count the number of frames returned
@@ -418,7 +482,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 					accAvg = accAvg - .025
 					
 				#In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
-				print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg))
+				print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg) + "\n")
 				
 				#Write change to log file
 				log_file.write( file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg) + "\n" )
@@ -804,7 +868,8 @@ if (runtype == "batch"):
 			print( "Error %s " % e + "\n" )
 			time.sleep(10)
                         print 'Error in Video:',vid
-                     
+                if makeVID:
+			videoM(vid)     
 
 ###If runtype is a single file - run file destination        
 if (runtype == "file"):
@@ -816,55 +881,7 @@ if (runtype == "file"):
 		print 'Error in Video:',inDEST
 		
 	if makeVID:
-		
-		#Find path of jpegs
-		normFP=os.path.normpath(inDEST)
-		(filepath, filename)=os.path.split(normFP)
-		(shortname, extension) = os.path.splitext(filename)
-		(_,IDFL) = os.path.split(filepath)
-			
-		#we want to name the output a folder from the output destination with the named extension 
-		file_destination=os.path.join(fileD,IDFL,shortname)
-		
-		vidDEST=os.path.join(filepath, shortname +'.avi')
-		
-		print("Video output path will be %s" % (vidDEST))
-		
-		if not os.path.exists(file_destination):
-			os.makedirs(file_destination)			
-		#Find all jpegs
-		jpgs=glob.glob(os.path.join(file_destination,"*.jpg"))			
-
-		#Get frame rate and size of images
-		cap = cv2.VideoCapture(inDEST)
-			
-			#Get frame rate if the plotwatcher setting hasn't been called
-			# not the most elegant solution, but get global frame_rate
-		if not frameSET:
-			frame_rate=round(cap.get(cv2.cv.CV_CAP_PROP_FPS))
-		
-		orig_image = cap.read()[1]  
-			
-		###Get information about camera and image
-		width = np.size(orig_image, 1)
-		height = np.size(orig_image, 0)
-		frame_size=(width, height)			
-		
-		# Define the codec and create VideoWriter object
-		fourcc = cv2.cv.CV_FOURCC(*'XVID')
-		out = cv2.VideoWriter(vidDEST,fourcc, float(frame_rate), frame_size)			
-		
-		#split and sort the jpg names
-		jpgs.sort(key=getint)
-		
-		#Loop through every frame and write video
-		for f in jpgs:
-			fr=cv2.imread(f)
-			out.write(fr)
-		
-		# Release everything if job is finished
-		cap.release()
-		out.release()
-		
+		videoM(inDEST)
+				
 raw_input("Hit any key to exit:")	
 time.sleep(2)
