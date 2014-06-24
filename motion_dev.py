@@ -87,7 +87,7 @@ if(len(sys.argv)<=2):
 		frameHIT=0
 		
 	#thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
-	threshT=raw_input("Threshold for movement tolerance,/n ranging from 0 [all] to 255 [no movement] (50):\n")
+	threshT=raw_input("Threshold for movement tolerance\n ranging from 0 [all] to 255 [no movement] (50):\n")
 	if not threshT: threshT = 50
 	else: threshT=float(threshT)
 	
@@ -102,11 +102,11 @@ if(len(sys.argv)<=2):
 	else: burnin=float(burnin)	
 	
 	#Manually set framerate
-	frameSET= "y" == raw_input("Set frame rate in frames per second? (If 'n', program will look at metadata -\n Depending on encoding this can be incorrect):\n ")
+	frameSET= "y" == raw_input("Set frame rate in frames per second?\n(If 'n', program will look at metadata -\n Depending on encoding this can be incorrect):\n ")
 	
 	#Set frame rate?
 	if frameSET:
-		frame_rate = raw_input("Set frames per second):\n ")
+		frame_rate = raw_input("Set frames per second):\n")
 		
 	else: frame_rate=0
 	
@@ -114,7 +114,10 @@ if(len(sys.argv)<=2):
 	plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera?:\n")
 	
 	#set ROI
-	set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest (ROI)?:\n ")
+	set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest (ROI)?:\n")
+	
+	#make video by stringing the jpgs back into an avi
+	makeVID="y"==raw_input("Make video out of the resulting frames?:\n")
 	
 ##Visualize the frames, this should only be used for testing!
 vis=False
@@ -183,7 +186,14 @@ def merge_collided_bboxes( bbox_list ):
         
         # When there are no collions between boxes, return that list:
         return bbox_list   
-            
+
+#define a sorting function
+def getint(name):
+	f=os.path.split(name)
+	(shortname, extension) = os.path.splitext(f[-1]) 
+	return int(shortname)
+
+#Define the run function
 def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT,floorvalue,adapt):
 	
         #Report name of file
@@ -804,6 +814,57 @@ if (runtype == "file"):
 		print( "Error %s " % e + "\n" )
 		time.sleep(10)
 		print 'Error in Video:',inDEST
+		
+	if makeVID:
+		
+		#Find path of jpegs
+		normFP=os.path.normpath(inDEST)
+		(filepath, filename)=os.path.split(normFP)
+		(shortname, extension) = os.path.splitext(filename)
+		(_,IDFL) = os.path.split(filepath)
+			
+		#we want to name the output a folder from the output destination with the named extension 
+		file_destination=os.path.join(fileD,IDFL,shortname)
+		
+		vidDEST=os.path.join(filepath, shortname +'.avi')
+		
+		print("Video output path will be %s" % (vidDEST))
+		
+		if not os.path.exists(file_destination):
+			os.makedirs(file_destination)			
+		#Find all jpegs
+		jpgs=glob.glob(os.path.join(file_destination,"*.jpg"))			
+
+		#Get frame rate and size of images
+		cap = cv2.VideoCapture(inDEST)
+			
+			#Get frame rate if the plotwatcher setting hasn't been called
+			# not the most elegant solution, but get global frame_rate
+		if not frameSET:
+			frame_rate=round(cap.get(cv2.cv.CV_CAP_PROP_FPS))
+		
+		orig_image = cap.read()[1]  
+			
+		###Get information about camera and image
+		width = np.size(orig_image, 1)
+		height = np.size(orig_image, 0)
+		frame_size=(width, height)			
+		
+		# Define the codec and create VideoWriter object
+		fourcc = cv2.cv.CV_FOURCC(*'XVID')
+		out = cv2.VideoWriter(vidDEST,fourcc, float(frame_rate), frame_size)			
+		
+		#split and sort the jpg names
+		jpgs.sort(key=getint)
+		
+		#Loop through every frame and write video
+		for f in jpgs:
+			fr=cv2.imread(f)
+			out.write(fr)
+		
+		# Release everything if job is finished
+		cap.release()
+		out.release()
 		
 raw_input("Hit any key to exit:")	
 time.sleep(2)
