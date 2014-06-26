@@ -87,8 +87,8 @@ if(len(sys.argv)<=2):
 		frameHIT=0
 		
 	#thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
-	threshT=raw_input("Threshold for movement tolerance\nranging from 0 [all] to 255 [no movement] (50):\n")
-	if not threshT: threshT = 50
+	threshT=raw_input("Threshold for movement tolerance\nranging from 0 [all] to 255 [no movement] (20):\n")
+	if not threshT: threshT = 20
 	else: threshT=float(threshT)
 	
 	#minimum size - use with caution
