@@ -122,13 +122,20 @@ if(len(sys.argv)<=2):
 ##Visualize the frames, this should only be used for testing!
 vis=False
 
-#Set defaults
+#A few hard coded testing variables, only to be used by the developers.
+todraw=True
+objectEdge=True
 
+###########Failure Classes, used to format output and illustrate number of frames
 
-###############Specific to Plotwatcher PRO, unusual camera setup because they are jpegs strung toghether as iamges, the frame_rate needs to be hard coded. 
-#just create a flag that says if Plotwatcher, set these extra conditions
-if plotwatcher: 
-	print("Plotwatcher rates set")
+##No motion, the frame was not different enough compared to the background due to accAvg 
+nodiff=0
+
+##No contours, there was not enough motion compared to background, did not meet threshold
+nocountr=0
+
+###Not large enough, the movement contour was too small to be included 
+toosmall=0
 
 #Set globals for mouse map, callback has unique syntax
 drawing = False # true if mouse is pressed
@@ -253,6 +260,104 @@ def videoM(x):
 	cap.release()
 	out.release()
 
+#Define experimental contour segmentation size analysis
+
+def motionContour(img):
+	#find edges
+	edges=cv2.Canny(img,100,250)
+	kernel = np.ones((3,3),np.uint8)
+	closing = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+	
+	#cv2.imshow('contour',closing)
+	#cv2.waitKey(1000)
+	#cv2.destroyWindow("contour")
+	
+	#find contours
+	contours,hierarchy = cv2.findContours(closing,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+	
+	#sort contours
+	cnts = sorted(contours, key = cv2.contourArea, reverse = True)
+	
+	for cnt in cnts[]:
+		bx,by,bw,bh = cv2.boundingRect(cnt)
+		cv2.drawContours(img,[cnt],0,(0,255,0),1)   # draw #contours in green color
+	    
+	#cv2.namedWindow('contour', cv2.WINDOW_NORMAL)
+	#cv2.imshow('contour',img)
+	#cv2.waitKey(1000)
+	#cv2.destroyWindow("contour")
+	
+	#get center_point
+	#img=camera_imageROI.copy()
+	index=0
+	found=[]
+	for cnt in cnts:
+		dist = cv2.pointPolygonTest(cnt,center_point,False)
+		if dist == 1 :
+			found.append(index)
+			cv2.drawContours(img,[cnt],-1,(0,255,0),1)   # draw #contours in green color
+			for entity in this_frame_entity_list:
+				center_point = entity[3]
+				c = entity[1]  # RGB color tuple
+				cv2.circle(img, center_point,  5, (c[0], c[1], c[2]), 3)
+		index=index+1	
+				
+	#cv2.imshow('contour',img)
+	#cv2.waitKey(3000)
+	#cv2.destroyWindow("contour")	
+	
+	#Available contours to choose from.
+	foundcnts = [cnts[i] for i in found]
+	
+	#sort for size one more time, get the smallest one
+	cntsF = sorted(foundcnts, key = cv2.contourArea)
+	
+	desired_cnt=cntsF[0]
+	
+	#draw that contour to be sure
+	#img=camera_imageROI.copy()
+	cv2.drawContours(img,[desired_cnt],0,(0,255,0),1)   # draw #contours in green color
+	cv2.namedWindow('contour', cv2.WINDOW_NORMAL)
+	
+	#cv2.imshow('contour',img)
+	#cv2.waitKey(1000)
+	#cv2.destroyWindow("contour")    
+	
+#Define reporting function to be called at the end of run
+
+def report():
+	log_file.write(str(frame_count) + "Total frames in file:" + "\n" )
+	#End of program, report some statistic to screen and log
+	#log
+	log_file.write("Thank you for using MotionMeerkat! \n")
+	
+	log_file.write("Candidate motion events: %.0f \n " % total_count )
+	
+	log_file.write("Frames skipped due to AccAvg: %.0f \n " % nodiff)
+	log_file.write("Frames skipped due to Threshold: %.0f \n " % nocountr)
+	log_file.write("Frames skipped due to minSIZE: %.0f \n " % toosmall)
+	
+	log_file.write("Total frames in files: %.0f \n " % frame_count)
+	
+	rate=float(total_count)/frame_count*100
+	log_file.write("Hitrate: %.2f %% \n" % rate)
+	log_file.write("Exiting")
+	
+	#screen
+	print("Thank you for using MotionMeerkat! \n")
+	print("Candidate motion events: %.0f \n " % total_count )
+	
+	print("Frames skipped due to AccAvg: %.0f \n " % nodiff)
+	print("Frames skipped due to Threshold: %.0f \n " % nocountr)
+	print("Frames skipped due to minSIZE: %.0f \n " % toosmall)
+	
+	print("Total frames in files: %.0f \n " % frame_count)
+	
+	rate=float(total_count)/frame_count*100
+	print("Hitrate: %.2f %% \n" % rate)
+	print("Exiting")
+	time.sleep(5)
+	
 #Define the run function
 def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT,floorvalue,adapt):
 	
@@ -415,25 +520,14 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
         text_color = (255,255,255)
 
         # Set this to the max number of targets to look for (passed to k-means):
-        max_targets = 1
+        max_targets = 2
                 
         while True:
 					
                 # Capture frame from file
                 ret,camera_imageO = cap.read()
                 if not ret:
-			log_file.write(str(frame_count) + "Total frames in file:" + "\n" )
-			#End of program, report some statistic
-			print("	Thank you for using MotionMeerkat! \n")
-			
-			print("Candidate motion events: %.0f \n " % total_count )
-			
-			print("Total frames in files: %.0f \n " % frame_count)
-			
-			rate=float(total_count)/frame_count*100
-			print("Hitrate: %.2f %% \n" % rate)
-			print("Exiting")
-			time.sleep(5)
+
                         break    
                               
 		#Cut off the bottom 5% if the plotwatcher option is called. 
@@ -542,6 +636,11 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 # Convert the image to greyscale.
                 grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
                 
+		#If some difference is 0, jump to next frame
+		if sum(grey_image)==0:
+			nodiff=nodiff+1
+			continue
+		
                 # Threshold the image to a black and white motion mask:
                 ret,grey_image = cv2.threshold(grey_image, threshT, 255, cv2.THRESH_BINARY )
 		if vis:
@@ -561,6 +660,8 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 contours,hierarchy = cv2.findContours(grey_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
                 
                 if len(contours) == 0 :
+			#No movement, add to counter
+			nocountr=nocountr+1
                         continue                        
                 #print(len(contours))
                 cnt=contours[0]
@@ -617,13 +718,16 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		
 		## If there are no boxes left at that size, skip to new frame
 		if len(trimmed_box_list) == 0:
+			toosmall=toosmall+1
 			continue
+		
                 ## Draw the trimmed box list:
                 #print(len(trimmed_box_list))
-                if vis:
+                if todraw:
 			for box in trimmed_box_list:
 				cv2.namedWindow('trimmed_box', cv2.WINDOW_NORMAL)			
 				cv2.rectangle( display_image, box[0], box[1], (0,255,0), 3 )
+		if vis:
 			cv2.imshow('trimmed_box',display_image)
 			cv2.waitKey(1000)    
 			cv2.destroyWindow("trimmed_box")
