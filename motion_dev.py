@@ -123,13 +123,13 @@ if(len(sys.argv)<=2):
 vis=False
 
 #A few hard coded testing variables, only to be used by the developers.
-todraw=False
+todraw=True
 objectEdge=False
-toWrite=True
+
+toWrite=False
 
 #Start time
 start=time.time()
-
 
 #Set globals for mouse map, callback has unique syntax
 drawing = False # true if mouse is pressed
@@ -188,6 +188,13 @@ def merge_collided_bboxes( bbox_list ):
         # When there are no collions between boxes, return that list:
         return bbox_list   
 
+#define a display function
+def display(window,t,image):
+	cv2.namedWindow(window, cv2.WINDOW_NORMAL)
+	cv2.imshow(window,image)
+	cv2.waitKey(t)
+	cv2.destroyWindow(window)
+	
 #define a sorting function
 def getint(name):
 	f=os.path.split(name)
@@ -218,6 +225,7 @@ def videoM(x,motion_frames):
 	
 	if not os.path.exists(file_destination):
 		os.makedirs(file_destination)
+
 #Get frame rate and size of images
 	cap = cv2.VideoCapture(x)
 
@@ -258,10 +266,8 @@ def motionContour(img,center_point,this_frame_entity_list,img_draw):
 	#find contours
 	contours,hierarchy = cv2.findContours(closing,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 	
-	#cv2.imshow('contour',closing)
-	#cv2.waitKey(3000)
-	#cv2.destroyWindow("contour")	
-	
+	#display("contour",3000,closing)
+
 	#sort contours
 	cnts = sorted(contours, key = cv2.contourArea, reverse = True)
 	
@@ -296,11 +302,7 @@ def motionContour(img,center_point,this_frame_entity_list,img_draw):
 	for cnt in cntsF:
 		cv2.drawContours(img_draw,[cnt],0,(0,0,255),1)   # draw #contours in red color
 
-	#cv2.namedWindow('contour', cv2.WINDOW_NORMAL)
-	#cv2.imshow('contour',img_draw)
-	#cv2.waitKey(1000)
-	#cv2.destroyWindow("contour")	
-	
+	display("contour",1000,img_draw)
 	return img_draw
 
 #Define reporting function to be called at the end of run
@@ -325,15 +327,11 @@ def report(frame_count,log_file,total_count,nodiff,nocountr,toosmall,start):
 	#End of program, report some statistic to screen and log
 	#log
 	log_file.write("\n \n Thank you for using MotionMeerkat! \n")
-	
 	log_file.write("Candidate motion events: %.0f \n " % total_count )
-	
 	log_file.write("Frames skipped due to AccAvg: %.0f \n " % nodiff)
 	log_file.write("Frames skipped due to Threshold: %.0f \n " % nocountr)
 	log_file.write("Frames skipped due to minSIZE: %.0f \n " % toosmall)
-	
 	log_file.write("Total frames in files: %.0f \n " % frame_count)
-	
 	rate=float(total_count)/frame_count*100
 	log_file.write("Hitrate: %.2f %% \n" % rate)
 	log_file.write("Exiting")
@@ -437,11 +435,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 	else:
 		orig = orig_image
 	
-	if vis:
-		cv2.namedWindow('frame', cv2.WINDOW_NORMAL)		
-		cv2.imshow("frame",orig)
-		cv2.waitKey(1000)
-		cv2.destroyWindow("frame")
+	if vis: display("origin", 100, orig)
 	
 	#make a copy of the image
 	orig_ROI=orig.copy()
@@ -555,8 +549,13 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 				fc=frame_count/total_frameC*100
 				print("%.0f %% completed" % fc)
 				print( "%.0f candidate motion frames" % total_count)
-		
-                
+				tracktime=time.time()
+				
+				#track time in minutes
+				trackmin=(tracktime-start)/60
+				timetogo=(trackmin / fc)/100
+				print( "Estimated minutes remaining %.1f" % timetogo)
+				
                 ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
 		#set floor flag, we can't have negative accAVG
 		floor=0
@@ -564,7 +563,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 				
 			#Every 10min, reset the agg threshold, depending on expected level of movement
 			#how many frames per minute? 
-			
+
 			#Should be a integer, round it
 			fift=round(10*60*float(frame_rate))
 			
@@ -573,8 +572,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 			       #If the total base is fift (15min window), then assuming 99% of images are junk the threshold should be
 				#We've been counting frames output to file in the hitcounter
 				log_file.write(str(hitcounter) + "files written in last 10minutes" + "\n" )
-				print(str(hitcounter) + " files written in last 10minutes" + "\n" )
-				
+				print(str(hitcounter) + " files written in last 10minutes" + "\n" )		
 				if hitcounter > (fift*frameHIT) :
 					accAvg = accAvg + .05
 				if hitcounter < (fift*frameHIT) :
@@ -608,35 +606,22 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 # Create a working "color image" to modify / blur
                 color_image =  display_image.copy()\
 		
-		if vis:
-			cv2.namedWindow('Initial', cv2.WINDOW_NORMAL)		
-			cv2.imshow("Initial",color_image)
-			cv2.waitKey(2000)
-			cv2.destroyAllWindows()                        
+		if vis: display(Initial,2000,color_image)                    
 
                 # Smooth to get rid of false positives
                 color_image = cv2.GaussianBlur(color_image,(5,5),0)
-                if vis:
-			cv2.namedWindow('Blur', cv2.WINDOW_NORMAL)		
-			cv2.imshow("Blur",color_image)
-			cv2.waitKey(2000)
-			cv2.destroyWindow("Blur")  
+                
+                if vis: display("Blur", 2000, color_image)
                 
                 # Use the Running Average as the static background                                       
                 cv2.accumulateWeighted(color_image,running_average_image,accAvg)                                  
                 running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
-                if vis:
-			cv2.namedWindow('runnAVG', cv2.WINDOW_NORMAL)					
-			cv2.imshow("runnAVG",running_average_in_display_color_depth)
-			cv2.waitKey(5000)
-			cv2.destroyWindow("runnAVG")                        
+                if vis: display("Running Average",5000,running_average_in_display_color_depth)                  
                 
                 # Subtract the current frame from the moving average.
                 difference=cv2.absdiff( color_image, running_average_in_display_color_depth)
-                if vis:
-			cv2.imshow("diff",difference)
-			cv2.waitKey(5000)
-			cv2.destroyWindow("diff")
+                
+                if vis: display("difference",5000,difference)
                 
                 # Convert the image to greyscale.
                 grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
@@ -648,11 +633,8 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		
                 # Threshold the image to a black and white motion mask:
                 ret,grey_image = cv2.threshold(grey_image, threshT, 255, cv2.THRESH_BINARY )
-		if vis:
-			cv2.namedWindow('Threshold', cv2.WINDOW_NORMAL)			
-			cv2.imshow("Threshold",grey_image)
-			cv2.waitKey(800)
-			cv2.destroyWindow("Threshold")
+		
+		if vis: display("Threshold",1000,grey_image)
                               
                 non_black_coords_array = numpy.where( grey_image > 3 )
                 # Convert from numpy.where()'s two separate lists to one list of (x, y) tuples:
@@ -676,15 +658,13 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 
                 ##Draw the initial contours
                 if vis:
-			cv2.namedWindow('contour', cv2.WINDOW_NORMAL)
-			cv2.imshow('contour',drawing)
+
 			for cnt in contours:
 				
 				bx,by,bw,bh = cv2.boundingRect(cnt)
 				cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw #contours in green color
 			
-			cv2.waitKey(1000)
-			cv2.destroyWindow("contour")
+			display("contours", 2000, drawing)
                 
                 for cnt in contours:
                         
@@ -731,10 +711,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 #for box in trimmed_box_list:
 		#	cv2.rectangle(camera_imageO, box[0], box[1], (0,255,0), 3 )
 		
-		if vis:
-			cv2.imshow('trimmed_box',display_image)
-			cv2.waitKey(1000)    
-			cv2.destroyWindow("trimmed_box")
+		if vis: display("trimmed_box",1000,display_image)
                 
                 ## combine boxes that touch
                 try:       
@@ -747,187 +724,179 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		if todraw:
 			for box in bounding_box_list:
 				cv2.rectangle(camera_imageO, box[0], box[1], (0,255,0), 1 )			
-                if vis:
-			cv2.namedWindow('merged_box', cv2.WINDOW_NORMAL)			
-			cv2.imshow('merged_box',display_image)
-			cv2.waitKey(10000)  
-			cv2.destroyWindow("merged_box")				
-                # Here are our estimate points to track, based on merged & trimmed boxes:
-                estimated_target_count = len(bounding_box_list)
                 
-                # Don't allow target "jumps" from few to many or many to few.
-                # Only change the number of targets up to one target per n seconds.
-                # This fixes the "exploding number of targets" when something stops moving
-                # and the motion erodes to disparate little puddles all over the place.
+                if vis: display("merged_box",2000,display_image)
+
+		#if objectEdge:
+			#camera_imageO=motionContour(display_image,center_point,this_frame_entity_list,camera_imageO)
+			
+                ## Here are our estimate points to track, based on merged & trimmed boxes:
+                #estimated_target_count = len(bounding_box_list)
                 
-                if frame_t0 - last_target_change_t < .350:  # 1 change per 0.35 secs
-                        estimated_target_count = last_target_count
-                else:
-                        if last_target_count - estimated_target_count > 1: estimated_target_count = last_target_count - 1
-                        if estimated_target_count - last_target_count > 1: estimated_target_count = last_target_count + 1
-                        last_target_change_t = frame_t0
+                ## Don't allow target "jumps" from few to many or many to few.
+                ## Only change the number of targets up to one target per n seconds.
+                ## This fixes the "exploding number of targets" when something stops moving
+                ## and the motion erodes to disparate little puddles all over the place.
                 
-                # Clip to the user-supplied maximum:
-                estimated_target_count = min( estimated_target_count, max_targets )
+                #if frame_t0 - last_target_change_t < .350:  # 1 change per 0.35 secs
+                        #estimated_target_count = last_target_count
+                #else:
+                        #if last_target_count - estimated_target_count > 1: estimated_target_count = last_target_count - 1
+                        #if estimated_target_count - last_target_count > 1: estimated_target_count = last_target_count + 1
+                        #last_target_change_t = frame_t0
                 
-                # The estimated_target_count at this point is the maximum number of targets
-                # we want to look for.  If kmeans decides that one of our candidate
-                # bboxes is not actually a target, we remove it from the target list below.
+                ## Clip to the user-supplied maximum:
+                #estimated_target_count = min( estimated_target_count, max_targets )
                 
-                # Using the numpy values directly (treating all pixels as points):        
-                points = non_black_coords_array
-                center_points = []
+                ## The estimated_target_count at this point is the maximum number of targets
+                ## we want to look for.  If kmeans decides that one of our candidate
+                ## bboxes is not actually a target, we remove it from the target list below.
+                
+                ## Using the numpy values directly (treating all pixels as points):        
+                #points = non_black_coords_array
+                #center_points = []
                         
-                if len(points):
+                #if len(points):
                         
-                        # If we have all the "target_count" targets from last frame,
-                        # use the previously known targets (for greater accuracy).
-                        k_or_guess = max( estimated_target_count, 1 )  # Need at least one target to look for.
-                        if len(codebook) == estimated_target_count: 
-                                k_or_guess = codebook
+                        ## If we have all the "target_count" targets from last frame,
+                        ## use the previously known targets (for greater accuracy).
+                        #k_or_guess = max( estimated_target_count, 1 )  # Need at least one target to look for.
+                        #if len(codebook) == estimated_target_count: 
+                                #k_or_guess = codebook
                         
-                        codebook, distortion = vq.kmeans( array( points ), k_or_guess )
+                        #codebook, distortion = vq.kmeans( array( points ), k_or_guess )
                         
-                        # Convert to tuples (and draw it to screen)
-                        for center_point in codebook:
-                                center_point = ( int(center_point[0]), int(center_point[1]) )
-                                center_points.append( center_point )
-                                cv2.circle(display_image, center_point, 10, (255, 0, 0), 2)
-                                cv2.circle(display_image, center_point, 5, (255, 0, 0), 3)
-				if vis:
-					cv2.imshow('output',display_image)
-					cv2.waitKey(10000)  
-					cv2.destroyWindow("output") 
+                        ## Convert to tuples (and draw it to screen)
+                        #for center_point in codebook:
+                                #center_point = ( int(center_point[0]), int(center_point[1]) )
+                                #center_points.append( center_point )
+                                #cv2.circle(display_image, center_point, 10, (255, 0, 0), 2)
+                                #cv2.circle(display_image, center_point, 5, (255, 0, 0), 3)
+				
+				#if vis: display("output",2000,display_image)
 					
 ####There are no more filters below, the rest is the beginning of tracking code;
 #### This also helps locate the movement from previous frames and would form the basis of object tracking in later versions
 					
-                # Now we have targets that are NOT computed from bboxes -- just
-                # movement weights (according to kmeans).  If any two targets are
-                # within the same "bbox count", average them into a single target.  
-                #
-                # (Any kmeans targets not within a bbox are also kept.)
-                trimmed_center_points = []
-                removed_center_points = []
+                ## Now we have targets that are NOT computed from bboxes -- just
+                ## movement weights (according to kmeans).  If any two targets are
+                ## within the same "bbox count", average them into a single target.  
+                ##
+                ## (Any kmeans targets not within a bbox are also kept.)
+                #trimmed_center_points = []
+                #removed_center_points = []
                                         
-                for box in bounding_box_list:
-                        # Find the centers within this box:
-                        center_points_in_box = []
+                #for box in bounding_box_list:
+                        ## Find the centers within this box:
+                        #center_points_in_box = []
                         
-                        for center_point in center_points:
-                                if        center_point[0] < box[right][0] and center_point[0] > box[left][0] and \
-                                        center_point[1] < box[bottom][1] and center_point[1] > box[top][1] :
+                        #for center_point in center_points:
+                                #if        center_point[0] < box[right][0] and center_point[0] > box[left][0] and \
+                                        #center_point[1] < box[bottom][1] and center_point[1] > box[top][1] :
                                         
-                                        # This point is within the box.
-                                        center_points_in_box.append( center_point )
+                                        ## This point is within the box.
+                                        #center_points_in_box.append( center_point )
                         
-                        # Now see if there are more than one.  If so, merge them.
-                        if len( center_points_in_box ) > 1:
-                                # Merge them:
-                                x_list = y_list = []
-                                for point in center_points_in_box:
-                                        x_list.append(point[0])
-                                        y_list.append(point[1])
+                        ## Now see if there are more than one.  If so, merge them.
+                        #if len( center_points_in_box ) > 1:
+                                ## Merge them:
+                                #x_list = y_list = []
+                                #for point in center_points_in_box:
+                                        #x_list.append(point[0])
+                                        #y_list.append(point[1])
                                 
-                                average_x = int( float(sum( x_list )) / len( x_list ) )
-                                average_y = int( float(sum( y_list )) / len( y_list ) )
+                                #average_x = int( float(sum( x_list )) / len( x_list ) )
+                                #average_y = int( float(sum( y_list )) / len( y_list ) )
                                 
-                                trimmed_center_points.append( (average_x, average_y) )
+                                #trimmed_center_points.append( (average_x, average_y) )
                                 
-                                # Record that they were removed:
-                                removed_center_points += center_points_in_box
+                                ## Record that they were removed:
+                                #removed_center_points += center_points_in_box
                                 
-                        if len( center_points_in_box ) == 1:
-                                trimmed_center_points.append( center_points_in_box[0] ) # Just use it.
+                        #if len( center_points_in_box ) == 1:
+                                #trimmed_center_points.append( center_points_in_box[0] ) # Just use it.
                 
-                # If there are any center_points not within a bbox, just use them.
-                # (It's probably a cluster comprised of a bunch of small bboxes.)
-                for center_point in center_points:
-                        if (not center_point in trimmed_center_points) and (not center_point in removed_center_points):
-                                trimmed_center_points.append( center_point )
+                ## If there are any center_points not within a bbox, just use them.
+                ## (It's probably a cluster comprised of a bunch of small bboxes.)
+                #for center_point in center_points:
+                        #if (not center_point in trimmed_center_points) and (not center_point in removed_center_points):
+                                #trimmed_center_points.append( center_point )
                 
-                # Determine if there are any new (or lost) targets:
-                actual_target_count = len( trimmed_center_points )
-                last_target_count = actual_target_count
+                ## Determine if there are any new (or lost) targets:
+                #actual_target_count = len( trimmed_center_points )
+                #last_target_count = actual_target_count
                 
-                # Now build the list of physical entities (objects)
-                this_frame_entity_list = []
+                ## Now build the list of physical entities (objects)
+                #this_frame_entity_list = []
                 
-                # An entity is list: [ name, color, last_time_seen, last_known_coords ]
+                ## An entity is list: [ name, color, last_time_seen, last_known_coords ]
                 
-                for target in trimmed_center_points:
+                #for target in trimmed_center_points:
                         
-                        # Is this a target near a prior entity (same physical entity)?
-                        entity_found = False
-                        entity_distance_dict = {}
+                        ## Is this a target near a prior entity (same physical entity)?
+                        #entity_found = False
+                        #entity_distance_dict = {}
                         
-                        for entity in last_frame_entity_list:
+                        #for entity in last_frame_entity_list:
                                 
-                                entity_coords= entity[3]
-                                delta_x = entity_coords[0] - target[0]
-                                delta_y = entity_coords[1] - target[1]
+                                #entity_coords= entity[3]
+                                #delta_x = entity_coords[0] - target[0]
+                                #delta_y = entity_coords[1] - target[1]
                 
-                                distance = sqrt( pow(delta_x,2) + pow( delta_y,2) )
-                                entity_distance_dict[ distance ] = entity
+                                #distance = sqrt( pow(delta_x,2) + pow( delta_y,2) )
+                                #entity_distance_dict[ distance ] = entity
                         
-                        # Did we find any non-claimed entities (nearest to furthest):
-                        distance_list = entity_distance_dict.keys()
-                        distance_list.sort()
+                        ## Did we find any non-claimed entities (nearest to furthest):
+                        #distance_list = entity_distance_dict.keys()
+                        #distance_list.sort()
                         
-                        for distance in distance_list:
+                        #for distance in distance_list:
                                 
-                                # Yes; see if we can claim the nearest one:
-                                nearest_possible_entity = entity_distance_dict[ distance ]
+                                ## Yes; see if we can claim the nearest one:
+                                #nearest_possible_entity = entity_distance_dict[ distance ]
                                 
-                                # Found the nearest entity to claim:
-                                entity_found = True
-                                nearest_possible_entity[2] = frame_t0  # Update last_time_seen
-                                nearest_possible_entity[3] = target  # Update the new location
-                                this_frame_entity_list.append( nearest_possible_entity )
-                                break
+                                ## Found the nearest entity to claim:
+                                #entity_found = True
+                                #nearest_possible_entity[2] = frame_t0  # Update last_time_seen
+                                #nearest_possible_entity[3] = target  # Update the new location
+                                #this_frame_entity_list.append( nearest_possible_entity )
+                                #break
                         
-                        if entity_found == False:
-                                # It's a new entity.
-                                color = ( random.randint(0,255), random.randint(0,255), random.randint(0,255) )
-                                name = hashlib.md5( str(frame_t0) + str(color) ).hexdigest()[:6]
-                                last_time_seen = frame_t0
+                        #if entity_found == False:
+                                ## It's a new entity.
+                                #color = ( random.randint(0,255), random.randint(0,255), random.randint(0,255) )
+                                #name = hashlib.md5( str(frame_t0) + str(color) ).hexdigest()[:6]
+                                #last_time_seen = frame_t0
                                 
-                                new_entity = [ name, color, last_time_seen, target ]
-                                this_frame_entity_list.append( new_entity )
+                                #new_entity = [ name, color, last_time_seen, target ]
+                                #this_frame_entity_list.append( new_entity )
                 
-                # Now "delete" any not-found entities which have expired:
-                entity_ttl = 1.0  # 1 sec.
+                ## Now "delete" any not-found entities which have expired:
+                #entity_ttl = 1.0  # 1 sec.
                 
-                for entity in last_frame_entity_list:
-                        last_time_seen = entity[2]
-                        if frame_t0 - last_time_seen > entity_ttl:
-                                # It's gone.
-                                pass
-                        else:
-                                # Save it for next time... not expired yet:
-                                this_frame_entity_list.append( entity )
+                #for entity in last_frame_entity_list:
+                        #last_time_seen = entity[2]
+                        #if frame_t0 - last_time_seen > entity_ttl:
+                                ## It's gone.
+                                #pass
+                        #else:
+                                ## Save it for next time... not expired yet:
+                                #this_frame_entity_list.append( entity )
                 
-                # For next frame:
-                last_frame_entity_list = this_frame_entity_list
+                ## For next frame:
+                #last_frame_entity_list = this_frame_entity_list
 
-		#Experimental analysis, no filters yet: Find the segemented object that encompasses the motion pixels
-		#This uses canny edge detection to capture the whole animal, and would be the first step to size class detection
-		if objectEdge:
-			camera_imageO=motionContour(display_image,center_point,this_frame_entity_list,camera_imageO)
+		##Experimental analysis, no filters yet: Find the segemented object that encompasses the motion pixels
+		##This uses canny edge detection to capture the whole animal, and would be the first step to size class detection
                 
-                # Draw the bullseye to screen:
-                for entity in this_frame_entity_list:
-                        center_point = entity[3]
-                        c = entity[1]  # RGB color tuple
-                        cv2.circle(camera_imageO, center_point, 15, (c[0], c[1], c[2]), 1)
-                        cv2.circle(camera_imageO, center_point, 10, (c[0], c[1], c[2]), 2)
-                        cv2.circle(camera_imageO, center_point,  5, (c[0], c[1], c[2]), 3)
-                                   
-              		
-                if vis:
-			cv2.imshow("Target",camera_imageO)
-			cv2.waitKey(1000)
-			cv2.destroyWindow("frame")                        
+                ## Draw the bullseye to screen:
+                #for entity in this_frame_entity_list:
+                        #center_point = entity[3]
+                        #c = entity[1]  # RGB color tuple
+                        #cv2.circle(camera_imageO, center_point, 15, (c[0], c[1], c[2]), 1)
+                        #cv2.circle(camera_imageO, center_point, 10, (c[0], c[1], c[2]), 2)
+                        #cv2.circle(camera_imageO, center_point,  5, (c[0], c[1], c[2]), 3)
+                                                     
                 
                 ##################################################
                 #Write image to file
@@ -945,7 +914,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		d = datetime(1,1,1) + sec
 		log_file.write( "%d %d:%d:%d " % ( int(frame_count), d.hour,d.minute, d.second) + "\n" )
 		#If a file has been written, flush the log to read
-		sys.stdout.flush()
+		#sys.stdout.flush()
 		
 		##################################################
                 #Have a returned counter to balance hitRate
@@ -974,7 +943,7 @@ if (runtype == "batch"):
                         motion_frames=run(fP=vid,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
                 except Exception, e:
 			print( "Error %s " % e + "\n" )
-			time.sleep(10)
+			time.sleep(8)
                         print 'Error in Video:',vid
                 if makeVID:
 			videoM(vid,motion_frames)     
