@@ -123,19 +123,13 @@ if(len(sys.argv)<=2):
 vis=False
 
 #A few hard coded testing variables, only to be used by the developers.
-todraw=True
-objectEdge=True
+todraw=False
+objectEdge=False
+toWrite=True
 
-###########Failure Classes, used to format output and illustrate number of frames
+#Start time
+start=time.time()
 
-##No motion, the frame was not different enough compared to the background due to accAvg 
-nodiff=0
-
-##No contours, there was not enough motion compared to background, did not meet threshold
-nocountr=0
-
-###Not large enough, the movement contour was too small to be included 
-toosmall=0
 
 #Set globals for mouse map, callback has unique syntax
 drawing = False # true if mouse is pressed
@@ -202,7 +196,8 @@ def getint(name):
 
 #define video function
 #Find path of jpegs
-def videoM(x):
+def videoM(x,motion_frames):
+
 	normFP=os.path.normpath(x)
 	(filepath, filename)=os.path.split(normFP)
 	(shortname, extension) = os.path.splitext(filename)
@@ -223,113 +218,113 @@ def videoM(x):
 	
 	if not os.path.exists(file_destination):
 		os.makedirs(file_destination)
-		
-	#Find all jpegs
-	jpgs=glob.glob(os.path.join(file_destination,"*.jpg"))			
-	
-	#Get frame rate and size of images
+#Get frame rate and size of images
 	cap = cv2.VideoCapture(x)
-		
+
 		#Get frame rate if the plotwatcher setting hasn't been called
 		# not the most elegant solution, but get global frame_rate
 	if not frameSET:
 		fr=round(cap.get(cv2.cv.CV_CAP_PROP_FPS))
 	else:
 		fr=frame_rate
-	
+
 	orig_image = cap.read()[1]  
-		
+
 	###Get information about camera and image
 	width = np.size(orig_image, 1)
 	height = np.size(orig_image, 0)
-	frame_size=(width, height)			
+	frame_size=(width, height)		
 	
 	# Define the codec and create VideoWriter object
 	fourcc = cv2.cv.CV_FOURCC(*'XVID')
 	out = cv2.VideoWriter(vidDEST,fourcc, float(fr), frame_size)			
 	
-	#split and sort the jpg names
-	jpgs.sort(key=getint)
-	
 	#Loop through every frame and write video
-	for f in jpgs:
-		fr=cv2.imread(f)
-		out.write(fr)
+	for f in motion_frames:
+		out.write(f)
 	
 	# Release everything if job is finished
-	cap.release()
 	out.release()
+	cap.release()
 
-#Define experimental contour segmentation size analysis
+#Define experimental contour segmentation size analysis, this is not available in the executable in version 1.1
 
-def motionContour(img):
+def motionContour(img,center_point,this_frame_entity_list,img_draw):
 	#find edges
-	edges=cv2.Canny(img,100,250)
-	kernel = np.ones((3,3),np.uint8)
+	edges=cv2.Canny(img,200,250)
+	kernel = np.ones((1.5,1.5),np.uint8)
 	closing = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
-	
-	#cv2.imshow('contour',closing)
-	#cv2.waitKey(1000)
-	#cv2.destroyWindow("contour")
 	
 	#find contours
 	contours,hierarchy = cv2.findContours(closing,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 	
+	#cv2.imshow('contour',closing)
+	#cv2.waitKey(3000)
+	#cv2.destroyWindow("contour")	
+	
 	#sort contours
 	cnts = sorted(contours, key = cv2.contourArea, reverse = True)
 	
-	for cnt in cnts[]:
-		bx,by,bw,bh = cv2.boundingRect(cnt)
-		cv2.drawContours(img,[cnt],0,(0,255,0),1)   # draw #contours in green color
+	#for cnt in cnts:
+		#bx,by,bw,bh = cv2.boundingRect(cnt)
+		#cv2.drawContours(img,[cnt],0,(0,255,0),1)   # draw #contours in green color
 	    
-	#cv2.namedWindow('contour', cv2.WINDOW_NORMAL)
-	#cv2.imshow('contour',img)
-	#cv2.waitKey(1000)
-	#cv2.destroyWindow("contour")
-	
 	#get center_point
-	#img=camera_imageROI.copy()
 	index=0
 	found=[]
 	for cnt in cnts:
 		dist = cv2.pointPolygonTest(cnt,center_point,False)
 		if dist == 1 :
 			found.append(index)
-			cv2.drawContours(img,[cnt],-1,(0,255,0),1)   # draw #contours in green color
-			for entity in this_frame_entity_list:
-				center_point = entity[3]
-				c = entity[1]  # RGB color tuple
-				cv2.circle(img, center_point,  5, (c[0], c[1], c[2]), 3)
+			#cv2.drawContours(img,[cnt],-1,(0,255,0),1)   # draw #contours in green color
+			#for entity in this_frame_entity_list:
+				#c = entity[1]  # RGB color tuple
+				#cv2.circle(img, center_point,  5, (c[0], c[1], c[2]), 3)
 		index=index+1	
 				
-	#cv2.imshow('contour',img)
-	#cv2.waitKey(3000)
-	#cv2.destroyWindow("contour")	
-	
 	#Available contours to choose from.
 	foundcnts = [cnts[i] for i in found]
 	
 	#sort for size one more time, get the smallest one
 	cntsF = sorted(foundcnts, key = cv2.contourArea)
-	
-	desired_cnt=cntsF[0]
+
+	#desired_cnt=cntsF[0]
+	#need to remove the largest contour?
 	
 	#draw that contour to be sure
 	#img=camera_imageROI.copy()
-	cv2.drawContours(img,[desired_cnt],0,(0,255,0),1)   # draw #contours in green color
-	cv2.namedWindow('contour', cv2.WINDOW_NORMAL)
-	
-	#cv2.imshow('contour',img)
-	#cv2.waitKey(1000)
-	#cv2.destroyWindow("contour")    
-	
-#Define reporting function to be called at the end of run
+	for cnt in cntsF:
+		cv2.drawContours(img_draw,[cnt],0,(0,0,255),1)   # draw #contours in red color
 
-def report():
+	#cv2.namedWindow('contour', cv2.WINDOW_NORMAL)
+	#cv2.imshow('contour',img_draw)
+	#cv2.waitKey(1000)
+	#cv2.destroyWindow("contour")	
+	
+	return img_draw
+
+#Define reporting function to be called at the end of run
+def report(frame_count,log_file,total_count,nodiff,nocountr,toosmall,start):
+	
+	#Ending time
+	end=time.time()
+	
+	#total_time()
+	total_min=(end-start)/60
+	
+	#processed frames per second
+	pfps=float(frame_count)/(total_min*60)
+	
+	##Write to log file
+	
+	log_file.write("Total run time (min): %.2f \n " % total_min)
+	log_file.write("Average frames per second: %.2f \n " % pfps)
+	
 	log_file.write(str(frame_count) + "Total frames in file:" + "\n" )
+	
 	#End of program, report some statistic to screen and log
 	#log
-	log_file.write("Thank you for using MotionMeerkat! \n")
+	log_file.write("\n \n Thank you for using MotionMeerkat! \n")
 	
 	log_file.write("Candidate motion events: %.0f \n " % total_count )
 	
@@ -343,14 +338,14 @@ def report():
 	log_file.write("Hitrate: %.2f %% \n" % rate)
 	log_file.write("Exiting")
 	
-	#screen
+	#print to screen
 	print("Thank you for using MotionMeerkat! \n")
+	print("Total run time (min): %.2f \n " % total_min)
+	print("Average frames processed per second: %.2f \n " % pfps)	
 	print("Candidate motion events: %.0f \n " % total_count )
-	
 	print("Frames skipped due to AccAvg: %.0f \n " % nodiff)
 	print("Frames skipped due to Threshold: %.0f \n " % nocountr)
 	print("Frames skipped due to minSIZE: %.0f \n " % toosmall)
-	
 	print("Total frames in files: %.0f \n " % frame_count)
 	
 	rate=float(total_count)/frame_count*100
@@ -365,7 +360,6 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
         sys.stderr.write("Processing file %s\n" % (fP))
         
         #Define directories, here assuming that we want to append the file structure of the last three folders to the file destination
-
 	normFP=os.path.normpath(fP)
 	(filepath, filename)=os.path.split(normFP)
 	(shortname, extension) = os.path.splitext(filename)
@@ -374,7 +368,20 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 	#we want to name the output a folder from the output destination with the named extension        
         print("Output path will be %s/%s/%s" % (fileD,IDFL,shortname))
         print("AccAvg begin value is: %s" % (accAvg))
+
+	###########Failure Classes, used to format output and illustrate number of frames
 	
+	##No motion, the frame was not different enough compared to the background due to accAvg 
+	nodiff=0
+	
+	##No contours, there was not enough motion compared to background, did not meet threshold
+	nocountr=0
+	
+	###Not large enough, the movement contour was too small to be included 
+	toosmall=0	
+	
+	#Hold all the output frames in an array
+	motionFRAMES = []
 	#If its batch, give an extra folder
 	if runtype == 'batch':
 		file_destination=os.path.join(fileD,IDFL,shortname)
@@ -405,7 +412,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 	
 	#get total number of frames
         total_frameC=cap.get(cv.CV_CAP_PROP_FRAME_COUNT)     
-	
+
         sys.stderr.write("frame rate: %s\n" % frame_rate)
 	
 	####Burnin and first image
@@ -420,11 +427,6 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		
 	# Capture the first frame from file for image properties
 	orig_image = cap.read()[1]  
-	
-	###Get information about camera and image
-	width = np.size(orig_image, 1)
-	height = np.size(orig_image, 0)
-	frame_size=(width, height)
 	
 	#Have to set global for the callback, feedback welcome. 
 	global orig
@@ -527,7 +529,8 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 # Capture frame from file
                 ret,camera_imageO = cap.read()
                 if not ret:
-
+			report(frame_count,log_file,total_count,nodiff,nocountr,toosmall,start)
+			return(motionFRAMES)
                         break    
                               
 		#Cut off the bottom 5% if the plotwatcher option is called. 
@@ -546,10 +549,12 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 frame_t0 = time.time()
                 
 		#Print trackbar
-		if(frame_count/total_frameC*100 %5 == 0):
-			fc=frame_count/total_frameC*100
-			print("%.0f %% completed" % fc)
-			print( "%.0f candidate motion frames" % total_count)
+		#for some videos this capture doesn't work, and we need to ignore frame
+		if not total_frameC == 0.0:		
+			if(frame_count/total_frameC*100 %5 == 0):
+				fc=frame_count/total_frameC*100
+				print("%.0f %% completed" % fc)
+				print( "%.0f candidate motion frames" % total_count)
 		
                 
                 ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
@@ -606,7 +611,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		if vis:
 			cv2.namedWindow('Initial', cv2.WINDOW_NORMAL)		
 			cv2.imshow("Initial",color_image)
-			cv2.waitKey(800)
+			cv2.waitKey(2000)
 			cv2.destroyAllWindows()                        
 
                 # Smooth to get rid of false positives
@@ -614,7 +619,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 if vis:
 			cv2.namedWindow('Blur', cv2.WINDOW_NORMAL)		
 			cv2.imshow("Blur",color_image)
-			cv2.waitKey(800)
+			cv2.waitKey(2000)
 			cv2.destroyWindow("Blur")  
                 
                 # Use the Running Average as the static background                                       
@@ -623,14 +628,14 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 if vis:
 			cv2.namedWindow('runnAVG', cv2.WINDOW_NORMAL)					
 			cv2.imshow("runnAVG",running_average_in_display_color_depth)
-			cv2.waitKey(800)
+			cv2.waitKey(5000)
 			cv2.destroyWindow("runnAVG")                        
                 
                 # Subtract the current frame from the moving average.
                 difference=cv2.absdiff( color_image, running_average_in_display_color_depth)
                 if vis:
 			cv2.imshow("diff",difference)
-			cv2.waitKey(800)
+			cv2.waitKey(5000)
 			cv2.destroyWindow("diff")
                 
                 # Convert the image to greyscale.
@@ -723,15 +728,15 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		
                 ## Draw the trimmed box list:
                 #print(len(trimmed_box_list))
-                if todraw:
-			for box in trimmed_box_list:
-				cv2.namedWindow('trimmed_box', cv2.WINDOW_NORMAL)			
-				cv2.rectangle( display_image, box[0], box[1], (0,255,0), 3 )
+                #for box in trimmed_box_list:
+		#	cv2.rectangle(camera_imageO, box[0], box[1], (0,255,0), 3 )
+		
 		if vis:
 			cv2.imshow('trimmed_box',display_image)
 			cv2.waitKey(1000)    
 			cv2.destroyWindow("trimmed_box")
                 
+                ## combine boxes that touch
                 try:       
 			bounding_box_list = merge_collided_bboxes( trimmed_box_list )
                 except Exception, e:
@@ -739,15 +744,14 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                         print 'Box Merge Fail:'
                         continue                
                 # Draw the merged box list:
+		if todraw:
+			for box in bounding_box_list:
+				cv2.rectangle(camera_imageO, box[0], box[1], (0,255,0), 1 )			
                 if vis:
 			cv2.namedWindow('merged_box', cv2.WINDOW_NORMAL)			
-			for box in bounding_box_list:
-				cv2.rectangle(display_image, box[0], box[1], (0,255,0), 1 )
-			 
 			cv2.imshow('merged_box',display_image)
 			cv2.waitKey(10000)  
 			cv2.destroyWindow("merged_box")				
-                        
                 # Here are our estimate points to track, based on merged & trimmed boxes:
                 estimated_target_count = len(bounding_box_list)
                 
@@ -792,8 +796,11 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                                 cv2.circle(display_image, center_point, 5, (255, 0, 0), 3)
 				if vis:
 					cv2.imshow('output',display_image)
-					cv2.waitKey(1000)  
+					cv2.waitKey(10000)  
 					cv2.destroyWindow("output") 
+					
+####There are no more filters below, the rest is the beginning of tracking code;
+#### This also helps locate the movement from previous frames and would form the basis of object tracking in later versions
 					
                 # Now we have targets that are NOT computed from bboxes -- just
                 # movement weights (according to kmeans).  If any two targets are
@@ -872,13 +879,6 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                                 # Yes; see if we can claim the nearest one:
                                 nearest_possible_entity = entity_distance_dict[ distance ]
                                 
-                                # Don't consider entities that are already claimed:
-                                if nearest_possible_entity in this_frame_entity_list:
-                                        #print "Target %s: Skipping the one iwth distance: %d at %s, C:%s" % (target, distance, nearest_possible_entity[3], nearest_possible_entity[1] )
-					print("target already claimed")
-                                        continue
-                                
-                                #print "Target %s: USING the one with distance: %d at %s, C:%s" % (target, distance, nearest_possible_entity[3] , nearest_possible_entity[1])
                                 # Found the nearest entity to claim:
                                 entity_found = True
                                 nearest_possible_entity[2] = frame_t0  # Update last_time_seen
@@ -909,22 +909,21 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 
                 # For next frame:
                 last_frame_entity_list = this_frame_entity_list
+
+		#Experimental analysis, no filters yet: Find the segemented object that encompasses the motion pixels
+		#This uses canny edge detection to capture the whole animal, and would be the first step to size class detection
+		if objectEdge:
+			camera_imageO=motionContour(display_image,center_point,this_frame_entity_list,camera_imageO)
                 
-                # Draw the found entities to screen:
+                # Draw the bullseye to screen:
                 for entity in this_frame_entity_list:
                         center_point = entity[3]
                         c = entity[1]  # RGB color tuple
                         cv2.circle(camera_imageO, center_point, 15, (c[0], c[1], c[2]), 1)
                         cv2.circle(camera_imageO, center_point, 10, (c[0], c[1], c[2]), 2)
                         cv2.circle(camera_imageO, center_point,  5, (c[0], c[1], c[2]), 3)
-		if vis:
-				
-			cv2.imshow('output',display_image)
-			cv2.waitKey(1000)  
-			cv2.destroyWindow("output")                                     
-                
-                ##cv2.ShowImage( "Target", image )
-		
+                                   
+              		
                 if vis:
 			cv2.imshow("Target",camera_imageO)
 			cv2.waitKey(1000)
@@ -932,7 +931,12 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 
                 ##################################################
                 #Write image to file
-                cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",camera_imageO)
+                
+                if toWrite:
+			cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",camera_imageO)
+		
+		#Append to list
+		motionFRAMES.append(camera_imageO)
 		
 		#Log the frame count and the time in video, in case user wants to check in the original
 		#create a time object, this relies on the frame_rate being correct!
@@ -967,25 +971,25 @@ if (runtype == "batch"):
                 ##Run Motion Function
                
                 try:
-                        run(fP=vid,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
+                        motion_frames=run(fP=vid,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
                 except Exception, e:
 			print( "Error %s " % e + "\n" )
 			time.sleep(10)
                         print 'Error in Video:',vid
                 if makeVID:
-			videoM(vid)     
+			videoM(vid,motion_frames)     
 
 ###If runtype is a single file - run file destination        
 if (runtype == "file"):
 	try:
-		run(fP=inDEST,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
+		motion_frames=run(fP=inDEST,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
 	except Exception, e:
 		print( "Error %s " % e + "\n" )
 		time.sleep(10)
 		print 'Error in Video:',inDEST
 		
 	if makeVID:
-		videoM(inDEST)
+		videoM(inDEST,motion_frames)
 				
 raw_input("Hit any key to exit:")	
 time.sleep(2)

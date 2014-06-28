@@ -7,8 +7,8 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{5C784574-7162-4518-849C-B2C13F88B122}
 AppName=MotionMeerkat
-AppVersion=1.1
-;AppVerName=MotionMeerkat 1.1
+AppVersion=1.2
+;AppVerName=MotionMeerkat 1.2
 AppPublisher=Ben Weinstein 
 AppPublisherURL=benweinstein.weebly.com
 AppSupportURL=benweinstein.weebly.com
@@ -19,7 +19,7 @@ LicenseFile=C:\Users\Ben\Documents\OpenCV_HummingbirdsMotion\dist\License.txt
 OutputBaseFilename=MotionMeerkatSetup
 Compression=lzma
 SolidCompression=yes
-
+    
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
