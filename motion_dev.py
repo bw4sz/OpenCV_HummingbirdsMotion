@@ -19,7 +19,6 @@ import numpy as np
 import time
 from scipy import *
 from scipy.cluster import vq
-import numpy
 import sys, os, random, hashlib
 import re
 from math import *
@@ -115,7 +114,10 @@ if(len(sys.argv)<=2):
 	plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera?:\n")
 	
 	#set ROI
-	set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest (ROI)?:\n")
+	set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest?:\n")
+	
+	if set_ROI:
+		ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'?:\n")
 	
 	#make video by stringing the jpgs back into an avi
 	makeVID="y"==raw_input("Write output as 'video', 'frames', or 'both'?:\n")
@@ -202,13 +204,12 @@ def getint(name):
 
 #define video function
 #Find path of jpegs
-def videoM(x,motion_frames):
-
+def videoM(x):
 	normFP=os.path.normpath(x)
 	(filepath, filename)=os.path.split(normFP)
 	(shortname, extension) = os.path.splitext(filename)
 	(_,IDFL) = os.path.split(filepath)
-		
+
 	#we want to name the output a folder from the output destination with the named extension 
 	if runtype == 'batch':
 		file_destination=os.path.join(fileD,IDFL,shortname)
@@ -219,13 +220,16 @@ def videoM(x,motion_frames):
 		vidDEST=os.path.join(filepath, shortname,shortname +'.avi')
 	else:
 		vidDEST=os.path.join(fileD, shortname,shortname +'.avi')
-	
+
 	print("Video output path will be %s" % (vidDEST))
-	
+
 	if not os.path.exists(file_destination):
 		os.makedirs(file_destination)
 
-#Get frame rate and size of images
+	#Find all jpegs
+	jpgs=glob.glob(os.path.join(file_destination,"*.jpg"))			
+
+	#Get frame rate and size of images
 	cap = cv2.VideoCapture(x)
 
 		#Get frame rate if the plotwatcher setting hasn't been called
@@ -240,19 +244,23 @@ def videoM(x,motion_frames):
 	###Get information about camera and image
 	width = np.size(orig_image, 1)
 	height = np.size(orig_image, 0)
-	frame_size=(width, height)		
-	
+	frame_size=(width, height)			
+
 	# Define the codec and create VideoWriter object
 	fourcc = cv2.cv.CV_FOURCC(*'XVID')
 	out = cv2.VideoWriter(vidDEST,fourcc, float(fr), frame_size)			
-	
+
+	#split and sort the jpg names
+	jpgs.sort(key=getint)
+
 	#Loop through every frame and write video
-	for f in motion_frames:
-		out.write(f)
-	
+	for f in jpgs:
+		fr=cv2.imread(f)
+		out.write(fr)
+
 	# Release everything if job is finished
-	out.release()
 	cap.release()
+	out.release()
 
 #Define experimental contour segmentation size analysis, this is not available in the executable in version 1.1
 
@@ -465,6 +473,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 					print(roi)
 					k=27
 			     
+		cv2.namedWindow("image", cv2.WINDOW_NORMAL)			
 		cv2.namedWindow('image')
 		cv2.setMouseCallback('image',draw_circle)
 		
@@ -477,10 +486,15 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		cv2.destroyAllWindows()
 		
 		print(roi)
-		display_image=orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]
-		cv2.imshow('newImage',display_image)
-		cv2.waitKey(2000)
-		cv2.destroyAllWindows()
+		
+		if ROI_include == "include": display_image=orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]
+		else:
+			orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]=255
+			display_image=orig_ROI
+		
+		display("newImage",2000,display_image)
+		
+		
 	else:
 		display_image=orig		
 		
@@ -550,16 +564,22 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		if not set_ROI:
 			camera_imageROI=camera_image
 		else:
-			camera_imageROI=camera_image[roi[1]:roi[3], roi[0]:roi[2]]
-			
+			if ROI_include == "include":camera_imageROI=camera_image[roi[1]:roi[3], roi[0]:roi[2]]
+			else: 
+				#Exclude area by making it a white square
+				camera_imageROI=camera_image
+				camera_imageROI[roi[1]:roi[3], roi[0]:roi[2]]=255
+				
                 frame_count += 1
                 frame_t0 = time.time()
                 
 		#Print trackbar
 		#for some videos this capture doesn't work, and we need to ignore frame
-		if not total_frameC == 0.0:		
-			if(frame_count/total_frameC*100 %5 == 0):
-				fc=frame_count/total_frameC*100
+		if not total_frameC == 0.0:
+			#This is a bit convulted, but because of scanning, we might miss the flag to calculate time, give it a step size equal to scan size
+			countR=frame_count - np.arange(0,scan+1)
+			if any(countR %10 ==0):
+				fc=float(frame_count)/total_frameC*100
 				print("%.0f %% completed" % fc)
 				print( "%.0f candidate motion frames" % total_count)
 				tracktime=time.time()
@@ -769,7 +789,6 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		#Append to list
 		#motionFRAMES.append(camera_imageO)
 		
-		print(len(motionFRAMES))
 		
 		#Log the frame count and the time in video, in case user wants to check in the original
 		#create a time object, this relies on the frame_rate being correct!
@@ -812,7 +831,7 @@ if (runtype == "batch"):
 			time.sleep(8)
                         print 'Error in Video:',vid
                 if makeVID:
-			videoM(vid,motion_frames)     
+			videoM(vid)     
 
 ###If runtype is a single file - run file destination        
 if (runtype == "file"):
@@ -824,7 +843,7 @@ if (runtype == "file"):
 		#print 'Error in Video:',inDEST
 		
 	if makeVID == "video" or "both":
-		videoM(inDEST,motion_frames)
+		videoM(inDEST)
 				
 raw_input("Hit any key to exit:")	
 time.sleep(2)
