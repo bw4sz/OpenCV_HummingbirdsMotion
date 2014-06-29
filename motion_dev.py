@@ -12,10 +12,6 @@ Default values for parameters are in parenthesis. To select default hit enter.
 
 Affirmative answers to questions are 'y', negative answers 'n'
 
-If set_ROI is 'y', the program will load the first frame of the image.
-To select the region of interest, left clicking on one corner and grab to create rectangle
-When complete hit escape. The new region of interest will flash once.
-
 """
 import cv2
 import cv2.cv as cv
@@ -100,6 +96,11 @@ if(len(sys.argv)<=2):
 	burnin= raw_input("Burn in, skip initial minutes of video (0):\n")
 	if not burnin: burnin = 0
 	else: burnin=float(burnin)	
+	
+	#Decrease frame rate, downsample
+	scan= raw_input("Scan one of every X frames (0):\n")
+	if not scan: scan = 0
+	else: scan=int(scan)
 	
 	#Manually set framerate
 	frameSET= "y" == raw_input("Set frame rate in fps?:\n")
@@ -352,7 +353,7 @@ def report(frame_count,log_file,total_count,nodiff,nocountr,toosmall,start):
 	time.sleep(5)
 	
 #Define the run function
-def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT,floorvalue,adapt):
+def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT,floorvalue,adapt,scan):
 	
         #Report name of file
         sys.stderr.write("Processing file %s\n" % (fP))
@@ -422,10 +423,12 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 	for x in range(1,int(float(burnin) * int(frame_rate) * 60)): 
 		cap.grab()
 		frame_count=frame_count+1
-		
+	#Set frame skip counter if downsampling	
+	frameSKIP=0
+	
 	# Capture the first frame from file for image properties
 	orig_image = cap.read()[1]  
-	
+		
 	#Have to set global for the callback, feedback welcome. 
 	global orig
 	
@@ -494,9 +497,6 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
         # ...but the AbsDiff() function requires matching image depths:
         running_average_in_display_color_depth = display_image.copy()
         
-        # RAM used by FindContours():
-        mem_storage = cv.CreateMemStorage(0)
-        
         # The difference between the running average and the current frame:
         difference =  display_image.copy()
         
@@ -517,9 +517,21 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 
         # Set this to the max number of targets to look for (passed to k-means):
         max_targets = 2
-                
+        
+        #Start with motion flag on
+	noMotion=False
+	
         while True:
-					
+		
+		#Was the last frame no motion; if not, scan frames
+		if not scan ==0:
+			if noMotion:
+				for x in range(1,scan):
+					cap.grab()
+					frame_count=frame_count+1
+			else:
+				pass
+				
                 # Capture frame from file
                 ret,camera_imageO = cap.read()
                 if not ret:
@@ -528,16 +540,16 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                         break    
                               
 		#Cut off the bottom 5% if the plotwatcher option is called. 
-                if plotwatcher:
-			camera_image = camera_imageO[1:700,1:1280]	
+                if not plotwatcher:
+			camera_image = camera_imageO	
 		else:
-			camera_image = camera_imageO
+			camera_image = camera_imageO[1:700,1:1280]
 		
 		#If set roi, subset the image
-		if set_ROI:
-			camera_imageROI=camera_image[roi[1]:roi[3], roi[0]:roi[2]]
-		else:
+		if not set_ROI:
 			camera_imageROI=camera_image
+		else:
+			camera_imageROI=camera_image[roi[1]:roi[3], roi[0]:roi[2]]
 			
                 frame_count += 1
                 frame_t0 = time.time()
@@ -553,16 +565,15 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 				
 				#track time in minutes
 				trackmin=(tracktime-start)/60
-				timetogo=(trackmin / fc)/100
-				print( "Estimated minutes remaining %.1f" % timetogo)
+				timetogo=(trackmin / (fc/100))
+				print( "Estimated hours remaining %.2f" % timetogo)
 				
                 ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
 		#set floor flag, we can't have negative accAVG
 		floor=0
 		if adapt:
 				
-			#Every 10min, reset the agg threshold, depending on expected level of movement
-			#how many frames per minute? 
+			#Every 10min, reset the accAvg threshold, depending on expected level of movement
 
 			#Should be a integer, round it
 			fift=round(10*60*float(frame_rate))
@@ -616,6 +627,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 # Use the Running Average as the static background                                       
                 cv2.accumulateWeighted(color_image,running_average_image,accAvg)                                  
                 running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
+                
                 if vis: display("Running Average",5000,running_average_in_display_color_depth)                  
                 
                 # Subtract the current frame from the moving average.
@@ -629,6 +641,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		#If some difference is 0, jump to next frame
 		if sum(grey_image)==0:
 			nodiff=nodiff+1
+			noMotion=True			
 			continue
 		
                 # Threshold the image to a black and white motion mask:
@@ -636,9 +649,9 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		
 		if vis: display("Threshold",1000,grey_image)
                               
-                non_black_coords_array = numpy.where( grey_image > 3 )
-                # Convert from numpy.where()'s two separate lists to one list of (x, y) tuples:
-                non_black_coords_array = zip( non_black_coords_array[1], non_black_coords_array[0] )
+                #non_black_coords_array = numpy.where( grey_image > 3 )
+                ## Convert from numpy.where()'s two separate lists to one list of (x, y) tuples:
+                #non_black_coords_array = zip( non_black_coords_array[1], non_black_coords_array[0] )
                 
                 points = []   # Was using this to hold either pixel coords or polygon coords.
                 bounding_box_list = []
@@ -649,6 +662,8 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 if len(contours) == 0 :
 			#No movement, add to counter
 			nocountr=nocountr+1
+			#NoMotion flag
+			noMotion=True
                         continue                        
                 #print(len(contours))
                 cnt=contours[0]
@@ -660,7 +675,6 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 if vis:
 
 			for cnt in contours:
-				
 				bx,by,bw,bh = cv2.boundingRect(cnt)
 				cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw #contours in green color
 			
@@ -671,10 +685,9 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                         bounding_rect = cv2.boundingRect( cnt )
                         point1 = ( bounding_rect[0], bounding_rect[1] )
                         point2 = ( bounding_rect[0] + bounding_rect[2], bounding_rect[1] + bounding_rect[3] )
-                        
                         bounding_box_list.append( ( point1, point2 ) )
-                        polygon_points = cv2.approxPolyDP( cnt,0.1*cv2.arcLength(cnt,True),True)
-                        approx = cv2.approxPolyDP(cnt,0.1*cv2.arcLength(cnt,True),True)
+                        #polygon_points = cv2.approxPolyDP( cnt,0.1*cv2.arcLength(cnt,True),True)
+                        #approx = cv2.approxPolyDP(cnt,0.1*cv2.arcLength(cnt,True),True)
                         
                 # Find the average size of the bbox (targets), then
                 # remove any tiny bboxes (which are probably just noise).
@@ -704,6 +717,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		## If there are no boxes left at that size, skip to new frame
 		if len(trimmed_box_list) == 0:
 			toosmall=toosmall+1
+			noMotion=True			
 			continue
 		
                 ## Draw the trimmed box list:
@@ -726,169 +740,14 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 				cv2.rectangle(camera_imageO, box[0], box[1], (0,255,0), 1 )			
                 
                 if vis: display("merged_box",2000,display_image)
-
+		
+		##Experimental analysis, no filters yet: Find the segemented object that encompasses the motion pixels
+			##This uses canny edge detection to capture the whole animal, and would be the first step to size class detection
+			
 		#if objectEdge:
 			#camera_imageO=motionContour(display_image,center_point,this_frame_entity_list,camera_imageO)
-			
-                ## Here are our estimate points to track, based on merged & trimmed boxes:
-                #estimated_target_count = len(bounding_box_list)
-                
-                ## Don't allow target "jumps" from few to many or many to few.
-                ## Only change the number of targets up to one target per n seconds.
-                ## This fixes the "exploding number of targets" when something stops moving
-                ## and the motion erodes to disparate little puddles all over the place.
-                
-                #if frame_t0 - last_target_change_t < .350:  # 1 change per 0.35 secs
-                        #estimated_target_count = last_target_count
-                #else:
-                        #if last_target_count - estimated_target_count > 1: estimated_target_count = last_target_count - 1
-                        #if estimated_target_count - last_target_count > 1: estimated_target_count = last_target_count + 1
-                        #last_target_change_t = frame_t0
-                
-                ## Clip to the user-supplied maximum:
-                #estimated_target_count = min( estimated_target_count, max_targets )
-                
-                ## The estimated_target_count at this point is the maximum number of targets
-                ## we want to look for.  If kmeans decides that one of our candidate
-                ## bboxes is not actually a target, we remove it from the target list below.
-                
-                ## Using the numpy values directly (treating all pixels as points):        
-                #points = non_black_coords_array
-                #center_points = []
-                        
-                #if len(points):
-                        
-                        ## If we have all the "target_count" targets from last frame,
-                        ## use the previously known targets (for greater accuracy).
-                        #k_or_guess = max( estimated_target_count, 1 )  # Need at least one target to look for.
-                        #if len(codebook) == estimated_target_count: 
-                                #k_or_guess = codebook
-                        
-                        #codebook, distortion = vq.kmeans( array( points ), k_or_guess )
-                        
-                        ## Convert to tuples (and draw it to screen)
-                        #for center_point in codebook:
-                                #center_point = ( int(center_point[0]), int(center_point[1]) )
-                                #center_points.append( center_point )
-                                #cv2.circle(display_image, center_point, 10, (255, 0, 0), 2)
-                                #cv2.circle(display_image, center_point, 5, (255, 0, 0), 3)
-				
-				#if vis: display("output",2000,display_image)
-					
-####There are no more filters below, the rest is the beginning of tracking code;
-#### This also helps locate the movement from previous frames and would form the basis of object tracking in later versions
-					
-                ## Now we have targets that are NOT computed from bboxes -- just
-                ## movement weights (according to kmeans).  If any two targets are
-                ## within the same "bbox count", average them into a single target.  
-                ##
-                ## (Any kmeans targets not within a bbox are also kept.)
-                #trimmed_center_points = []
-                #removed_center_points = []
-                                        
-                #for box in bounding_box_list:
-                        ## Find the centers within this box:
-                        #center_points_in_box = []
-                        
-                        #for center_point in center_points:
-                                #if        center_point[0] < box[right][0] and center_point[0] > box[left][0] and \
-                                        #center_point[1] < box[bottom][1] and center_point[1] > box[top][1] :
-                                        
-                                        ## This point is within the box.
-                                        #center_points_in_box.append( center_point )
-                        
-                        ## Now see if there are more than one.  If so, merge them.
-                        #if len( center_points_in_box ) > 1:
-                                ## Merge them:
-                                #x_list = y_list = []
-                                #for point in center_points_in_box:
-                                        #x_list.append(point[0])
-                                        #y_list.append(point[1])
-                                
-                                #average_x = int( float(sum( x_list )) / len( x_list ) )
-                                #average_y = int( float(sum( y_list )) / len( y_list ) )
-                                
-                                #trimmed_center_points.append( (average_x, average_y) )
-                                
-                                ## Record that they were removed:
-                                #removed_center_points += center_points_in_box
-                                
-                        #if len( center_points_in_box ) == 1:
-                                #trimmed_center_points.append( center_points_in_box[0] ) # Just use it.
-                
-                ## If there are any center_points not within a bbox, just use them.
-                ## (It's probably a cluster comprised of a bunch of small bboxes.)
-                #for center_point in center_points:
-                        #if (not center_point in trimmed_center_points) and (not center_point in removed_center_points):
-                                #trimmed_center_points.append( center_point )
-                
-                ## Determine if there are any new (or lost) targets:
-                #actual_target_count = len( trimmed_center_points )
-                #last_target_count = actual_target_count
-                
-                ## Now build the list of physical entities (objects)
-                #this_frame_entity_list = []
-                
-                ## An entity is list: [ name, color, last_time_seen, last_known_coords ]
-                
-                #for target in trimmed_center_points:
-                        
-                        ## Is this a target near a prior entity (same physical entity)?
-                        #entity_found = False
-                        #entity_distance_dict = {}
-                        
-                        #for entity in last_frame_entity_list:
-                                
-                                #entity_coords= entity[3]
-                                #delta_x = entity_coords[0] - target[0]
-                                #delta_y = entity_coords[1] - target[1]
-                
-                                #distance = sqrt( pow(delta_x,2) + pow( delta_y,2) )
-                                #entity_distance_dict[ distance ] = entity
-                        
-                        ## Did we find any non-claimed entities (nearest to furthest):
-                        #distance_list = entity_distance_dict.keys()
-                        #distance_list.sort()
-                        
-                        #for distance in distance_list:
-                                
-                                ## Yes; see if we can claim the nearest one:
-                                #nearest_possible_entity = entity_distance_dict[ distance ]
-                                
-                                ## Found the nearest entity to claim:
-                                #entity_found = True
-                                #nearest_possible_entity[2] = frame_t0  # Update last_time_seen
-                                #nearest_possible_entity[3] = target  # Update the new location
-                                #this_frame_entity_list.append( nearest_possible_entity )
-                                #break
-                        
-                        #if entity_found == False:
-                                ## It's a new entity.
-                                #color = ( random.randint(0,255), random.randint(0,255), random.randint(0,255) )
-                                #name = hashlib.md5( str(frame_t0) + str(color) ).hexdigest()[:6]
-                                #last_time_seen = frame_t0
-                                
-                                #new_entity = [ name, color, last_time_seen, target ]
-                                #this_frame_entity_list.append( new_entity )
-                
-                ## Now "delete" any not-found entities which have expired:
-                #entity_ttl = 1.0  # 1 sec.
-                
-                #for entity in last_frame_entity_list:
-                        #last_time_seen = entity[2]
-                        #if frame_t0 - last_time_seen > entity_ttl:
-                                ## It's gone.
-                                #pass
-                        #else:
-                                ## Save it for next time... not expired yet:
-                                #this_frame_entity_list.append( entity )
-                
-                ## For next frame:
-                #last_frame_entity_list = this_frame_entity_list
 
-		##Experimental analysis, no filters yet: Find the segemented object that encompasses the motion pixels
-		##This uses canny edge detection to capture the whole animal, and would be the first step to size class detection
-                
+
                 ## Draw the bullseye to screen:
                 #for entity in this_frame_entity_list:
                         #center_point = entity[3]
@@ -940,7 +799,7 @@ if (runtype == "batch"):
                 ##Run Motion Function
                
                 try:
-                        motion_frames=run(fP=vid,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
+                        motion_frames=run(fP=vid,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt,scan=scan)
                 except Exception, e:
 			print( "Error %s " % e + "\n" )
 			time.sleep(8)
@@ -951,10 +810,10 @@ if (runtype == "batch"):
 ###If runtype is a single file - run file destination        
 if (runtype == "file"):
 	try:
-		motion_frames=run(fP=inDEST,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt)
+		motion_frames=run(fP=inDEST,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt,scan=scan)
 	except Exception, e:
 		print( "Error %s " % e + "\n" )
-		time.sleep(10)
+		time.sleep(8)
 		print 'Error in Video:',inDEST
 		
 	if makeVID:
