@@ -118,7 +118,7 @@ if(len(sys.argv)<=2):
 	set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest (ROI)?:\n")
 	
 	#make video by stringing the jpgs back into an avi
-	makeVID="y"==raw_input("Make video out of the resulting frames?:\n")
+	makeVID="y"==raw_input("Write output as 'video', 'frames', or 'both'?:\n")
 	
 ##Visualize the frames, this should only be used for testing!
 vis=False
@@ -126,8 +126,6 @@ vis=False
 #A few hard coded testing variables, only to be used by the developers.
 todraw=True
 objectEdge=False
-
-toWrite=False
 
 #Start time
 start=time.time()
@@ -322,7 +320,6 @@ def report(frame_count,log_file,total_count,nodiff,nocountr,toosmall,start):
 	
 	log_file.write("Total run time (min): %.2f \n " % total_min)
 	log_file.write("Average frames per second: %.2f \n " % pfps)
-	
 	log_file.write(str(frame_count) + "Total frames in file:" + "\n" )
 	
 	#End of program, report some statistic to screen and log
@@ -365,7 +362,6 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 	(_,IDFL) = os.path.split(filepath)
 	
 	#we want to name the output a folder from the output destination with the named extension        
-        print("Output path will be %s/%s/%s" % (fileD,IDFL,shortname))
         print("AccAvg begin value is: %s" % (accAvg))
 
 	###########Failure Classes, used to format output and illustrate number of frames
@@ -389,7 +385,9 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 	
         if not os.path.exists(file_destination):
                 os.makedirs(file_destination)
-                     
+	
+	print("Output path will be %s" % (file_destination))
+	
         # Create a log file with each coordinate
         log_file_name = file_destination + "/" + "tracker_output.log"
         log_file = file(log_file_name, 'a' )
@@ -423,6 +421,8 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 	for x in range(1,int(float(burnin) * int(frame_rate) * 60)): 
 		cap.grab()
 		frame_count=frame_count+1
+		
+	print("Beginning Motion Detection")
 	#Set frame skip counter if downsampling	
 	frameSKIP=0
 	
@@ -531,13 +531,14 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 					frame_count=frame_count+1
 			else:
 				pass
+		else:
+			pass
 				
                 # Capture frame from file
                 ret,camera_imageO = cap.read()
                 if not ret:
 			report(frame_count,log_file,total_count,nodiff,nocountr,toosmall,start)
 			return(motionFRAMES)
-                        break    
                               
 		#Cut off the bottom 5% if the plotwatcher option is called. 
                 if not plotwatcher:
@@ -565,7 +566,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 				
 				#track time in minutes
 				trackmin=(tracktime-start)/60
-				timetogo=(trackmin / (fc/100))
+				timetogo=(trackmin / (fc/100))/60
 				print( "Estimated hours remaining %.2f" % timetogo)
 				
                 ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
@@ -628,6 +629,8 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 cv2.accumulateWeighted(color_image,running_average_image,accAvg)                                  
                 running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
                 
+		mem_storage = cv.CreateMemStorage(0)
+		
                 if vis: display("Running Average",5000,running_average_in_display_color_depth)                  
                 
                 # Subtract the current frame from the moving average.
@@ -760,11 +763,13 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 ##################################################
                 #Write image to file
                 
-                if toWrite:
+                if makeVID == "frames" or "both":
 			cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",camera_imageO)
 		
 		#Append to list
-		motionFRAMES.append(camera_imageO)
+		#motionFRAMES.append(camera_imageO)
+		
+		print(len(motionFRAMES))
 		
 		#Log the frame count and the time in video, in case user wants to check in the original
 		#create a time object, this relies on the frame_rate being correct!
@@ -779,6 +784,8 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 #Have a returned counter to balance hitRate
 		hitcounter=hitcounter+1
                 total_count=total_count+1
+		#set flag to motion
+		noMotion=False
 		
 ######################################################################################################
 ###Run Analysis on a Pool of videos
@@ -809,14 +816,14 @@ if (runtype == "batch"):
 
 ###If runtype is a single file - run file destination        
 if (runtype == "file"):
-	try:
-		motion_frames=run(fP=inDEST,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt,scan=scan)
-	except Exception, e:
-		print( "Error %s " % e + "\n" )
-		time.sleep(8)
-		print 'Error in Video:',inDEST
+	#try:
+	motion_frames=run(fP=inDEST,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt,scan=scan)
+	#except Exception, e:
+		#print( "Error %s " % e + "\n" )
+		#time.sleep(8)
+		#print 'Error in Video:',inDEST
 		
-	if makeVID:
+	if makeVID == "video" or "both":
 		videoM(inDEST,motion_frames)
 				
 raw_input("Hit any key to exit:")	
