@@ -1043,4 +1043,51 @@ Candidate motion events: 43
  Frames skipped due to minSIZE: 6 
  Total frames in files: 49 
  Hitrate: 87.76 % 
+Exiting1 0:0:1 
+2 0:0:2 
+3 0:0:3 
+4 0:0:4 
+5 0:0:5 
+6 0:0:6 
+7 0:0:7 
+8 0:0:8 
+9 0:0:9 
+12 0:0:12 
+13 0:0:13 
+16 0:0:16 
+19 0:0:19 
+20 0:0:20 
+21 0:0:21 
+22 0:0:22 
+23 0:0:23 
+24 0:0:24 
+25 0:0:25 
+26 0:0:26 
+27 0:0:27 
+28 0:0:28 
+33 0:0:33 
+34 0:0:34 
+35 0:0:35 
+36 0:0:36 
+37 0:0:37 
+38 0:0:38 
+39 0:0:39 
+40 0:0:40 
+43 0:0:43 
+46 0:0:46 
+47 0:0:47 
+48 0:0:48 
+49 0:0:49 
+Total run time (min): 0.29 
+ Average frames per second: 2.82 
+ 49Total frames in file:
+
+ 
+ Thank you for using MotionMeerkat! 
+Candidate motion events: 35 
+ Frames skipped due to AccAvg: 0 
+ Frames skipped due to Threshold: 0 
+ Frames skipped due to minSIZE: 7 
+ Total frames in files: 49 
+ Hitrate: 71.43 % 
 Exiting
