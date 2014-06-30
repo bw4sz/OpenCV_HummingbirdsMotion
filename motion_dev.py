@@ -556,7 +556,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                               
 		#Cut off the bottom 5% if the plotwatcher option is called. 
                 if not plotwatcher:
-			camera_image = camera_imageO	
+			camera_image = camera_imageO.copy()	
 		else:
 			camera_image = camera_imageO[1:700,1:1280]
 		
@@ -567,7 +567,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 			if ROI_include == "include":camera_imageROI=camera_image[roi[1]:roi[3], roi[0]:roi[2]]
 			else: 
 				#Exclude area by making it a white square
-				camera_imageROI=camera_image
+				camera_imageROI=camera_image.copy()
 				camera_imageROI[roi[1]:roi[3], roi[0]:roi[2]]=255
 				
                 frame_count += 1
@@ -578,7 +578,11 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		if not total_frameC == 0.0:
 			#This is a bit convulted, but because of scanning, we might miss the flag to calculate time, give it a step size equal to scan size
 			countR=frame_count - np.arange(0,scan+1)
-			if any(countR %10 ==0):
+			if not scan ==0 :a = countR.astype(np.float32, copy=False)
+			else: a = frame_count
+			#If percent compelted is a multiple of 10, print processing rate.
+			if any((a/total_frameC)*100 %10 == 0):
+				
 				fc=float(frame_count)/total_frameC*100
 				print("%.0f %% completed" % fc)
 				print( "%.0f candidate motion frames" % total_count)
@@ -687,7 +691,8 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 			nocountr=nocountr+1
 			#NoMotion flag
 			noMotion=True
-                        continue                        
+                        continue                    
+		
                 #print(len(contours))
                 cnt=contours[0]
                 len(cnt)
