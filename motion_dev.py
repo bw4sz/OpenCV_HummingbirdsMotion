@@ -25,17 +25,101 @@ from math import *
 import glob
 from datetime import datetime, timedelta
 import csv
+import argparse
 
 #for py2exe needs manual
 from scipy.sparse.csgraph import _validation
-
+	
 if len(sys.argv)<2:
         print Usage
 else:
-        FileList=sys.argv[1:]
-        for infileName in FileList:
-                print infileName
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--runtype", help="Batch or single file")
+	parser.add_argument("--batchpool", help="run directory of videos")
+	parser.add_argument("--inDEST", help="path of single video")
+	parser.add_argument("--fileD", help="output directory")
+	parser.add_argument("--adapt", help="Adaptive background averaging")
+	parser.add_argument("--accAvg", help="Fixed background averaging rate")
+	parser.add_argument("--frameHIT", help="expected percentage of motion frames")
+	parser.add_argument("--floorvalue", help="minimum background averaging")
+	parser.add_argument("--threshT", help="Threshold of movement")
+	parser.add_argument("--minSIZE", help="Minimum size of contour")
+	parser.add_argument("--burnin", help="Delay time")
+	parser.add_argument("--frameSET", help="Set frame_rate?")
+	parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true")
+	parser.add_argument("--frame_rate", help="frames per second")
+	parser.add_argument("--set_ROI", help="Set region of interest?")
+	parser.add_argument("--ROI_include", help="Include or exclude?")
+	parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?")
 	
+	
+	args = parser.parse_args()
+	print args
+	
+	#Legacy change, set argparse to named variables, to be fixed in version 2.0
+	if args.runtype:
+		runtype=args.runtype
+	else:
+		runtype='file'
+	if args.batchpool:
+		batchpool=args.batchpool
+	if args.inDEST:
+		inDEST=args.inDEST
+	if args.fileD:
+		fileD=args.fileD
+	if(args.adapt):
+		adapt=args.adapt
+	else:
+		adapt=False
+	if args.accAvg:
+		accAvg=args.accAvg
+	else:
+		accAvg=0.35
+	if args.frameHIT:
+		frameHIT=args.frameHIT
+	else: 
+		frameHIT=0.01
+	if args.floorvalue:
+		floorvalue=args.floorvalue
+	else:
+		floorvalue=0.05
+	if args.threshT:
+		threshT=args.threshT
+	else:
+		threshT=50
+	if args.minSIZE:
+		minSIZE=args.minSIZE
+	else:
+		minSIZE=0.1
+	if args.burnin:
+		burnin=args.burnin
+	else: 
+		burnin=0
+	if args.frameSET:
+		frameSET=args.frameSET
+	else:
+		frameSET=False
+	if args.plotwatcher:
+		plotwatcher=args.plotwatcher
+	else:
+		plotwatcher=False
+	if args.frame_rate:
+		frame_rate=args.frame_rate
+	else:
+		frame_rate=0
+	if args.set_ROI:
+		set_ROI=args.set_ROI
+	else:
+		set_ROI=False
+	if args.ROI_include:
+		ROI_include=args.ROI_include
+	else:
+		set_ROI='include'
+	if args.makeVID:
+		makeVID=args.makeVID
+	else:
+		makeVID='frames'
+		
 #########################################
 #Get user inputs if no system arguments
 #########################################
@@ -204,7 +288,7 @@ def getint(name):
 
 #define video function
 #Find path of jpegs
-def videoM(x):
+def videoM(x,makeVID):
 	normFP=os.path.normpath(x)
 	(filepath, filename)=os.path.split(normFP)
 	(shortname, extension) = os.path.splitext(filename)
@@ -261,12 +345,17 @@ def videoM(x):
 	# Release everything if job is finished
 	cap.release()
 	out.release()
-
+	
+	#If video only, delete jpegs
+	if makeVID == "video":
+		for f in jpgs:
+			os.remove(f)
+		
 #Define experimental contour segmentation size analysis, this is not available in the executable in version 1.1
 
 def motionContour(img,center_point,this_frame_entity_list,img_draw):
 	#find edges
-	edges=cv2.Canny(img,200,250)
+	edges=cv2.Canny(img,100,250)
 	kernel = np.ones((1.5,1.5),np.uint8)
 	closing = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
 	
@@ -444,9 +533,9 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		#cut off the bottom 5% if the timing mechanism is on the bottom. 
 		orig = orig_image[1:700,1:1280]
 	else:
-		orig = orig_image
+		orig = orig_image.copy()
 	
-	if vis: display("origin", 100, orig)
+	#if vis: display("origin", 100, orig)
 	
 	#make a copy of the image
 	orig_ROI=orig.copy()
@@ -520,7 +609,8 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
         k_or_guess = 1
         codebook=[]
         last_frame_entity_list = []
-        
+        frameC_announce=0
+	
         #Set time
         t0 = time.time()
         
@@ -584,9 +674,15 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 			if any((a/total_frameC)*100 %10 == 0):
 				
 				fc=float(frame_count)/total_frameC*100
-				print("%.0f %% completed" % fc)
-				print( "%.0f candidate motion frames" % total_count)
-				tracktime=time.time()
+				#Give it a pause feature so it doesn't announce twice on the scan, i a bit ugly, but it doesn't run very often.
+				#if the last time the percent complete was printed was within the scan range, don't print again. 
+				if not 0.0 <= abs(frameC_announce - frame_count) <= scan:
+					print("%.0f %% completed" % fc)
+					print( "%.0f candidate motion frames" % total_count)
+					
+				#tracktime=time.time()
+				#Reset the last time it was printed. 
+				frameC_announce=frame_count
 				
 				##track time in minutes
 				#trackmin=(tracktime-start)/60
@@ -642,12 +738,12 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 # Create a working "color image" to modify / blur
                 color_image =  display_image.copy()\
 		
-		if vis: display(Initial,2000,color_image)                    
+		#if vis: display(Initial,2000,color_image)                    
 
                 # Smooth to get rid of false positives
                 color_image = cv2.GaussianBlur(color_image,(5,5),0)
                 
-                if vis: display("Blur", 2000, color_image)
+                #if vis: display("Blur", 2000, color_image)
                 
                 # Use the Running Average as the static background                                       
                 cv2.accumulateWeighted(color_image,running_average_image,accAvg)                                  
@@ -655,12 +751,12 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 
 		mem_storage = cv.CreateMemStorage(0)
 		
-                if vis: display("Running Average",5000,running_average_in_display_color_depth)                  
+                #if vis: display("Running Average",5000,running_average_in_display_color_depth)                  
                 
                 # Subtract the current frame from the moving average.
                 difference=cv2.absdiff( color_image, running_average_in_display_color_depth)
                 
-                if vis: display("difference",5000,difference)
+                #if vis: display("difference",5000,difference)
                 
                 # Convert the image to greyscale.
                 grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
@@ -674,7 +770,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 # Threshold the image to a black and white motion mask:
                 ret,grey_image = cv2.threshold(grey_image, threshT, 255, cv2.THRESH_BINARY )
 		
-		if vis: display("Threshold",1000,grey_image)
+		#if vis: display("Threshold",1000,grey_image)
                               
                 #non_black_coords_array = numpy.where( grey_image > 3 )
                 ## Convert from numpy.where()'s two separate lists to one list of (x, y) tuples:
@@ -700,13 +796,13 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 drawing = np.uint8(display_image)
                 
                 ##Draw the initial contours
-                if vis:
+                #if vis:
 
-			for cnt in contours:
-				bx,by,bw,bh = cv2.boundingRect(cnt)
-				cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw #contours in green color
+			#for cnt in contours:
+				#bx,by,bw,bh = cv2.boundingRect(cnt)
+				#cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw #contours in green color
 			
-			display("contours", 2000, drawing)
+			#display("contours", 2000, drawing)
                 
                 for cnt in contours:
                         
@@ -753,7 +849,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 #for box in trimmed_box_list:
 		#	cv2.rectangle(camera_imageO, box[0], box[1], (0,255,0), 3 )
 		
-		if vis: display("trimmed_box",1000,display_image)
+		#if vis: display("trimmed_box",1000,display_image)
                 
                 ## combine boxes that touch
                 try:       
@@ -767,7 +863,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 			for box in bounding_box_list:
 				cv2.rectangle(camera_imageO, box[0], box[1], (0,255,0), 1 )			
                 
-                if vis: display("merged_box",2000,display_image)
+                #if vis: display("merged_box",2000,display_image)
 		
 		##Experimental analysis, no filters yet: Find the segemented object that encompasses the motion pixels
 			##This uses canny edge detection to capture the whole animal, and would be the first step to size class detection
