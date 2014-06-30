@@ -87,8 +87,8 @@ if(len(sys.argv)<=2):
 	else: threshT=float(threshT)
 	
 	#minimum size - use with caution
-	minSIZE=raw_input("Minimum motion contour size (0.001):\n")
-	if not minSIZE: minSIZE = 0.001
+	minSIZE=raw_input("Minimum motion contour size (0.1):\n")
+	if not minSIZE: minSIZE = 0.1
 	else: minSIZE=float(minSIZE)
 	
 	#Skip initial frames of video, in case of camera setup and shake. 	
@@ -588,10 +588,10 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 				print( "%.0f candidate motion frames" % total_count)
 				tracktime=time.time()
 				
-				#track time in minutes
-				trackmin=(tracktime-start)/60
-				timetogo=(trackmin / (fc/100))/60
-				print( "Estimated hours remaining %.2f" % timetogo)
+				##track time in minutes
+				#trackmin=(tracktime-start)/60
+				#timetogo=(trackmin / (fc/100))/60
+				#print( "Estimated hours remaining %.2f" % timetogo)
 				
                 ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
 		#set floor flag, we can't have negative accAVG
@@ -739,7 +739,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 			#Relative to the entire frame, only keep box if its larger 
 			#than .001 of the frame, reduces the number of tiny blips
                         if (box_width * box_height) > average_box_area*.3:
-				if (box_width * box_height) > (width * height) * float(minSIZE): 
+				if (box_width * box_height) > (width * height) * (float(minSIZE)/100): 
 					trimmed_box_list.append( box )
 		
 		## If there are no boxes left at that size, skip to new frame
