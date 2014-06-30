@@ -114,7 +114,7 @@ else:
 	if args.ROI_include:
 		ROI_include=args.ROI_include
 	else:
-		set_ROI='include'
+		set_ROI='exclude'
 	if args.makeVID:
 		makeVID=args.makeVID
 	else:
@@ -202,6 +202,7 @@ if(len(sys.argv)<=2):
 	
 	if set_ROI:
 		ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'?:\n")
+	else: ROI_include='exclude'
 	
 	#make video by stringing the jpgs back into an avi
 	makeVID="y"==raw_input("Write output as 'video', 'frames', or 'both'?:\n")
@@ -606,7 +607,6 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
         target_count = 1
         last_target_count = 1
         last_target_change_t = 0.0
-        k_or_guess = 1
         codebook=[]
         last_frame_entity_list = []
         frameC_announce=0
@@ -684,11 +684,6 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 				#Reset the last time it was printed. 
 				frameC_announce=frame_count
 				
-				##track time in minutes
-				#trackmin=(tracktime-start)/60
-				#timetogo=(trackmin / (fc/100))/60
-				#print( "Estimated hours remaining %.2f" % timetogo)
-				
                 ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
 		#set floor flag, we can't have negative accAVG
 		floor=0
@@ -701,7 +696,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 			
 			if frame_count % fift == 0:  
 				
-			       #If the total base is fift (15min window), then assuming 99% of images are junk the threshold should be
+			       #If the total base is fift (10min window), then assuming 99% of images are junk the threshold should be
 				#We've been counting frames output to file in the hitcounter
 				log_file.write(str(hitcounter) + "files written in last 10minutes" + "\n" )
 				print(str(hitcounter) + " files written in last 10minutes" + "\n" )		
@@ -731,7 +726,6 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 					#Write change to log file
 					log_file.write( file_destination + str(frame_count) + " accAvg is reset to: " + str(accAvg) + "\n" )
 
-		
                 # Create an image with interactive feedback:
                 display_image = camera_imageROI.copy()
                 
@@ -748,9 +742,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 # Use the Running Average as the static background                                       
                 cv2.accumulateWeighted(color_image,running_average_image,accAvg)                                  
                 running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
-                
-		mem_storage = cv.CreateMemStorage(0)
-		
+                		
                 #if vis: display("Running Average",5000,running_average_in_display_color_depth)                  
                 
                 # Subtract the current frame from the moving average.
@@ -834,20 +826,8 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                         # Only keep the box if it's not a tiny noise box:
 			#Relative to the entire frame, only keep box if its larger 
 			#than .001 of the frame, reduces the number of tiny blips
-                        if (box_width * box_height) > average_box_area*.3:
-				if (box_width * box_height) > (width * height) * (float(minSIZE)/100): 
-					trimmed_box_list.append( box )
-		
-		## If there are no boxes left at that size, skip to new frame
-		if len(trimmed_box_list) == 0:
-			toosmall=toosmall+1
-			noMotion=True			
-			continue
-		
-                ## Draw the trimmed box list:
-                #print(len(trimmed_box_list))
-                #for box in trimmed_box_list:
-		#	cv2.rectangle(camera_imageO, box[0], box[1], (0,255,0), 3 )
+                        if (box_width * box_height) > average_box_area*.3: 
+				trimmed_box_list.append( box )
 		
 		#if vis: display("trimmed_box",1000,display_image)
                 
@@ -857,20 +837,38 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                 except Exception, e:
                         print 'Error:',e
                         print 'Box Merge Fail:'
-                        continue                
+                        continue
+
+		size_filter_box=[]
+                for box in bounding_box_list:
+                        box_width = box[right][0] - box[left][0]
+                        box_height = box[bottom][0] - box[top][0]
+                        
+                        # Only keep the box if its larger than the user specified area
+                        if (box_width * box_height) > (width * height) * (float(minSIZE)/100):
+				size_filter_box.append(box)
+				
+		## If there are no boxes left at that size, skip to new frame
+		if len(size_filter_box) == 0:
+			toosmall=toosmall+1
+			noMotion=True			
+			continue		
                 # Draw the merged box list:
 		if todraw:
-			for box in bounding_box_list:
-				cv2.rectangle(camera_imageO, box[0], box[1], (0,255,0), 1 )			
-                
+			if ROI_include == "exclude":
+				for box in size_filter_box:
+					cv2.rectangle(camera_imageO, box[0], box[1], (0,255,0), 1 )			
+			else:
+				for box in size_filter_box:
+					cv2.rectangle(display_image, box[0], box[1], (0,255,0), 1 )		
+					
                 #if vis: display("merged_box",2000,display_image)
 		
 		##Experimental analysis, no filters yet: Find the segemented object that encompasses the motion pixels
-			##This uses canny edge detection to capture the whole animal, and would be the first step to size class detection
+		##This uses canny edge detection to capture the whole animal, and would be the first step to size class detection
 			
 		#if objectEdge:
 			#camera_imageO=motionContour(display_image,center_point,this_frame_entity_list,camera_imageO)
-
 
                 ## Draw the bullseye to screen:
                 #for entity in this_frame_entity_list:
@@ -880,16 +878,18 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                         #cv2.circle(camera_imageO, center_point, 10, (c[0], c[1], c[2]), 2)
                         #cv2.circle(camera_imageO, center_point,  5, (c[0], c[1], c[2]), 3)
                                                      
-                
                 ##################################################
                 #Write image to file
-                
-                if makeVID == "frames" or "both":
-			cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",camera_imageO)
+                ##################################################
 		
+                if makeVID == "frames" or "both":
+			if ROI_include == "exclude":
+				cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",camera_imageO)
+			else:
+				cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",display_image)
+
 		#Append to list
 		#motionFRAMES.append(camera_imageO)
-		
 		
 		#Log the frame count and the time in video, in case user wants to check in the original
 		#create a time object, this relies on the frame_rate being correct!
@@ -907,9 +907,9 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 		#set flag to motion
 		noMotion=False
 		
-######################################################################################################
+########################################
 ###Run Analysis on a Pool of videos
-######################################################################################################
+########################################
 if (runtype == "batch"):
         ##Overall destination
         
@@ -932,16 +932,16 @@ if (runtype == "batch"):
 			time.sleep(8)
                         print 'Error in Video:',vid
                 if makeVID:
-			videoM(vid)     
+			videoM(vid,makeVID)     
 
 ###If runtype is a single file - run file destination        
 if (runtype == "file"):
-	#try:
-	motion_frames=run(fP=inDEST,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt,scan=scan)
-	#except Exception, e:
-		#print( "Error %s " % e + "\n" )
-		#time.sleep(8)
-		#print 'Error in Video:',inDEST
+	try:
+		motion_frames=run(fP=inDEST,accAvg=accAvg,threshT=threshT,frame_rate=frame_rate,burnin=burnin,minSIZE=minSIZE,set_ROI=set_ROI,plotwatcher=plotwatcher,frameHIT=frameHIT,floorvalue=floorvalue,adapt=adapt,scan=scan)
+	except Exception, e:
+		print( "Error %s " % e + "\n" )
+		time.sleep(8)
+		print 'Error in Video:',inDEST
 		
 	if makeVID == "video" or "both":
 		videoM(inDEST)
