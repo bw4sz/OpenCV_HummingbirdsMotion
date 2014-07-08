@@ -29,7 +29,19 @@ import argparse
 
 #for py2exe needs manual
 from scipy.sparse.csgraph import _validation
-	
+
+#A sanitizer for floating variables
+
+def ask_acc():
+	in_accAvg=raw_input("Fixed accumulated averaging (accAvg) sensitivity to motion (0.35):\n")
+	if in_accAvg:
+		try:
+			out=float(in_accAvg)
+			return(out)
+		except Exception, e:
+			print( "Error: accAvg much be a numeric value not character." )
+			ask_acc()
+			
 if len(sys.argv)<2:
         print Usage
 else:
@@ -143,9 +155,8 @@ if(len(sys.argv)<=2):
 	adapt= 'y'==raw_input("Adapt the motion sensitivity based on hitrate?:\n")	
 		
 	if adapt:
-		accAvg=raw_input("Accumulated averaging (accAvg) sensitivity to motion starting value (0.35):\n")
+		accAvg=ask_acc()
 		if not accAvg: accAvg = 0.35
-		else: accAvg=float(accAvg)
 		
 		#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
 		frameHIT=raw_input("Expected percentage of frames with motion (decimal 0.01):\n")
@@ -157,10 +168,9 @@ if(len(sys.argv)<=2):
 		if not floorvalue: floorvalue = 0.05
 		else: floorvalue=float(floorvalue)
 	else:
-		accAvg=raw_input("Fixed accumulated averaging (accAvg) sensitivity to motion (0.35):\n")
+		accAvg=ask_acc()
 		if not accAvg: accAvg = 0.35
-		else: accAvg=float(accAvg)
-		
+
 		#set dummy variable for no adapt
 		floorvalue=0
 		frameHIT=0
@@ -205,7 +215,21 @@ if(len(sys.argv)<=2):
 	else: ROI_include='exclude'
 	
 	#make video by stringing the jpgs back into an avi
-	makeVID="y"==raw_input("Write output as 'video', 'frames', or 'both'?:\n")
+	makeVID=raw_input("Write output as 'video', 'frames', or 'both'?:\n")
+	if not makeVID: makeVID="frames"
+		
+#quick error check.
+
+if runtype=="file":
+	if os.path.isfile(inDEST): pass
+	else:
+		print("File path does not exist!")
+		time.sleep(2)
+else:
+	if os.path.isdir(batchpool): pass
+	else:
+		print("Directory does not exist!")
+		time.sleep(2)
 	
 ##Visualize the frames, this should only be used for testing!
 vis=False
@@ -289,6 +313,7 @@ def getint(name):
 
 #define video function
 #Find path of jpegs
+
 def videoM(x,makeVID):
 	normFP=os.path.normpath(x)
 	(filepath, filename)=os.path.split(normFP)
@@ -297,9 +322,11 @@ def videoM(x,makeVID):
 
 	#we want to name the output a folder from the output destination with the named extension 
 	if runtype == 'batch':
-		file_destination=os.path.join(fileD,IDFL,shortname+'.avi')
+		file_destination=os.path.join(fileD,IDFL)
+		file_destination=os.path.join(file_destination,shortname)
+		
         else:
-		file_destination=os.path.join(fileD,shortname+'.avi')
+		file_destination=os.path.join(fileD,shortname)
 
 	if fileD =='':
 		vidDEST=os.path.join(filepath, shortname,shortname +'.avi')
@@ -346,7 +373,7 @@ def videoM(x,makeVID):
 	# Release everything if job is finished
 	cap.release()
 	out.release()
-	
+
 	#If video only, delete jpegs
 	if makeVID == "video":
 		for f in jpgs:
