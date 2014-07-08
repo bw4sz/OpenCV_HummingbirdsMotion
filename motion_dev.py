@@ -297,9 +297,9 @@ def videoM(x,makeVID):
 
 	#we want to name the output a folder from the output destination with the named extension 
 	if runtype == 'batch':
-		file_destination=os.path.join(fileD,IDFL,shortname)
+		file_destination=os.path.join(fileD,IDFL,shortname+'.avi')
         else:
-		file_destination=os.path.join(fileD,shortname)
+		file_destination=os.path.join(fileD,shortname+'.avi')
 
 	if fileD =='':
 		vidDEST=os.path.join(filepath, shortname,shortname +'.avi')
@@ -562,12 +562,11 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 					roi.extend(roi_pts)
 					print(roi)
 					k=27
-			     
-		cv2.namedWindow("image", cv2.WINDOW_NORMAL)			
-		cv2.namedWindow('image')
+		cv2.namedWindow('image',cv2.CV_WINDOW_AUTOSIZE)
 		cv2.setMouseCallback('image',draw_circle)
 		
 		while(1):
+			cv2.namedWindow('image',cv2.CV_WINDOW_AUTOSIZE)			
 			cv2.imshow('image',orig)
 			k = cv2.waitKey(1) & 0xFF
 			if k == 27:
@@ -582,7 +581,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
 			orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]=255
 			display_image=orig_ROI
 		
-		display("newImage",2000,display_image)
+		display("newImageNORMAL",3000,display_image)
 		
 		
 	else:
@@ -605,9 +604,6 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
         difference =  display_image.copy()
         
         target_count = 1
-        last_target_count = 1
-        last_target_change_t = 0.0
-        codebook=[]
         last_frame_entity_list = []
         frameC_announce=0
 	
@@ -824,8 +820,6 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                         box_height = box[bottom][0] - box[top][0]
                         
                         # Only keep the box if it's not a tiny noise box:
-			#Relative to the entire frame, only keep box if its larger 
-			#than .001 of the frame, reduces the number of tiny blips
                         if (box_width * box_height) > average_box_area*.3: 
 				trimmed_box_list.append( box )
 		
@@ -917,7 +911,7 @@ if (runtype == "batch"):
         #Create Pool of Videos
         for (root, dirs, files) in os.walk(batchpool):
                 for files in files:
-                        if files.endswith(".TLV") or files.endswith(".AVI") or files.endswith(".MPG") or files.endswith(".mp4") or files.endswith(".MOD") or files.endswith(".MTS"):
+                        if files.endswith(".TLV") or files.endswith(".AVI") or files.endswith(".MPG") or files.endswith(".mp4") or files.endswith(".MOD") or files.endswith(".MTS") or files.endswith(".wmv") or files.endswith(".avi"):
                                 videoPool.append(os.path.join(root, files))
         
         for vid in videoPool:      
@@ -931,7 +925,7 @@ if (runtype == "batch"):
 			print( "Error %s " % e + "\n" )
 			time.sleep(8)
                         print 'Error in Video:',vid
-                if makeVID:
+                if makeVID == "video" or "both":
 			videoM(vid,makeVID)     
 
 ###If runtype is a single file - run file destination        
@@ -944,7 +938,7 @@ if (runtype == "file"):
 		print 'Error in Video:',inDEST
 		
 	if makeVID == "video" or "both":
-		videoM(inDEST)
+		videoM(inDEST,makeVID)
 				
 raw_input("Hit any key to exit:")	
 time.sleep(2)
