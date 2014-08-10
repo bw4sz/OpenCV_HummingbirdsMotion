@@ -39,6 +39,12 @@ bottom = 1
 left = 0
 right = 1
 
+BLUE = [255,0,0]        # rectangle color
+RED = [0,0,255]         # PR BG
+GREEN = [0,255,0]       # PR FG
+BLACK = [0,0,0]         # sure BG
+WHITE = [255,255,255]   # sure FG
+
 ##Visualize the frames, this should only be used for testing!
 vis=False
 
@@ -49,8 +55,10 @@ objectEdge=False
 #Start time
 start=time.time()
 
+
 #Set globals for mouse map, callback has unique syntax
 drawing = False # true if mouse is pressed
+drawing_area = False # true if mouse is pressed
 roi=[]  
 ix,iy = -1,-1
 #Global methods
@@ -110,8 +118,12 @@ def merge_collided_bboxes(bbox_list ):
                 return bbox_list   
 
 #Define reporting function to be called at the end of run
-def report(frame_count,log_file,total_count,nodiff,nocountr,toosmall,start):
-        
+def report(frame_count,log_file,total_count,nodiff,nocountr,toosmall,start,stamp,file_destination):
+        #Create log file
+        log_file_report = file_destination + "/" + "Parameters_Results.log"
+        log_report = file(log_file_report, 'a' )
+        #Print parameters
+
         #Ending time
         end=time.time()
         
@@ -122,22 +134,21 @@ def report(frame_count,log_file,total_count,nodiff,nocountr,toosmall,start):
         pfps=float(frame_count)/(total_min*60)
         
         ##Write to log file
-        
-        log_file.write("Total run time (min): %.2f \n " % total_min)
-        log_file.write("Average frames per second: %.2f \n " % pfps)
-        log_file.write(str(frame_count) + "Total frames in file:" + "\n" )
+        log_report.write("Total run time (min): %.2f \n " % total_min)
+        log_report.write("Average frames per second: %.2f \n " % pfps)
+        log_report.write(str(frame_count) + "Total frames in file:" + "\n" )
         
         #End of program, report some statistic to screen and log
         #log
-        log_file.write("\n \n Thank you for using MotionMeerkat! \n")
-        log_file.write("Candidate motion events: %.0f \n " % total_count )
-        log_file.write("Frames skipped due to AccAvg: %.0f \n " % nodiff)
-        log_file.write("Frames skipped due to Threshold: %.0f \n " % nocountr)
-        log_file.write("Frames skipped due to minSIZE: %.0f \n " % toosmall)
-        log_file.write("Total frames in files: %.0f \n " % frame_count)
+        log_report.write("\n \n Thank you for using MotionMeerkat! \n")
+        log_report.write("Candidate motion events: %.0f \n " % total_count )
+        log_report.write("Frames skipped due to AccAvg: %.0f \n " % nodiff)
+        log_report.write("Frames skipped due to Threshold: %.0f \n " % nocountr)
+        log_report.write("Frames skipped due to minSIZE: %.0f \n " % toosmall)
+        log_report.write("Total frames in files: %.0f \n " % frame_count)
         rate=float(total_count)/frame_count*100
-        log_file.write("Hitrate: %.2f %% \n" % rate)
-        log_file.write("Exiting")
+        log_report.write("Hitrate: %.2f %% \n" % rate)
+        log_report.write("Exiting")
         
         #print to screen
         print("Thank you for using MotionMeerkat! \n")
@@ -151,116 +162,63 @@ def report(frame_count,log_file,total_count,nodiff,nocountr,toosmall,start):
         
         rate=float(total_count)/frame_count*100
         print("Hitrate: %.2f %% \n" % rate)
-        
-#Read in system arguments if they exist
-if len(sys.argv)<2:
-        print Usage
-else:
-        parser = argparse.ArgumentParser()
-        parser.add_argument("--runtype", help="Batch or single file")
-        parser.add_argument("--batchpool", help="run directory of videos")
-        parser.add_argument("--inDEST", help="path of single video")
-        parser.add_argument("--fileD", help="output directory")
-        parser.add_argument("--adapt", help="Adaptive background averaging")
-        parser.add_argument("--accAvg", help="Fixed background averaging rate")
-        parser.add_argument("--frameHIT", help="expected percentage of motion frames")
-        parser.add_argument("--floorvalue", help="minimum background averaging")
-        parser.add_argument("--threshT", help="Threshold of movement")
-        parser.add_argument("--minSIZE", help="Minimum size of contour")
-        parser.add_argument("--burnin", help="Delay time")
-        parser.add_argument("--frameSET", help="Set frame_rate?")
-        parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true")
-        parser.add_argument("--frame_rate", help="frames per second")
-        parser.add_argument("--set_ROI", help="Set region of interest?")
-        parser.add_argument("--ROI_include", help="Include or exclude?")
-        parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?")
-        
-        
-        args = parser.parse_args()
-        print args
 
-        if args.runtype:
-                runtype=args.runtype
-        else:
-                runtype='file'
-        if args.batchpool:
-                batchpool=args.batchpool
-        if args.inDEST:
-                inDEST=args.inDEST
-        if args.fileD:
-                fileD=args.fileD
-        if(args.adapt):
-                adapt=args.adapt
-        else:
-                adapt=False
-        if args.accAvg:
-                accAvg=args.accAvg
-        else:
-                accAvg=0.35
-        if args.frameHIT:
-                frameHIT=args.frameHIT
-        else: 
-                frameHIT=0.01
-        if args.floorvalue:
-                floorvalue=args.floorvalue
-        else:
-                floorvalue=0.05
-        if args.threshT:
-                threshT=args.threshT
-        else:
-                threshT=20
-        if args.minSIZE:
-                minSIZE=args.minSIZE
-        else:
-                minSIZE=0.1
-        if args.burnin:
-                burnin=args.burnin
-        else: 
-                burnin=0
-        if args.frameSET:
-                frameSET=args.frameSET
-        else:
-                frameSET=False
-        if args.plotwatcher:
-                plotwatcher=args.plotwatcher
-        else:
-                plotwatcher=False
-        if args.frame_rate:
-                frame_rate=args.frame_rate
-        else:
-                frame_rate=0
-        if args.set_ROI:
-                set_ROI=args.set_ROI
-        else:
-                set_ROI=False
-        if args.ROI_include:
-                ROI_include=args.ROI_include
-        else:
-                ROI_include='exclude'
-        if args.makeVID:
-                makeVID=args.makeVID
-        else:
-                makeVID='frames'
+        #Write csv of time stamps and frame counts
+        #file name
+        time_stamp_report = file_destination + "/" + "Frames.csv"
+
+        with open(time_stamp_report, 'wb') as f:
+                writer = csv.writer(f)
+                writer.writerows(stamp)
         
-
-
-                        
+#define a display function
+def display(window,t,image):
+        cv2.namedWindow(window, cv2.WINDOW_NORMAL)
+        cv2.imshow(window,image)
+        cv2.waitKey(t)
+        cv2.destroyWindow(window)                        
 ###Create motion class with sensible defaults
 
 class Motion:
 
         def __init__(self,name):
                 self.name=name
+                #Empty dict for time stamps
+                self.stamp=[]
 
-        #A sanitizer for floating variables
-       
+#If there were system arguments
+                #Read in system arguments if they exist
+        if len(sys.argv)<2:
+                print Usage
+        else:
+                self.parser = argparse.ArgumentParser()
+                self.parser.add_argument("--runtype", help="Batch or single file",default='file')
+                self.parser.add_argument("--batchpool", help="run directory of videos")
+                self.parser.add_argument("--inDEST", help="path of single video")
+                self.parser.add_argument("--fileD", help="output directory")
+                self.parser.add_argument("--adapt", help="Adaptive background averaging",action='store_true',default=False)
+                self.parser.add_argument("--accAvg", help="Fixed background averaging rate",default=0.35,type=float)
+                self.parser.add_argument("--frameHIT", help="expected percentage of motion frames",default=0.1,type=float)
+                self.parser.add_argument("--floorvalue", help="minimum background averaging",default=0.01,type=float)
+                self.parser.add_argument("--threshT", help="Threshold of movement",default=20,type=int)
+                self.parser.add_argument("--minSIZE", help="Minimum size of contour",default=0.1,type=float)
+                self.parser.add_argument("--burnin", help="Delay time",default=0,type=int)
+                self.parser.add_argument("--frameSET", help="Set frame_rate?",action='store_true',default=False)
+                self.parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true",default=False)
+                self.parser.add_argument("--frame_rate", help="frames per second",default=0)
+                self.parser.add_argument("--set_ROI", help="Set region of interest?",action='store_true',default=False)
+                self.parser.add_argument("--ROI_include", help="Include or exclude?")
+                self.parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?",default='frames')
+                
+
+                args = parser.parse_args(namespace=self)
+                print args
                                 
         #########################################
         #Get user inputs if no system arguments
         #########################################
         def arguments(self):
                 if(len(sys.argv)<=2):
-                        
                         #Batch or single file
                         self.runtype=raw_input("'batch' run or single 'file'?:\n")   
                         
@@ -284,7 +242,7 @@ class Motion:
                                 #Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
                                 self.frameHIT=raw_input("Expected percentage of frames with motion (decimal 0.01):\n")
                                 if not self.frameHIT: self.frameHIT = 0.01
-                                else: self.frameHIT=float(frameHIT)
+                                else: self.frameHIT=float(self.frameHIT)
                                 
                                 #Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
                                 self.floorvalue=raw_input("Minimum allowed sensitivity (0.05):\n")
@@ -295,8 +253,8 @@ class Motion:
                                 if not self.accAvg: self.accAvg = 0.35
 
                                 #set dummy variable for no adapt
-                                floorvalue=0
-                                frameHIT=0
+                                self.floorvalue=0
+                                self.frameHIT=0
                                 
                         #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
                         self.threshT=raw_input("Threshold for movement tolerance\nranging from 0 [all] to 255 [no movement] (20):\n")
@@ -306,7 +264,7 @@ class Motion:
                         #minimum size - use with caution
                         self.minSIZE=raw_input("Minimum motion contour size (0.1):\n")
                         if not self.minSIZE: self.minSIZE = 0.1
-                        else: self.minSIZE=float(self.minSIZE)
+                        else: self.minSIZE=float(minSIZE)
                         
                         #Skip initial frames of video, in case of camera setup and shake.       
                         self.burnin= raw_input("Burn in, skip initial minutes of video (0):\n")
@@ -324,6 +282,7 @@ class Motion:
                         #Set frame rate?
                         if self.frameSET:
                                 self.frame_rate = raw_input("frames per second:\n")
+                                
                         else: self.frame_rate=0
                         
                         #There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean       
@@ -337,20 +296,13 @@ class Motion:
                         else: self.ROI_include='exclude'
                         
                         #make video by stringing the jpgs back into an avi
-                        self.makeVID=raw_input("Write output as 'video', 'frames', or 'both'?:\n")
+                        self.makeVID=raw_input("Write output as 'video', 'frames','both','none'?:\n")
                         if not self.makeVID: self.makeVID="frames"
-                
-
 
         ###########Inputs Read in #################
 
         
-        #define a display function
-        def display(self,window,t,image):
-                cv2.namedWindow(window, cv2.WINDOW_NORMAL)
-                cv2.imshow(window,image)
-                cv2.waitKey(t)
-                cv2.destroyWindow(window)
+
                 
         #define a sorting function
         def getint(self,name):
@@ -572,33 +524,41 @@ class Motion:
                 #make a copy of the image
                 orig_ROI=orig.copy()
 
+                #make a copy for the markup
+                iorig=orig.copy()    
+
                 #Set region of interest 
                 if self.set_ROI:
-                        
-                        # mouse callback function
-                        def draw_circle(event,x,y,flags,param):
-                                global ix,iy,mode,roi,drawing
-                                if event == cv2.EVENT_LBUTTONDOWN:
-                                        drawing = True
-                                        ix,iy = x,y
-                        
-                                elif event == cv2.EVENT_MOUSEMOVE:
-                                        if drawing == True:
-                                                cv2.rectangle(orig,(ix,iy),(x,y),(0,255,0),-2)
-                        
-                                elif event == cv2.EVENT_LBUTTONUP:
-                                                drawing = False
-                                                box=cv2.rectangle(orig,(ix,iy),(x,y),(0,255,0),-2)
-                                                roi_pts=ix,iy,x,y
-                                                roi.extend(roi_pts)
-                                                print(roi)
-                                                k=27
+
+                        #make a copy of the image.
+
+                        def onmouse(event,x,y,flags,param):
+                            global ix,iy,roi,drawing
+
+                            # Draw Rectangle
+                            if event == cv2.EVENT_RBUTTONDOWN:
+                                drawing = True
+                                ix,iy = x,y
+
+                            elif event == cv2.EVENT_MOUSEMOVE:
+                                if drawing == True:
+                                    cv2.rectangle(iorig,(ix,iy),(x,y),BLUE,-1)
+                                    rect = (ix,iy,abs(ix-x),abs(iy-y))
+
+                            elif event == cv2.EVENT_RBUTTONUP:
+                                drawing = False
+                                cv2.rectangle(iorig,(ix,iy),(x,y),BLUE,-1)
+                                rect = (ix,iy,abs(ix-x),abs(iy-y))
+                                roi.extend(rect)
+
+
                         cv2.namedWindow('image',cv2.CV_WINDOW_AUTOSIZE)
-                        cv2.setMouseCallback('image',draw_circle)
-                        
+                        cv2.setMouseCallback('image',onmouse)
+
+                        print ("Please draw a single rectangle using right click!")
                         while(1):
-                                cv2.namedWindow('image',cv2.CV_WINDOW_AUTOSIZE)                 
-                                cv2.imshow('image',orig)
+                                cv2.namedWindow('image')                 
+                                cv2.imshow('image',iorig)
                                 k = cv2.waitKey(1) & 0xFF
                                 if k == 27:
                                         break
@@ -620,8 +580,50 @@ class Motion:
                         
                 width = np.size(display_image, 1)
                 height = np.size(display_image, 0)
-                frame_size=(width, height)      
-                
+                frame_size=(width, height)
+
+                ###If set area counter, draw another box.
+                area_box=[]
+                self.set_areacounter=True
+                if self.set_areacounter:
+                        
+                        def onmouse(event,x,y,flags,param):
+                            global ix,iy,mode,roi,drawing
+
+                            # Draw Rectangle
+                            if event == cv2.EVENT_RBUTTONDOWN:
+                                drawing = True
+                                ix,iy = x,y
+
+                            elif event == cv2.EVENT_MOUSEMOVE:
+                                if drawing == True:
+                                    cv2.rectangle(orig,(ix,iy),(x,y),BLUE,-1)
+                                    rect = (ix,iy,abs(ix-x),abs(iy-y))
+
+                            elif event == cv2.EVENT_RBUTTONUP:
+                                drawing = False
+                                cv2.rectangle(orig,(ix,iy),(x,y),BLUE,-1)
+                                rect = (ix,iy,abs(ix-x),abs(iy-y))
+                                area_box.extend(rect)
+
+
+                        cv2.namedWindow('image',cv2.CV_WINDOW_AUTOSIZE)
+                        cv2.setMouseCallback('image',onmouse)
+                        print ("Please draw a single rectangle using right click!")
+
+                        while(1):
+                                cv2.namedWindow('image',cv2.CV_WINDOW_AUTOSIZE)                 
+                                cv2.imshow('image',orig)
+                                k = cv2.waitKey(1) & 0xFF
+                                if k == 27:
+                                        break
+                        
+                        cv2.destroyAllWindows()
+                        
+                #Draw and show the area to count inside
+                cv2.rectangle(orig, (area_box[1],area_box[3]), (area_box[0],area_box[2]), (255,0,0), 1)
+                        
+                display("Area counter",4000,orig)
                 # Greyscale image, thresholded to create the motion mask:
                 grey_image = np.uint8(display_image)
                 
@@ -674,7 +676,7 @@ class Motion:
                         # Capture frame from file
                         ret,camera_imageO = cap.read()
                         if not ret:
-                                report(frame_count,log_file,total_count,nodiff,nocountr,toosmall,start)
+                                report(frame_count,log_file,total_count,nodiff,nocountr,toosmall,start,self.stamp,file_destination)
                                 return(motionFRAMES)
                                       
                         #Cut off the bottom 5% if the plotwatcher option is called. 
@@ -731,7 +733,6 @@ class Motion:
                                         
                                        #If the total base is fift (10min window), then assuming 99% of images are junk the threshold should be
                                         #We've been counting frames output to file in the hitcounter
-                                        log_file.write(str(hitcounter) + "files written in last 10minutes" + "\n" )
                                         print(str(hitcounter) + " files written in last 10minutes" + "\n" )             
                                         if hitcounter > (fift*frameHIT) :
                                                 accAvg = accAvg + .05
@@ -742,7 +743,6 @@ class Motion:
                                         print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg) + "\n")
                                         
                                         #Write change to log file
-                                        log_file.write( file_destination + str(frame_count) + " accAvg is changed to: " + str(self.accAvg) + "\n" )
                                         
                                         #reset hitcoutner for another fifteen minutes
                                         hitcounter=0
@@ -757,7 +757,6 @@ class Motion:
 
                                                 print(file_destination + str(frame_count) + " accAvg is reset to: " + str(self.accAvg))
                                                 #Write change to log file
-                                                log_file.write( file_destination + str(frame_count) + " accAvg is reset to: " + str(accAvg) + "\n" )
 
                         # Create an image with interactive feedback:
                         display_image = camera_imageROI.copy()
@@ -910,24 +909,24 @@ class Motion:
                         #Write image to file
                         ##################################################
                         
-                        if self.makeVID == "frames" or "both":
-                                if self.ROI_include == "exclude":
-                                        cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",camera_imageO)
-                                else:
-                                        cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",display_image)
+                        if not self.makeVID == "none":
+                                if self.makeVID == "frames" or "both":
+                                        if self.ROI_include == "exclude":
+                                                cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",camera_imageO)
+                                        else:
+                                                cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",display_image)
 
-                        #Append to list
-                        #motionFRAMES.append(camera_imageO)
                         
-                        #Log the frame count and the time in video, in case user wants to check in the original
+                        #save the frame count and the time in video, in case user wants to check in the original
                         #create a time object, this relies on the frame_rate being correct!
                         #set seconds
                         sec = timedelta(seconds=int(frame_count/float(frame_rate)))             
                         d = datetime(1,1,1) + sec
-                        log_file.write( "%d %d:%d:%d " % ( int(frame_count), d.hour,d.minute, d.second) + "\n" )
-                        #If a file has been written, flush the log to read
-                        #sys.stdout.flush()
-                        
+
+                        #self.stamp.append(str( "%d %d:%d:%d " % ( int(frame_count), d.hour,d.minute, d.second)))
+                        stampadd=(str("%d:%d:%d "  % (d.hour,d.minute, d.second)), int(frame_count))
+                        self.stamp.append(stampadd)
+
                         ##################################################
                         #Have a returned counter to balance hitRate
                         hitcounter=hitcounter+1
@@ -973,8 +972,8 @@ class Motion:
                                         print( "Error %s " % e + "\n" )
                                         time.sleep(8)
                                         print 'Error in Video:',vid
-                                if self.makeVID == "video" or "both":
-                                        videoM(self.vid,self.makeVID)     
+                                if self.makeVID == "video":
+                                        videoM(self.vid,self.makeVID)
 
                 ###If runtype is a single file - run file destination        
                 if (self.runtype == "file"):
@@ -984,10 +983,9 @@ class Motion:
                                 print( "Error %s " % e + "\n" )
                                 print 'Error in Video:',self.inDEST
                                 
-                        if not self.makeVID == 'frames':
-                                self.videoM(self.inDEST,self.makeVID)
+                        #if self.makeVID == "video":
+                                #self.videoM(self.inDEST,self.makeVID)
                                         
-
 
 if __name__ == "__main__":
         while True:
@@ -996,12 +994,10 @@ if __name__ == "__main__":
                 motionVid.wrap()
 
                 #reboot or exit?
-                print 'Press any key to restart, ESC to exit'
-                #This is still not working!!
-                ch = 0xFF & cv2.waitKey()
-                print ch
-                if ch == 27:
-                    break
+                ch=raw_input("Press r to reboot, press any key to exit \n")
+                if ch=='r':
+                    continue
                 break
+                
 
 
