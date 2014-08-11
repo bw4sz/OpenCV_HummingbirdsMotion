@@ -820,7 +820,7 @@ def run(fP,accAvg,threshT,frame_rate,burnin,minSIZE,set_ROI,plotwatcher,frameHIT
                         #display("contours", 2000, drawing)
                 
                 for cnt in contours:
-                        
+                        print(cnt)
                         bounding_rect = cv2.boundingRect( cnt )
                         point1 = ( bounding_rect[0], bounding_rect[1] )
                         point2 = ( bounding_rect[0] + bounding_rect[2], bounding_rect[1] + bounding_rect[3] )

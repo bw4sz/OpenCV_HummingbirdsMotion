@@ -118,58 +118,7 @@ def merge_collided_bboxes(bbox_list ):
                 return bbox_list   
 
 #Define reporting function to be called at the end of run
-def report(frame_count,log_file,total_count,nodiff,nocountr,toosmall,start,stamp,file_destination):
-        #Create log file
-        log_file_report = file_destination + "/" + "Parameters_Results.log"
-        log_report = file(log_file_report, 'a' )
-        #Print parameters
 
-        #Ending time
-        end=time.time()
-        
-        #total_time()
-        total_min=(end-start)/60
-        
-        #processed frames per second
-        pfps=float(frame_count)/(total_min*60)
-        
-        ##Write to log file
-        log_report.write("Total run time (min): %.2f \n " % total_min)
-        log_report.write("Average frames per second: %.2f \n " % pfps)
-        log_report.write(str(frame_count) + "Total frames in file:" + "\n" )
-        
-        #End of program, report some statistic to screen and log
-        #log
-        log_report.write("\n \n Thank you for using MotionMeerkat! \n")
-        log_report.write("Candidate motion events: %.0f \n " % total_count )
-        log_report.write("Frames skipped due to AccAvg: %.0f \n " % nodiff)
-        log_report.write("Frames skipped due to Threshold: %.0f \n " % nocountr)
-        log_report.write("Frames skipped due to minSIZE: %.0f \n " % toosmall)
-        log_report.write("Total frames in files: %.0f \n " % frame_count)
-        rate=float(total_count)/frame_count*100
-        log_report.write("Hitrate: %.2f %% \n" % rate)
-        log_report.write("Exiting")
-        
-        #print to screen
-        print("Thank you for using MotionMeerkat! \n")
-        print("Total run time (min): %.2f \n " % total_min)
-        print("Average frames processed per second: %.2f \n " % pfps)   
-        print("Candidate motion events: %.0f \n " % total_count )
-        print("Frames skipped due to AccAvg: %.0f \n " % nodiff)
-        print("Frames skipped due to Threshold: %.0f \n " % nocountr)
-        print("Frames skipped due to minSIZE: %.0f \n " % toosmall)
-        print("Total frames in files: %.0f \n " % frame_count)
-        
-        rate=float(total_count)/frame_count*100
-        print("Hitrate: %.2f %% \n" % rate)
-
-        #Write csv of time stamps and frame counts
-        #file name
-        time_stamp_report = file_destination + "/" + "Frames.csv"
-
-        with open(time_stamp_report, 'wb') as f:
-                writer = csv.writer(f)
-                writer.writerows(stamp)
         
 #define a display function
 def display(window,t,image):
@@ -183,8 +132,11 @@ class Motion:
 
         def __init__(self,name):
                 self.name=name
-                #Empty dict for time stamps
+                #Empty list for time stamps
                 self.stamp=[]
+
+                #Empty list for area counter
+                self.areaC=[]
 
 #If there were system arguments
                 #Read in system arguments if they exist
@@ -221,16 +173,18 @@ class Motion:
                 if(len(sys.argv)<=2):
                         #Batch or single file
                         self.runtype=raw_input("'batch' run or single 'file'?:\n")   
-                        
+                        if not self.runtype: self.runtype="file"
                         if(self.runtype=="file"):
                                 self.inDEST=raw_input("Enter video input:\n")
+                                if not self.inDEST: self.inDEST = "C:/Program Files/MotionMeerkat/data/PlotwatcherTest.tlv"
                         
                         if(self.runtype=="batch"):
                                 self.batchpool=raw_input("Enter folder containing videos:\n")
                         
                         #Destination of file
                         self.fileD=raw_input("File Destination Folder:\n")   
-                        
+                        if not self.fileD: self.fileD = "C:/MotionMeerkat/"
+
                         #Sensitivity to movement
                         #Should accAVG be adapted every 10minutes based on an estimated hitrate
                         self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on hitrate?:\n")      
@@ -313,7 +267,7 @@ class Motion:
         #define video function
         #Find path of jpegs
 
-        def videoM(self,x,makeVID):
+        def videoM(x,makeVID):
                 normFP=os.path.normpath(x)
                 (filepath, filename)=os.path.split(normFP)
                 (shortname, extension) = os.path.splitext(filename)
@@ -548,7 +502,7 @@ class Motion:
                             elif event == cv2.EVENT_RBUTTONUP:
                                 drawing = False
                                 cv2.rectangle(iorig,(ix,iy),(x,y),BLUE,-1)
-                                rect = (ix,iy,abs(ix-x),abs(iy-y))
+                                rect = (ix,iy,x,y)
                                 roi.extend(rect)
 
 
@@ -557,7 +511,7 @@ class Motion:
 
                         print ("Please draw a single rectangle using right click!")
                         while(1):
-                                cv2.namedWindow('image')                 
+                                cv2.namedWindow('image',cv2.CV_WINDOW_AUTOSIZE)                 
                                 cv2.imshow('image',iorig)
                                 k = cv2.waitKey(1) & 0xFF
                                 if k == 27:
@@ -620,10 +574,10 @@ class Motion:
                         
                         cv2.destroyAllWindows()
                         
-                #Draw and show the area to count inside
-                cv2.rectangle(orig, (area_box[1],area_box[3]), (area_box[0],area_box[2]), (255,0,0), 1)
+                        #Draw and show the area to count inside
+                        cv2.rectangle(orig, (area_box[1],area_box[3]), (area_box[0],area_box[2]), (255,0,0), 1)     
+                        display("Area counter",2000,orig)
                         
-                display("Area counter",4000,orig)
                 # Greyscale image, thresholded to create the motion mask:
                 grey_image = np.uint8(display_image)
                 
@@ -676,7 +630,14 @@ class Motion:
                         # Capture frame from file
                         ret,camera_imageO = cap.read()
                         if not ret:
-                                report(frame_count,log_file,total_count,nodiff,nocountr,toosmall,start,self.stamp,file_destination)
+                                #finalize the counters for reporting
+                                self.frame_count=frame_count
+                                self.total_count=total_count
+                                self.nodiff=nodiff
+                                self.nocountr=nocountr
+                                self.toosmall=toosmall
+                                self.start=start
+                                self.file_destination=file_destination
                                 return(motionFRAMES)
                                       
                         #Cut off the bottom 5% if the plotwatcher option is called. 
@@ -826,7 +787,6 @@ class Motion:
                                 #display("contours", 2000, drawing)
                         
                         for cnt in contours:
-                                
                                 bounding_rect = cv2.boundingRect( cnt )
                                 point1 = ( bounding_rect[0], bounding_rect[1] )
                                 point2 = ( bounding_rect[0] + bounding_rect[2], bounding_rect[1] + bounding_rect[3] )
@@ -897,14 +857,34 @@ class Motion:
                         #if objectEdge:
                                 #camera_imageO=motionContour(display_image,center_point,this_frame_entity_list,camera_imageO)
 
-                        ## Draw the bullseye to screen:
-                        #for entity in this_frame_entity_list:
-                                #center_point = entity[3]
-                                #c = entity[1]  # RGB color tuple
-                                #cv2.circle(camera_imageO, center_point, 15, (c[0], c[1], c[2]), 1)
-                                #cv2.circle(camera_imageO, center_point, 10, (c[0], c[1], c[2]), 2)
-                                #cv2.circle(camera_imageO, center_point,  5, (c[0], c[1], c[2]), 3)
-                                                             
+                        #Bounding center
+                        bound_center=[]
+                        ###Get center of the motion contour
+                        
+                        for box in size_filter_box:
+                                mean_x=int(mean((box[0][0],box[1][0])))
+                                mean_y=int(mean((box[0][1],box[1][1])))
+                                bound_center.append((mean_x,mean_y))
+
+                        #Set flag for inside area
+                                inside_area=False
+                        if self.set_areacounter:
+                        #test drawing center circle
+                                for box in bound_center:
+                                        
+                                        #cv2.circle(camera_imageO,box,5,(255, 255, 0), 3)
+                                        #Do this the simple way for now
+                                     
+
+                                        #is the x coordinate within
+                                        if area_box[2] > box[0] > area_box[0]:
+                                                if area_box[3] > box[1] > area_box[1]:
+                                                                inside_area=invert(inside_area)
+                                
+                                        
+
+        
+
                         ##################################################
                         #Write image to file
                         ##################################################
@@ -927,6 +907,11 @@ class Motion:
                         stampadd=(str("%d:%d:%d "  % (d.hour,d.minute, d.second)), int(frame_count))
                         self.stamp.append(stampadd)
 
+                        #if inside area and counter is on, write stamp to a seperate file
+                        if self.set_areacounter & inside_area:
+                                                        self.areaC.append(stampadd)
+                             
+                                
                         ##################################################
                         #Have a returned counter to balance hitRate
                         hitcounter=hitcounter+1
@@ -972,19 +957,77 @@ class Motion:
                                         print( "Error %s " % e + "\n" )
                                         time.sleep(8)
                                         print 'Error in Video:',vid
-                                if self.makeVID == "video":
-                                        videoM(self.vid,self.makeVID)
+                                #if self.makeVID == "video":
+                                        #videoM(self.vid,self.makeVID)
 
                 ###If runtype is a single file - run file destination        
                 if (self.runtype == "file"):
+
                         try:
                                 motion_frames=self.run()
                         except Exception, e:
                                 print( "Error %s " % e + "\n" )
-                                print 'Error in Video:',self.inDEST
+                                print 'Error in input file:',self.inDEST
                                 
                         #if self.makeVID == "video":
                                 #self.videoM(self.inDEST,self.makeVID)
+        def report(self):
+                #Create log file
+                log_file_report = self.file_destination + "/" + "Parameters_Results.log"
+                log_report = file(log_file_report, 'a' )
+                #Print parameters
+
+                #Ending time
+                end=time.time()
+
+                #total_time()
+                total_min=(end-self.start)/60
+
+                #processed frames per second
+                pfps=float(self.frame_count)/(total_min*60)
+
+                ##Write to log file
+                log_report.write("Total run time (min): %.2f \n " % total_min)
+                log_report.write("Average frames per second: %.2f \n " % pfps)
+                log_report.write(str(self.frame_count) + "Total frames in file:" + "\n" )
+
+                #End of program, report some statistic to screen and log
+                #log
+                log_report.write("\n \n Thank you for using MotionMeerkat! \n")
+                log_report.write("Candidate motion events: %.0f \n " % self.total_count )
+                log_report.write("Frames skipped due to AccAvg: %.0f \n " % self.nodiff)
+                log_report.write("Frames skipped due to Threshold: %.0f \n " % self.nocountr)
+                log_report.write("Frames skipped due to minSIZE: %.0f \n " % self.toosmall)
+                log_report.write("Total frames in files: %.0f \n " % self.frame_count)
+                rate=float(self.total_count)/self.frame_count*100
+                log_report.write("Hitrate: %.2f %% \n" % rate)
+                log_report.write("Exiting")
+
+                #print to screen
+                print("Thank you for using MotionMeerkat! \n")
+                print("Total run time (min): %.2f \n " % total_min)
+                print("Average frames processed per second: %.2f \n " % pfps)   
+                print("Candidate motion events: %.0f \n " % self.total_count )
+                print("Frames skipped due to AccAvg: %.0f \n " % self.nodiff)
+                print("Frames skipped due to Threshold: %.0f \n " % self.nocountr)
+                print("Frames skipped due to minSIZE: %.0f \n " % self.toosmall)
+                print("Total frames in files: %.0f \n " % self.frame_count)
+
+                rate=float(self.total_count)/self.frame_count*100
+                print("Hitrate: %.2f %% \n" % rate)
+
+                #Write csv of time stamps and frame counts
+                #file name
+                time_stamp_report = self.file_destination + "/" + "Frames.csv"
+
+                with open(time_stamp_report, 'wb') as f:
+                        writer = csv.writer(f)
+                        writer.writerows(self.stamp)
+                if self.set_areacounter:
+                        area_report = self.file_destination + "/" + "AreaCounter.csv"
+                        with open(area_report, 'wb') as f:
+                                writer = csv.writer(f)
+                                writer.writerows(self.areaC)
                                         
 
 if __name__ == "__main__":
@@ -992,8 +1035,12 @@ if __name__ == "__main__":
                 motionVid=Motion("video")
                 motionVid.arguments()
                 motionVid.wrap()
+                motionVid.report()
 
                 #reboot or exit?
+                #if system arguments, immediately exit
+                if len(sys.argv)>2:
+                        break
                 ch=raw_input("Press r to reboot, press any key to exit \n")
                 if ch=='r':
                     continue
