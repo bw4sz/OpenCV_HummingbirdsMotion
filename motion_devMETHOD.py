@@ -960,26 +960,26 @@ class Motion:
 
                 #Print parameters
                 #Batch or single file
-                log_report.write("Run type: %s" % self.runtype)
+                log_report.write("\nRun type: %s" % self.runtype)
                 if self.runtype=="file":
-                        log_report.write("Input file path: %s" % self.fileD)
+                        log_report.write("\nInput file path: %s" % self.fileD)
                 else:
-                        log_report.write("Input file path: %s" % self.batchpool)
-                log_report.write("Output dir: %s" % self.inDEST)
-                log_report.write("Adapt accAvg? %s" % self.adapt)
+                        log_report.write("\nInput file path: %s" % self.batchpool)
+                log_report.write("\nOutput dir: %s" % self.inDEST)
+                log_report.write("\nAdapt accAvg? %s" % self.adapt)
                 if self.adapt:
-                        log_report.write("Expected hitrate: %s" % self.frameHIT)
-                        log_report.write("Minimum accAvg: %s" % self.floorvalue)
-                log_report.write("Threshold %s" % self.threshT)
-                log_report.write("Minimum contour area: %s" % self.minSIZE)
-                log_report.write("Burnin: %s" % self.burnin)
-                log_report.write("Scan frames: %s" % self.scan)
+                        log_report.write("\nExpected hitrate: %s" % self.frameHIT)
+                        log_report.write("\nMinimum accAvg: %s" % self.floorvalue)
+                log_report.write("\nThreshold %s" % self.threshT)
+                log_report.write("\nMinimum contour area: %s" % self.minSIZE)
+                log_report.write("\nBurnin: %s" % self.burnin)
+                log_report.write("\nScan frames: %s" % self.scan)
                 if self.frameSET:
-                        log_report.write("Manual framerate: %s" % self.frame_rate)
+                        log_report.write("\nManual framerate: %s" % self.frame_rate)
                 if self.set_ROI:
-                        log_report.write("Set ROI: %s" % self.ROI_include)
-                log_report.write("Area counter?: %s" % self.set_areacounter)
-                log_report.write("Output type?: %s" % self.makeVID)
+                        log_report.write("\nSet ROI: %s" % self.ROI_include)
+                log_report.write("\nArea counter?: %s" % self.set_areacounter)
+                log_report.write("\nOutput type?: %s" % self.makeVID)
 
                 #Ending time
                 end=time.time()
@@ -993,7 +993,6 @@ class Motion:
                 ##Write to log file
                 log_report.write("Total run time (min): %.2f \n " % total_min)
                 log_report.write("Average frames per second: %.2f \n " % pfps)
-                log_report.write(str(self.frame_count) + "Total frames in file:" + "\n" )
 
                 #End of program, report some statistic to screen and log
                 #log
