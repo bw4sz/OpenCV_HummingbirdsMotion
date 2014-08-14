@@ -111,9 +111,6 @@ def merge_collided_bboxes(bbox_list ):
                 
                 # When there are no collions between boxes, return that list:
                 return bbox_list   
-
-#Define reporting function to be called at the end of run
-
         
 #define a display function
 def display(window,t,image):
@@ -161,9 +158,8 @@ class Motion:
                        self.parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?",default='frames')
                        self.args = self.parser.parse_args(namespace=self)
 
-                       print "/n" 
-                       print self.args
-                       print "/n"
+                       print "\n"
+                       print "\n"
                                 
         #########################################
         #Get user inputs if no system arguments
@@ -963,30 +959,27 @@ class Motion:
                 log_report = file(log_file_report, 'a' )
 
                 #Print parameters
-                if len(sys.argv) > 2:
-                        log_report.write(str(self.args))
-                if len(sys.argv) < 2:
-                        #Batch or single file
-                        log_report.write("Run type: %s" % self.runtype)
-                        if runtype=="file":
-                                log_report.write("Input file path: %s" % self.fileD)
-                        else:
-                                log_report.write("Input file path: %s" % self.batchpool)
-                        log_report.write("Output dir: %s" % self.inDEST)
-                        log_report.write("Adapt accAvg? %s" % self.adapt)
-                        if self.adapt:
-                                log_report.write("Expected hitrate: %s" % self.frameHIT)
-                                log_report.write("Minimum accAvg: %s" % self.floorvalue)
-                        log_report.write("Threshold %s" % self.threshT)
-                        log_report.write("Minimum contour area: %s" % self.minSIZE)
-                        log_report.write("Burnin: %s" % self.burnin)
-                        log_report.write("Scan frames: %s" % self.scan)
-                        if self.frameSET:
-                                log_report.write("Manual framerate: %s" % self.frame_rate)
-                        if self.set_ROI:
-                                log_report.write("Set ROI: %s" % self.ROI_include)
-                        log_report.write("Area counter?: %s" % self.set_areacounter)
-                        log_report.write("Output type?: %s" % self.self.makeVID)
+                #Batch or single file
+                log_report.write("Run type: %s" % self.runtype)
+                if self.runtype=="file":
+                        log_report.write("Input file path: %s" % self.fileD)
+                else:
+                        log_report.write("Input file path: %s" % self.batchpool)
+                log_report.write("Output dir: %s" % self.inDEST)
+                log_report.write("Adapt accAvg? %s" % self.adapt)
+                if self.adapt:
+                        log_report.write("Expected hitrate: %s" % self.frameHIT)
+                        log_report.write("Minimum accAvg: %s" % self.floorvalue)
+                log_report.write("Threshold %s" % self.threshT)
+                log_report.write("Minimum contour area: %s" % self.minSIZE)
+                log_report.write("Burnin: %s" % self.burnin)
+                log_report.write("Scan frames: %s" % self.scan)
+                if self.frameSET:
+                        log_report.write("Manual framerate: %s" % self.frame_rate)
+                if self.set_ROI:
+                        log_report.write("Set ROI: %s" % self.ROI_include)
+                log_report.write("Area counter?: %s" % self.set_areacounter)
+                log_report.write("Output type?: %s" % self.makeVID)
 
                 #Ending time
                 end=time.time()
