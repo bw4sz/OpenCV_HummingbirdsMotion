@@ -40,10 +40,6 @@ left = 0
 right = 1
 
 BLUE = [255,0,0]        # rectangle color
-RED = [0,0,255]         # PR BG
-GREEN = [0,255,0]       # PR FG
-BLACK = [0,0,0]         # sure BG
-WHITE = [255,255,255]   # sure FG
 
 ##Visualize the frames, this should only be used for testing!
 vis=False
@@ -54,7 +50,6 @@ objectEdge=False
 
 #Start time
 start=time.time()
-
 
 #Set globals for mouse map, callback has unique syntax
 drawing = False # true if mouse is pressed
@@ -138,33 +133,37 @@ class Motion:
                 #Empty list for area counter
                 self.areaC=[]
 
-#If there were system arguments
-                #Read in system arguments if they exist
-        if len(sys.argv)<2:
-                print Usage
-        else:
+        #If there were system arguments
                 self.parser = argparse.ArgumentParser()
-                self.parser.add_argument("--runtype", help="Batch or single file",default='file')
-                self.parser.add_argument("--batchpool", help="run directory of videos")
-                self.parser.add_argument("--inDEST", help="path of single video")
-                self.parser.add_argument("--fileD", help="output directory")
-                self.parser.add_argument("--adapt", help="Adaptive background averaging",action='store_true',default=False)
-                self.parser.add_argument("--accAvg", help="Fixed background averaging rate",default=0.35,type=float)
-                self.parser.add_argument("--frameHIT", help="expected percentage of motion frames",default=0.1,type=float)
-                self.parser.add_argument("--floorvalue", help="minimum background averaging",default=0.01,type=float)
-                self.parser.add_argument("--threshT", help="Threshold of movement",default=20,type=int)
-                self.parser.add_argument("--minSIZE", help="Minimum size of contour",default=0.1,type=float)
-                self.parser.add_argument("--burnin", help="Delay time",default=0,type=int)
-                self.parser.add_argument("--frameSET", help="Set frame_rate?",action='store_true',default=False)
-                self.parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true",default=False)
-                self.parser.add_argument("--frame_rate", help="frames per second",default=0)
-                self.parser.add_argument("--set_ROI", help="Set region of interest?",action='store_true',default=False)
-                self.parser.add_argument("--ROI_include", help="Include or exclude?")
-                self.parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?",default='frames')
-                
 
-                args = parser.parse_args(namespace=self)
-                print args
+                #Read in system arguments if they exist
+                if len(sys.argv)<2:
+                        print Usage
+                else:
+                       self.parser.add_argument("--runtype", help="Batch or single file",default='file')
+                       self.parser.add_argument("--batchpool", help="run directory of videos")
+                       self.parser.add_argument("--inDEST", help="path of single video",default="C:/Program Files/MotionMeerkat/data/PlotwatcherTest.tlv")
+                       self.parser.add_argument("--fileD", help="output directory",default="C:/MotionMeerkat")
+                       self.parser.add_argument("--adapt", help="Adaptive background averaging",action='store_true',default=False)
+                       self.parser.add_argument("--accAvg", help="Fixed background averaging rate",default=0.35,type=float)
+                       self.parser.add_argument("--frameHIT", help="expected percentage of motion frames",default=0.1,type=float)
+                       self.parser.add_argument("--floorvalue", help="minimum background averaging",default=0.01,type=float)
+                       self.parser.add_argument("--threshT", help="Threshold of movement",default=20,type=int)
+                       self.parser.add_argument("--minSIZE", help="Minimum size of contour",default=0.1,type=float)
+                       self.parser.add_argument("--burnin", help="Delay time",default=0,type=int)
+                       self.parser.add_argument("--scan", help="Scan one of every X frames for motion",default=0,type=int)
+                       self.parser.add_argument("--frameSET", help="Set frame_rate?",action='store_true',default=False)
+                       self.parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true",default=False)
+                       self.parser.add_argument("--frame_rate", help="frames per second",default=0)
+                       self.parser.add_argument("--set_ROI", help="Set region of interest?",action='store_true',default=False)
+                       self.parser.add_argument("--ROI_include", help="include or exclude?",default="include")
+                       self.parser.add_argument("--set_areacounter", help="Set region to count area",action="store_true",default=False)
+                       self.parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?",default='frames')
+                       self.args = self.parser.parse_args(namespace=self)
+
+                       print "/n" 
+                       print self.args
+                       print "/n"
                                 
         #########################################
         #Get user inputs if no system arguments
@@ -215,7 +214,7 @@ class Motion:
                         if not self.threshT: self.threshT = 20
                         else: self.threshT=float(self.threshT)
                         
-                        #minimum size - use with caution
+                        #minimum size of contour object
                         self.minSIZE=raw_input("Minimum motion contour size (0.1):\n")
                         if not self.minSIZE: self.minSIZE = 0.1
                         else: self.minSIZE=float(minSIZE)
@@ -230,10 +229,10 @@ class Motion:
                         if not self.scan: self.scan = 0
                         else: self.scan=int(self.scan)
                         
-                        #Manually set framerate
+                        #Manually set framerate?
                         self.frameSET= "y" == raw_input("Set frame rate in fps?:\n")
                         
-                        #Set frame rate?
+                        #Set frame rate.
                         if self.frameSET:
                                 self.frame_rate = raw_input("frames per second:\n")
                                 
@@ -248,16 +247,16 @@ class Motion:
                         if self.set_ROI:
                                 self.ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'?:\n")
                         else: self.ROI_include='exclude'
-                        
+
+                        #Create area counter by highlighting a section of frame
+                        self.set_areacounter='y'==raw_input("Highlight region for area count? \n")
+
                         #make video by stringing the jpgs back into an avi
                         self.makeVID=raw_input("Write output as 'video', 'frames','both','none'?:\n")
                         if not self.makeVID: self.makeVID="frames"
 
         ###########Inputs Read in #################
 
-        
-
-                
         #define a sorting function
         def getint(self,name):
                 f=os.path.split(name)
@@ -381,8 +380,6 @@ class Motion:
 
                 display("contour",1000,img_draw)
                 return img_draw
-
-
                 
         #Define the run function
         def run(self):
@@ -400,7 +397,6 @@ class Motion:
                 print("AccAvg begin value is: %s" % (self.accAvg))
 
                 ###########Failure Classes, used to format output and illustrate number of frames
-                
                 ##No motion, the frame was not different enough compared to the background due to accAvg 
                 nodiff=0
                 
@@ -423,9 +419,7 @@ class Motion:
                 
                 print("Output path will be %s" % (file_destination))
                 
-                # Create a log file with each coordinate
-                log_file_name = file_destination + "/" + "tracker_output.log"
-                log_file = file(log_file_name, 'a' )
+                # Create a log file with each coordinates
 
                 #create hit counter to track number of outputs
                 hitcounter=0
@@ -505,7 +499,6 @@ class Motion:
                                 rect = (ix,iy,x,y)
                                 roi.extend(rect)
 
-
                         cv2.namedWindow('image',cv2.CV_WINDOW_AUTOSIZE)
                         cv2.setMouseCallback('image',onmouse)
 
@@ -538,7 +531,6 @@ class Motion:
 
                 ###If set area counter, draw another box.
                 area_box=[]
-                self.set_areacounter=True
                 if self.set_areacounter:
                         
                         def onmouse(event,x,y,flags,param):
@@ -559,7 +551,6 @@ class Motion:
                                 cv2.rectangle(orig,(ix,iy),(x,y),BLUE,-1)
                                 rect = (ix,iy,abs(ix-x),abs(iy-y))
                                 area_box.extend(rect)
-
 
                         cv2.namedWindow('image',cv2.CV_WINDOW_AUTOSIZE)
                         cv2.setMouseCallback('image',onmouse)
@@ -733,7 +724,6 @@ class Motion:
                         #if vis: display("Blur", 2000, color_image)
                         
                         # Use the Running Average as the static background
-                        
                         cv2.accumulateWeighted(color_image,running_average_image,self.accAvg)                                  
                         running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
                                         
@@ -874,17 +864,12 @@ class Motion:
                                         
                                         #cv2.circle(camera_imageO,box,5,(255, 255, 0), 3)
                                         #Do this the simple way for now
-                                     
 
                                         #is the x coordinate within
                                         if area_box[2] > box[0] > area_box[0]:
                                                 if area_box[3] > box[1] > area_box[1]:
                                                                 inside_area=invert(inside_area)
-                                
-                                        
-
-        
-
+     
                         ##################################################
                         #Write image to file
                         ##################################################
@@ -903,16 +888,18 @@ class Motion:
                         sec = timedelta(seconds=int(frame_count/float(frame_rate)))             
                         d = datetime(1,1,1) + sec
 
-                        #self.stamp.append(str( "%d %d:%d:%d " % ( int(frame_count), d.hour,d.minute, d.second)))
-                        stampadd=(str("%d:%d:%d "  % (d.hour,d.minute, d.second)), int(frame_count))
-                        self.stamp.append(stampadd)
+                        for target in bound_center:
+                                stampadd=(str("%d:%d:%d "  % (d.hour,d.minute, d.second)), int(frame_count),target[0],target[1])
+                                self.stamp.append(stampadd)
 
                         #if inside area and counter is on, write stamp to a seperate file
                         if self.set_areacounter & inside_area:
-                                                        self.areaC.append(stampadd)
-                             
+                                for target in bound_center:
+                                        stampadd=(str("%d:%d:%d "  % (d.hour,d.minute, d.second)), int(frame_count),
+                                                  target[0],target[1])
+                                        self.areaC.append(stampadd)
                                 
-                        ##################################################
+                       ##################################################
                         #Have a returned counter to balance hitRate
                         hitcounter=hitcounter+1
                         total_count=total_count+1
@@ -962,7 +949,6 @@ class Motion:
 
                 ###If runtype is a single file - run file destination        
                 if (self.runtype == "file"):
-
                         try:
                                 motion_frames=self.run()
                         except Exception, e:
@@ -975,7 +961,32 @@ class Motion:
                 #Create log file
                 log_file_report = self.file_destination + "/" + "Parameters_Results.log"
                 log_report = file(log_file_report, 'a' )
+
                 #Print parameters
+                if len(sys.argv) > 2:
+                        log_report.write(str(self.args))
+                if len(sys.argv) < 2:
+                        #Batch or single file
+                        log_report.write("Run type: %s" % self.runtype)
+                        if runtype=="file":
+                                log_report.write("Input file path: %s" % self.fileD)
+                        else:
+                                log_report.write("Input file path: %s" % self.batchpool)
+                        log_report.write("Output dir: %s" % self.inDEST)
+                        log_report.write("Adapt accAvg? %s" % self.adapt)
+                        if self.adapt:
+                                log_report.write("Expected hitrate: %s" % self.frameHIT)
+                                log_report.write("Minimum accAvg: %s" % self.floorvalue)
+                        log_report.write("Threshold %s" % self.threshT)
+                        log_report.write("Minimum contour area: %s" % self.minSIZE)
+                        log_report.write("Burnin: %s" % self.burnin)
+                        log_report.write("Scan frames: %s" % self.scan)
+                        if self.frameSET:
+                                log_report.write("Manual framerate: %s" % self.frame_rate)
+                        if self.set_ROI:
+                                log_report.write("Set ROI: %s" % self.ROI_include)
+                        log_report.write("Area counter?: %s" % self.set_areacounter)
+                        log_report.write("Output type?: %s" % self.self.makeVID)
 
                 #Ending time
                 end=time.time()
@@ -993,7 +1004,7 @@ class Motion:
 
                 #End of program, report some statistic to screen and log
                 #log
-                log_report.write("\n \n Thank you for using MotionMeerkat! \n")
+                log_report.write("\n Thank you for using MotionMeerkat! \n")
                 log_report.write("Candidate motion events: %.0f \n " % self.total_count )
                 log_report.write("Frames skipped due to AccAvg: %.0f \n " % self.nodiff)
                 log_report.write("Frames skipped due to Threshold: %.0f \n " % self.nocountr)
@@ -1004,7 +1015,7 @@ class Motion:
                 log_report.write("Exiting")
 
                 #print to screen
-                print("Thank you for using MotionMeerkat! \n")
+                print("\n\nThank you for using MotionMeerkat! \n")
                 print("Total run time (min): %.2f \n " % total_min)
                 print("Average frames processed per second: %.2f \n " % pfps)   
                 print("Candidate motion events: %.0f \n " % self.total_count )
