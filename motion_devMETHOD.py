@@ -30,7 +30,6 @@ import argparse
 #for py2exe needs manual
 from scipy.sparse.csgraph import _validation
 
-
 ##Global variables
 # BBoxes must be in the format:
 # ( (topleft_x), (topleft_y) ), ( (bottomright_x), (bottomright_y) ) )
@@ -127,19 +126,22 @@ class Motion:
                 #Empty list for time stamps
                 self.stamp=[]
 
+                #Write header row
+                self.stamp.append(("Time","Frame","X","Y"))
                 #Empty list for area counter
                 self.areaC=[]
+                self.areaC.append(("Time","Frame","X","Y"))
 
         #If there were system arguments
                 self.parser = argparse.ArgumentParser()
 
                 #Read in system arguments if they exist
-                if len(sys.argv)<2:
+                if len(sys.argv)< 2:
                         print Usage
                 else:
                        self.parser.add_argument("--runtype", help="Batch or single file",default='file')
-                       self.parser.add_argument("--batchpool", help="run directory of videos")
-                       self.parser.add_argument("--inDEST", help="path of single video",default="C:/Program Files/MotionMeerkat/data/PlotwatcherTest.tlv")
+                       self.parser.add_argument("--batchpool", help="run directory of videos",type=str)
+                       self.parser.add_argument("--inDEST", help="path of single video",type=str,default="C:/Program Files/MotionMeerkat/data/PlotwatcherTest.tlv")
                        self.parser.add_argument("--fileD", help="output directory",default="C:/MotionMeerkat")
                        self.parser.add_argument("--adapt", help="Adaptive background averaging",action='store_true',default=False)
                        self.parser.add_argument("--accAvg", help="Fixed background averaging rate",default=0.35,type=float)
@@ -165,7 +167,7 @@ class Motion:
         #Get user inputs if no system arguments
         #########################################
         def arguments(self):
-                if(len(sys.argv)<=2):
+                if(len(sys.argv)< 2):
                         #Batch or single file
                         self.runtype=raw_input("'batch' run or single 'file'?:\n")   
                         if not self.runtype: self.runtype="file"
@@ -181,76 +183,91 @@ class Motion:
                         if not self.fileD: self.fileD = "C:/MotionMeerkat/"
 
                         #Sensitivity to movement
-                        #Should accAVG be adapted every 10minutes based on an estimated hitrate
-                        self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on hitrate?:\n")      
-                                
-                        if self.adapt:
-                                self.accAvg=ask_acc()
-                                if not self.accAvg: self.accAvg = 0.35
-                                
-                                #Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
-                                self.frameHIT=raw_input("Expected percentage of frames with motion (decimal 0.01):\n")
-                                if not self.frameHIT: self.frameHIT = 0.01
-                                else: self.frameHIT=float(self.frameHIT)
-                                
-                                #Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
-                                self.floorvalue=raw_input("Minimum allowed sensitivity (0.05):\n")
-                                if not self.floorvalue: self.floorvalue = 0.05
-                                else: self.floorvalue=float(self.floorvalue)
-                        else:
-                                self.accAvg=ask_acc()
-                                if not self.accAvg: self.accAvg = 0.35
+                        self.accAvg=ask_acc()
+                        if not self.accAvg: self.accAvg=0.35
 
-                                #set dummy variable for no adapt
-                                self.floorvalue=0
-                                self.frameHIT=0
-                                
                         #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
                         self.threshT=raw_input("Threshold for movement tolerance\nranging from 0 [all] to 255 [no movement] (20):\n")
-                        if not self.threshT: self.threshT = 20
+                        if not self.threshT: self.threshT = 40
                         else: self.threshT=float(self.threshT)
-                        
+
                         #minimum size of contour object
                         self.minSIZE=raw_input("Minimum motion contour size (0.1):\n")
                         if not self.minSIZE: self.minSIZE = 0.1
                         else: self.minSIZE=float(minSIZE)
+
+                        self.advanced= 'y'==raw_input("Set advanced options? (n) :\n")
                         
-                        #Skip initial frames of video, in case of camera setup and shake.       
-                        self.burnin= raw_input("Burn in, skip initial minutes of video (0):\n")
-                        if not self.burnin: self.burnin = 0
-                        else: self.burnin=float(self.burnin)      
+                        if self.advanced:
+
+                                #Should accAVG be adapted every 10minutes based on an estimated hitrate
+                                self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on hitrate?:\n")      
+                                        
+                                if self.adapt:
+                                        self.accAvg=ask_acc()
+                                        if not self.accAvg: self.accAvg = 0.35
+                                        
+                                        #Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
+                                        self.frameHIT=raw_input("Expected percentage of frames with motion (decimal 0.01):\n")
+                                        if not self.frameHIT: self.frameHIT = 0.01
+                                        else: self.frameHIT=float(self.frameHIT)
+                                        
+                                        #Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
+                                        self.floorvalue=raw_input("Minimum allowed sensitivity (0.05):\n")
+                                        if not self.floorvalue: self.floorvalue = 0.05
+                                        else: self.floorvalue=float(self.floorvalue)
                         
-                        #Decrease frame rate, downsample
-                        self.scan= raw_input("Scan one of every X frames (0):\n")
-                        if not self.scan: self.scan = 0
-                        else: self.scan=int(self.scan)
-                        
-                        #Manually set framerate?
-                        self.frameSET= "y" == raw_input("Set frame rate in fps?:\n")
-                        
-                        #Set frame rate.
-                        if self.frameSET:
-                                self.frame_rate = raw_input("frames per second:\n")
+                                #Skip initial frames of video, in case of camera setup and shake.       
+                                self.burnin= raw_input("Burn in, skip initial minutes of video (0):\n")
+                                if not self.burnin: self.burnin = 0
+                                else: self.burnin=float(self.burnin)
+      
+                                #Decrease frame rate, downsample
+                                self.scan= raw_input("Scan one of every X frames (0):\n")
+                                if not self.scan: self.scan = 0
+                                else: self.scan=int(self.scan)
+
+
+                                #Manually set framerate?
+                                self.frameSET= "y" == raw_input("Set frame rate in fps?:\n")
                                 
-                        else: self.frame_rate=0
-                        
-                        #There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean       
-                        self.plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera?:\n")
-                        
-                        #set ROI
-                        self.set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest?:\n")
-                        
-                        if self.set_ROI:
-                                self.ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'?:\n")
-                        else: self.ROI_include='exclude'
+                                #Set frame rate.
+                                if self.frameSET:
+                                        self.frame_rate = raw_input("frames per second:\n")
+                                        if not self.frame_rate: self.frame_rate=0
 
-                        #Create area counter by highlighting a section of frame
-                        self.set_areacounter='y'==raw_input("Highlight region for area count? \n")
+                                #There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean       
+                                self.plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera?:\n")
+                                if not self.plotwatcher: self.plotwatcher = False
+                                #set ROI
+                                self.set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest?:\n")
+                                
+                                if self.set_ROI:
+                                        self.ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'?:\n")
+                                else: self.ROI_include='exclude'
 
-                        #make video by stringing the jpgs back into an avi
-                        self.makeVID=raw_input("Write output as 'video', 'frames','both','none'?:\n")
-                        if not self.makeVID: self.makeVID="frames"
+                                #Create area counter by highlighting a section of frame
+                                self.set_areacounter='y'==raw_input("Highlight region for area count? \n")
+                                if not self.set_areacounter: self.set_areacounter=False
 
+                                #make video by stringing the jpgs back into an avi
+                                self.makeVID=raw_input("Write output as 'video', 'frames','both','none'?:\n")
+                                if not self.makeVID:self.makeVID="frames"
+
+                        else:
+                                self.floorvalue=0
+                                self.frameHIT=0
+                                self.adapt=False
+                                self.makeVID="frames"
+                                self.scan = 0
+                                self.burnin = 0
+                                self.ROI_include='exclude'
+                                self.frameSET=False
+                                self.plotwatcher=False
+                                self.frame_rate=0
+                                self.set_ROI=False
+                                self.set_areacounter=False
+                                
         ###########Inputs Read in #################
 
         #define a sorting function
@@ -326,56 +343,7 @@ class Motion:
                 if makeVID == "video":
                         for f in jpgs:
                                 os.remove(f)
-                        
-        #Define experimental contour segmentation size analysis, this is not available in the executable in version 1.1
-
-        def motionContour(self,img,center_point,this_frame_entity_list,img_draw):
-                #find edges
-                edges=cv2.Canny(img,100,250)
-                kernel = np.ones((1.5,1.5),np.uint8)
-                closing = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
-                
-                #find contours
-                contours,hierarchy = cv2.findContours(closing,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-                
-                #display("contour",3000,closing)
-
-                #sort contours
-                cnts = sorted(contours, key = cv2.contourArea, reverse = True)
-                
-                #for cnt in cnts:
-                        #bx,by,bw,bh = cv2.boundingRect(cnt)
-                        #cv2.drawContours(img,[cnt],0,(0,255,0),1)   # draw #contours in green color
-                    
-                #get center_point
-                index=0
-                found=[]
-                for cnt in cnts:
-                        dist = cv2.pointPolygonTest(cnt,center_point,False)
-                        if dist == 1 :
-                                found.append(index)
-                                #cv2.drawContours(img,[cnt],-1,(0,255,0),1)   # draw #contours in green color
-                                #for entity in this_frame_entity_list:
-                                        #c = entity[1]  # RGB color tuple
-                                        #cv2.circle(img, center_point,  5, (c[0], c[1], c[2]), 3)
-                        index=index+1   
-                                        
-                #Available contours to choose from.
-                foundcnts = [cnts[i] for i in found]
-                
-                #sort for size one more time, get the smallest one
-                cntsF = sorted(foundcnts, key = cv2.contourArea)
-
-                #desired_cnt=cntsF[0]
-                #need to remove the largest contour?
-                
-                #draw that contour to be sure
-                #img=camera_imageROI.copy()
-                for cnt in cntsF:
-                        cv2.drawContours(img_draw,[cnt],0,(0,0,255),1)   # draw #contours in red color
-
-                display("contour",1000,img_draw)
-                return img_draw
+                 
                 
         #Define the run function
         def run(self):
@@ -403,7 +371,7 @@ class Motion:
                 toosmall=0      
                 
                 #Hold all the output frames in an array
-                motionFRAMES = []
+
                 #If its batch, give an extra folder
                 if self.runtype == 'batch':
                         file_destination=os.path.join(self.fileD,IDFL,shortname)
@@ -625,7 +593,6 @@ class Motion:
                                 self.toosmall=toosmall
                                 self.start=start
                                 self.file_destination=file_destination
-                                return(motionFRAMES)
                                       
                         #Cut off the bottom 5% if the plotwatcher option is called. 
                         if not self.plotwatcher:
@@ -715,7 +682,7 @@ class Motion:
                         #if vis: display(Initial,2000,color_image)                    
 
                         # Smooth to get rid of false positives
-                        color_image = cv2.GaussianBlur(color_image,(5,5),0)
+                        #color_image = cv2.GaussianBlur(color_image,(5,5),0)
                         
                         #if vis: display("Blur", 2000, color_image)
                         
@@ -926,7 +893,7 @@ class Motion:
                         #Create Pool of Videos
                         for (root, dirs, files) in os.walk(self.batchpool):
                                 for files in files:
-                                        if files.endswith(".TLV") or files.endswith(".AVI") or files.endswith(".MPG") or files.endswith(".mp4") or files.endswith(".MOD") or files.endswith(".MTS") or files.endswith(".wmv") or files.endswith(".avi"):
+                                        if files.endswith((".TLV",".AVI",".avi",".MPG",".mp4",".MOD",".MTS",".wmv",".WMV")):
                                                 videoPool.append(os.path.join(root, files))
                         
                         for vid in videoPool:      
@@ -945,6 +912,7 @@ class Motion:
 
                 ###If runtype is a single file - run file destination        
                 if (self.runtype == "file"):
+
                         try:
                                 motion_frames=self.run()
                         except Exception, e:
@@ -979,7 +947,7 @@ class Motion:
                 if self.set_ROI:
                         log_report.write("\nSet ROI: %s" % self.ROI_include)
                 log_report.write("\nArea counter?: %s" % self.set_areacounter)
-                log_report.write("\nOutput type?: %s" % self.makeVID)
+                log_report.write("\nOutput type?: %s\n\n" % self.makeVID)
 
                 #Ending time
                 end=time.time()
@@ -1042,7 +1010,7 @@ if __name__ == "__main__":
 
                 #reboot or exit?
                 #if system arguments, immediately exit
-                if len(sys.argv)>2:
+                if len(sys.argv)>=2:
                         break
                 ch=raw_input("Press r to reboot, press any key to exit \n")
                 if ch=='r':
