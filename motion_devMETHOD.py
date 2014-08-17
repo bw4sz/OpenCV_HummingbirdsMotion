@@ -805,14 +805,14 @@ class Motion:
                                 cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,200),1)
                         #if vis: display("trimmed_box",1000,display_image)
                         ## combine boxes that touch
-                        try:       
-                                bounding_box_list = merge_collided_bboxes( trimmed_box_list )
+                        #try:       
+                                #bounding_box_list = merge_collided_bboxes( trimmed_box_list )
                                 #bounding_box_list = trimmed_box_list
 
-                        except Exception, e:
-                                print 'Error:',e
-                                print 'Box Merge Fail:'
-                                continue
+##                        except Exception, e:
+##                                print 'Error:',e
+##                                print 'Box Merge Fail:'
+##                                continue
 
                         size_filter_box=[]
                         for box in bounding_box_list:
@@ -907,12 +907,10 @@ class Motion:
                         if os.path.isfile(self.inDEST): pass
                         else:
                                 print("File path does not exist!")
-                                time.sleep(2)
                 else:
                         if os.path.isdir(self.batchpool): pass
                         else:
                                 print("Directory does not exist!")
-                                time.sleep(2)
 
                 ###Run Batch Mode                
                 if (self.runtype == "batch"):
@@ -934,7 +932,7 @@ class Motion:
                                         motion_frames=run()
                                 except Exception, e:
                                         print( "Error %s " % e + "\n" )
-                                        time.sleep(8)
+                                        time.sleep(5)
                                         print 'Error in Video:',vid
                                 #if self.makeVID == "video":
                                         #videoM(self.vid,self.makeVID)
