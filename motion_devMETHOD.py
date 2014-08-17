@@ -787,6 +787,7 @@ class Motion:
                         #shapely does a much faster job of polygon union
                         #format into shapely bounding feature
                         shape_list=[]
+                        shape_counter=0
                         for out in trimmed_box_list:
                                 sh_out=sg.box(out[0][0],out[0][1],out[1][0],out[1][1])
                                 shape_list.append(sh_out)
@@ -798,11 +799,26 @@ class Motion:
                             for x in range(1,len(casc.geoms)):
                                 b=casc.geoms[x].bounds
                                 if casc.geoms[x].area > ((width * height) * (float(self.minSIZE)/100)):
-                                    cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,200),1)
+                                        if self.ROI_include == "exclude":
+                                                cv2.rectangle(camera_imageO,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                        else:
+                                                cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                        shape_counter=shape_counter+1
+
                         else:
                             b=casc.bounds
                             if casc.area > ((width * height) * (float(self.minSIZE)/100)):
-                                cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,200),1)
+                                if self.ROI_include == "exclude":
+                                        cv2.rectangle(camera_imageO,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                else:
+                                        cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                shape_counter=shape_counter+1
+
+                        if shape_counter == 0:
+                                toosmall=toosmall+1
+                                noMotion=True                   
+                                continue
+                        
                         #if vis: display("trimmed_box",1000,display_image)
                         ## combine boxes that touch
                         #try:       
@@ -814,42 +830,59 @@ class Motion:
 ##                                print 'Box Merge Fail:'
 ##                                continue
 
-                        size_filter_box=[]
-                        for box in bounding_box_list:
-                                box_width = box[right][0] - box[left][0]
-                                box_height = box[bottom][0] - box[top][0]
-                                
-                                # Only keep the box if its larger than the user specified area
-                                if (box_width * box_height) > (width * height) * (float(self.minSIZE)/100):
-                                        size_filter_box.append(box)
-                                        
-                        ## If there are no boxes left at that size, skip to new frame
-                        if len(size_filter_box) == 0:
-                                toosmall=toosmall+1
-                                noMotion=True                   
-                                continue                
+##                        size_filter_box=[]
+##                        for box in bounding_box_list:
+##                                box_width = box[right][0] - box[left][0]
+##                                box_height = box[bottom][0] - box[top][0]
+##                                
+##                                # Only keep the box if its larger than the user specified area
+##                                if (box_width * box_height) > (width * height) * (float(self.minSIZE)/100):
+##                                        size_filter_box.append(box)
+##                                        
+##                        ## If there are no boxes left at that size, skip to new frame
+##                        if len(size_filter_box) == 0:
+##                                toosmall=toosmall+1
+##                                noMotion=True                   
+##                                continue                
                         # Draw the merged box list:
-                        if todraw:
-                                if self.ROI_include == "exclude":
-                                        for box in size_filter_box:
-                                                cv2.rectangle(camera_imageO, box[0], box[1], GREEN, 1 )                     
-                                else:
-                                        for box in size_filter_box:
-                                                cv2.rectangle(display_image, box[0], box[1], GREEN, 1 )             
+
+                        ###To do!!! Need to integrate the shapely boxes into the ROI selection below.
+##                        if todraw:
+##                                if self.ROI_include == "exclude":
+##                                        for box in size_filter_box:
+##                                                cv2.rectangle(camera_imageO, box[0], box[1], GREEN, 1 )                     
+##                                else:
+##                                        for box in size_filter_box:
+##                                                cv2.rectangle(display_image, box[0], box[1], GREEN, 1 )             
                                                 
                         #if vis: display("merged_box",2000,display_image)
-                 
-                        #Bounding center
+                        ## Centroids of each target
                         bound_center=[]
-                        ###Get center of the motion contour
-                        
-                        for box in size_filter_box:
-                                mean_x=int(mean((box[0][0],box[1][0])))
-                                mean_y=int(mean((box[0][1],box[1][1])))
-                                bound_center.append((mean_x,mean_y))
+
+                        if casc.type=="MultiPolygon":
+                            #draw shapely bounds
+                            for x in range(1,len(casc.geoms)):
+                                b=casc.geoms[x]      
+                                x=b.centroid.coords.xy[0][0]
+                                y=b.centroid.coords.xy[0][0]
+                                bound_center.append((x,y))
+
+                        else:      
+                                x=casc.centroid.coords.xy[0][0]
+                                y=casc.centroid.coords.xy[0][0]
+                                bound_center.append((x,y))
+
+##                              
+##                        #Bounding center
+##                        ###Get center of the motion contour
+##                        
+##                        for box in size_filter_box:
+##                                mean_x=int(mean((box[0][0],box[1][0])))
+##                                mean_y=int(mean((box[0][1],box[1][1])))
+##                                bound_center.append((mean_x,mean_y))
 
                         #Set flag for inside area
-                                inside_area=False
+                        inside_area=False
                         if self.set_areacounter:
                         #test drawing center circle
                                 for box in bound_center:
