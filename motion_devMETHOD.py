@@ -26,7 +26,8 @@ import glob
 from datetime import datetime, timedelta
 import csv
 import argparse
-
+from shapely.ops import cascaded_union
+import shapely.geometry as sg
 #for py2exe needs manual
 from scipy.sparse.csgraph import _validation
 
@@ -38,7 +39,10 @@ bottom = 1
 left = 0
 right = 1
 
-BLUE = [255,0,0]        # rectangle color
+BLUE = (255,0,0)        # rectangle color
+GREEN = (0,255,0)        # rectangle color
+RED = (0,0,255)        # rectangle color
+
 
 ##Visualize the frames, this should only be used for testing!
 vis=False
@@ -66,7 +70,8 @@ def ask_acc():
                 except Exception, e:
                         print( "Error: accAvg much be a numeric value not character." )
                         ask_acc()
-                        
+
+
 #Combine objects of motion bounding boxes
 def merge_collided_bboxes(bbox_list ):
                 # For every bbox...
@@ -147,7 +152,7 @@ class Motion:
                        self.parser.add_argument("--accAvg", help="Fixed background averaging rate",default=0.35,type=float)
                        self.parser.add_argument("--frameHIT", help="expected percentage of motion frames",default=0.1,type=float)
                        self.parser.add_argument("--floorvalue", help="minimum background averaging",default=0.01,type=float)
-                       self.parser.add_argument("--threshT", help="Threshold of movement",default=20,type=int)
+                       self.parser.add_argument("--threshT", help="Threshold of movement",default=30,type=int)
                        self.parser.add_argument("--minSIZE", help="Minimum size of contour",default=0.1,type=float)
                        self.parser.add_argument("--burnin", help="Delay time",default=0,type=int)
                        self.parser.add_argument("--scan", help="Scan one of every X frames for motion",default=0,type=int)
@@ -187,13 +192,13 @@ class Motion:
                         if not self.accAvg: self.accAvg=0.35
 
                         #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
-                        self.threshT=raw_input("Threshold for movement tolerance\nranging from 0 [all] to 255 [no movement] (20):\n")
-                        if not self.threshT: self.threshT = 40
+                        self.threshT=raw_input("Threshold for movement tolerance\nranging from 0 [all] to 255 [no movement] (30):\n")
+                        if not self.threshT: self.threshT = 30
                         else: self.threshT=float(self.threshT)
 
                         #minimum size of contour object
                         self.minSIZE=raw_input("Minimum motion contour size (0.1):\n")
-                        if not self.minSIZE: self.minSIZE = 0.1
+                        if not self.minSIZE: self.minSIZE = 0.15
                         else: self.minSIZE=float(minSIZE)
 
                         self.advanced= 'y'==raw_input("Set advanced options? (n) :\n")
@@ -226,7 +231,6 @@ class Motion:
                                 self.scan= raw_input("Scan one of every X frames (0):\n")
                                 if not self.scan: self.scan = 0
                                 else: self.scan=int(self.scan)
-
 
                                 #Manually set framerate?
                                 self.frameSET= "y" == raw_input("Set frame rate in fps?:\n")
@@ -344,7 +348,6 @@ class Motion:
                         for f in jpgs:
                                 os.remove(f)
                  
-                
         #Define the run function
         def run(self):
                 
@@ -483,8 +486,7 @@ class Motion:
                                 orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]=255
                                 display_image=orig_ROI
                         
-                        display("newImageNORMAL",3000,display_image)
-                        
+                        display("newImageNORMAL",3000,display_image)      
                         
                 else:
                         display_image=orig              
@@ -682,7 +684,7 @@ class Motion:
                         #if vis: display(Initial,2000,color_image)                    
 
                         # Smooth to get rid of false positives
-                        #color_image = cv2.GaussianBlur(color_image,(5,5),0)
+                        color_image = cv2.GaussianBlur(color_image,(3,3),0)
                         
                         #if vis: display("Blur", 2000, color_image)
                         
@@ -708,6 +710,19 @@ class Motion:
                         
                         # Threshold the image to a black and white motion mask:
                         ret,grey_image = cv2.threshold(grey_image, self.threshT, 255, cv2.THRESH_BINARY )
+
+                        #display("Before closing",1500,grey_image)
+                        
+                        #Dilate the areas to merge bounded objects
+                        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(7,7))
+                        grey_image= cv2.morphologyEx(grey_image, cv2.MORPH_CLOSE, kernel)
+
+                        #display("Before dilation",1500,grey_image)
+
+                        #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(7,7))
+                        #grey_image=cv2.dilate(grey_image,kernel)
+
+                        #display("after dilation",1500,grey_image)
 
                         #if vis: display("Threshold",1000,grey_image)
                         
@@ -738,12 +753,12 @@ class Motion:
                                         #cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw #contours in green color
                                 
                                 #display("contours", 2000, drawing)
-                        
                         for cnt in contours:
                                 bounding_rect = cv2.boundingRect( cnt )
                                 point1 = ( bounding_rect[0], bounding_rect[1] )
                                 point2 = ( bounding_rect[0] + bounding_rect[2], bounding_rect[1] + bounding_rect[3] )
                                 bounding_box_list.append( ( point1, point2 ) )
+                                
                                 #polygon_points = cv2.approxPolyDP( cnt,0.1*cv2.arcLength(cnt,True),True)
                                 #approx = cv2.approxPolyDP(cnt,0.1*cv2.arcLength(cnt,True),True)
                                 
@@ -768,12 +783,32 @@ class Motion:
                                 # Only keep the box if it's not a tiny noise box:
                                 if (box_width * box_height) > average_box_area*.3: 
                                         trimmed_box_list.append( box )
-                        
+
+                        #shapely does a much faster job of polygon union
+                        #format into shapely bounding feature
+                        shape_list=[]
+                        for out in trimmed_box_list:
+                                sh_out=sg.box(out[0][0],out[0][1],out[1][0],out[1][1])
+                                shape_list.append(sh_out)
+
+                        #shape_pol=sg.MultiPolygon(shape_list)
+                        casc=cascaded_union(shape_list)
+                        if casc.type=="MultiPolygon":
+                            #draw shapely bounds
+                            for x in range(1,len(casc.geoms)):
+                                b=casc.geoms[x].bounds
+                                if casc.geoms[x].area > ((width * height) * (float(self.minSIZE)/100)):
+                                    cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,200),1)
+                        else:
+                            b=casc.bounds
+                            if casc.area > ((width * height) * (float(self.minSIZE)/100)):
+                                cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,200),1)
                         #if vis: display("trimmed_box",1000,display_image)
-                        
                         ## combine boxes that touch
                         try:       
                                 bounding_box_list = merge_collided_bboxes( trimmed_box_list )
+                                #bounding_box_list = trimmed_box_list
+
                         except Exception, e:
                                 print 'Error:',e
                                 print 'Box Merge Fail:'
@@ -797,19 +832,13 @@ class Motion:
                         if todraw:
                                 if self.ROI_include == "exclude":
                                         for box in size_filter_box:
-                                                cv2.rectangle(camera_imageO, box[0], box[1], (0,255,0), 1 )                     
+                                                cv2.rectangle(camera_imageO, box[0], box[1], GREEN, 1 )                     
                                 else:
                                         for box in size_filter_box:
-                                                cv2.rectangle(display_image, box[0], box[1], (0,255,0), 1 )             
+                                                cv2.rectangle(display_image, box[0], box[1], GREEN, 1 )             
                                                 
                         #if vis: display("merged_box",2000,display_image)
-                        
-                        ##Experimental analysis, no filters yet: Find the segemented object that encompasses the motion pixels
-                        ##This uses canny edge detection to capture the whole animal, and would be the first step to size class detection
-                                
-                        #if objectEdge:
-                                #camera_imageO=motionContour(display_image,center_point,this_frame_entity_list,camera_imageO)
-
+                 
                         #Bounding center
                         bound_center=[]
                         ###Get center of the motion contour
@@ -912,7 +941,6 @@ class Motion:
 
                 ###If runtype is a single file - run file destination        
                 if (self.runtype == "file"):
-
                         try:
                                 motion_frames=self.run()
                         except Exception, e:
@@ -944,8 +972,7 @@ class Motion:
                 log_report.write("\nScan frames: %s" % self.scan)
                 if self.frameSET:
                         log_report.write("\nManual framerate: %s" % self.frame_rate)
-                if self.set_ROI:
-                        log_report.write("\nSet ROI: %s" % self.ROI_include)
+                log_report.write("\nSet ROI: %s" % self.ROI_include)
                 log_report.write("\nArea counter?: %s" % self.set_areacounter)
                 log_report.write("\nOutput type?: %s\n\n" % self.makeVID)
 
