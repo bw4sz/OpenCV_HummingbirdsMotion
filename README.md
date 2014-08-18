@@ -6,12 +6,19 @@ MotionMeerkat is a standalone python executable that identifies candidate motion
 
 Executable can be found here: http://benweinstein.weebly.com/motionmeerkat.html
 
+Current Version (1.5)
+---------------------
+
+New features : [https://github.com/bw4sz/OpenCV_HummingbirdsMotion/issues/16]
+
+See issues in this repository for higher priority changes to be made. 
+
 Approach
 -------------
 
 Combining Python 2.7 and the OpenCv2 library, with videos read using ffmpeg. 
 
-All testing has been done on Windows, but there is no reason to expect major difficulties on linux or mac.
+All source corde testing has been done on Windows to develop the exe, but there is no reason to expect major difficulties on linux or mac if running in python.
 
 Contents
 -------------
@@ -52,3 +59,6 @@ FFmpeg is exported and in the path variables, typing ffmpeg into cmd prompt will
 
 
 Note: *Please check paths depending on your cloned git library - they may not be relative in all cases.*
+
+
+
