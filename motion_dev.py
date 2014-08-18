@@ -193,7 +193,7 @@ class Motion:
                                 #Set frame rate.
                                 if self.frameSET:
                                         self.frame_rate = raw_input("frames per second:\n")
-                                        if not self.frame_rate: self.frame_rate=0
+                                if not self.frame_rate: self.frame_rate=0
 
                                 #There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean       
                                 self.plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera?:\n")
