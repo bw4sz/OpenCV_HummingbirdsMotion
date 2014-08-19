@@ -208,7 +208,7 @@ class Motion:
                                 if not self.set_areacounter: self.set_areacounter=False
 
                                 #make video by stringing the jpgs back into an avi
-                                self.makeVID=raw_input("Write output as 'video', 'frames','both','none'?:\n")
+                                self.makeVID=raw_input("Write output as 'video', 'frames','both','none'? (frames):\n")
                                 if not self.makeVID:self.makeVID="frames"
 
                         else:
@@ -793,7 +793,7 @@ class Motion:
                         #test drawing center circle
                                 for box in bound_center:
                                         
-                                        cv2.circle(camera_imageO,box,5,(255, 255, 0), 2)
+                                        #cv2.circle(camera_imageO,box,5,(255, 255, 0), 2)
                                         #Do this the simple way for now
 
                                         #is the x coordinate within
@@ -878,13 +878,13 @@ class Motion:
 
                 ###If runtype is a single file - run file destination        
                 if (self.runtype == "file"):
-                        #try:
-                        self.run()
-                        self.videoM()
-                        self.report()                                
-                        #except Exception, e:
-                                #print( "Error %s " % e + "\n" )
-                                #print 'Error in input file:',self.inDEST
+                        try:
+                                self.run()
+                                self.videoM()
+                                self.report()                                
+                        except Exception, e:
+                                print( "Error %s " % e + "\n" )
+                                print 'Error in input file:',self.inDEST
 
         def report(self):
                 #Create log file
@@ -970,12 +970,12 @@ class Motion:
 
 if __name__ == "__main__":
         while True:
-                #try:
-                motionVid=Motion()
-                motionVid.arguments()
-                motionVid.wrap()
-                #except Exception, e:
-                        #print( "Error %s " % e + "\n" )
+                try:
+                        motionVid=Motion()
+                        motionVid.arguments()
+                        motionVid.wrap()
+                except Exception, e:
+                        print( "Error %s " % e + "\n" )
 
                 #reboot or exit?
                 #if system arguments, immediately exit

@@ -19,7 +19,7 @@ OutputBaseFilename=MotionMeerkatSetup
 Compression=lzma
 SolidCompression=yes
                            
-[Languages]
+[Languages]                                                                         
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
@@ -30,7 +30,7 @@ Source: "C:\Users\Ben\Documents\OpenCV_HummingbirdsMotion\dist\*"; DestDir: "{ap
 Source: "C:\FFmpeg\bin\ffmpeg.exe";DestDir: "{app}\FFmpeg"; Flags: ignoreversion
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-
+         
 [Icons]
 Name: "{group}\MotionMeerkat"; Filename: "{app}\motion_dev.exe"; IconFileName: "{app}\thumbnail.ico"
 Name: "{commondesktop}\MotionMeerkat"; IconFileName: "{app}\thumbnail.ico"; Filename: "{app}\motion_dev.exe"; Tasks: desktopicon
