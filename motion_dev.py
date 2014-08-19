@@ -193,8 +193,8 @@ class Motion:
                                 #Set frame rate.
                                 if self.frameSET:
                                         self.frame_rate = raw_input("frames per second:\n")
-                                if not self.frame_rate: self.frame_rate=0
-
+                                else: self.frame_rate=0
+                                
                                 #There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean       
                                 self.plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera?:\n")
                                 if not self.plotwatcher: self.plotwatcher = False
@@ -606,6 +606,7 @@ class Motion:
                                         
                                        #If the total base is fift (10min window), then assuming 99% of images are junk the threshold should be
                                         #We've been counting frames output to file in the hitcounter
+                                        
                                         print(str(hitcounter) + " files written in last 10minutes" + "\n" )             
                                         if hitcounter > (fift*frameHIT) :
                                                 accAvg = accAvg + .05
@@ -709,6 +710,7 @@ class Motion:
                                         #cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw #contours in green color
                                 
                                 #display("contours", 2000, drawing)
+                                
                         for cnt in contours:
                                 bounding_rect = cv2.boundingRect( cnt )
                                 point1 = ( bounding_rect[0], bounding_rect[1] )
@@ -775,43 +777,6 @@ class Motion:
                                 noMotion=True                   
                                 continue
                         
-                        #if vis: display("trimmed_box",1000,display_image)
-                        ## combine boxes that touch
-                        #try:       
-                                #bounding_box_list = merge_collided_bboxes( trimmed_box_list )
-                                #bounding_box_list = trimmed_box_list
-
-##                        except Exception, e:
-##                                print 'Error:',e
-##                                print 'Box Merge Fail:'
-##                                continue
-
-##                        size_filter_box=[]
-##                        for box in bounding_box_list:
-##                                box_width = box[right][0] - box[left][0]
-##                                box_height = box[bottom][0] - box[top][0]
-##                                
-##                                # Only keep the box if its larger than the user specified area
-##                                if (box_width * box_height) > (width * height) * (float(self.minSIZE)/100):
-##                                        size_filter_box.append(box)
-##                                        
-##                        ## If there are no boxes left at that size, skip to new frame
-##                        if len(size_filter_box) == 0:
-##                                toosmall=toosmall+1
-##                                noMotion=True                   
-##                                continue                
-                        # Draw the merged box list:
-
-                        ###To do!!! Need to integrate the shapely boxes into the ROI selection below.
-##                        if todraw:
-##                                if self.ROI_include == "exclude":
-##                                        for box in size_filter_box:
-##                                                cv2.rectangle(camera_imageO, box[0], box[1], GREEN, 1 )                     
-##                                else:
-##                                        for box in size_filter_box:
-##                                                cv2.rectangle(display_image, box[0], box[1], GREEN, 1 )             
-                                                
-                        #if vis: display("merged_box",2000,display_image)
                         ## Centroids of each target
                         bound_center=[]
 
@@ -827,15 +792,6 @@ class Motion:
                                 x=casc.centroid.coords.xy[0][0]
                                 y=casc.centroid.coords.xy[0][0]
                                 bound_center.append((x,y))
-
-##                              
-##                        #Bounding center
-##                        ###Get center of the motion contour
-##                        
-##                        for box in size_filter_box:
-##                                mean_x=int(mean((box[0][0],box[1][0])))
-##                                mean_y=int(mean((box[0][1],box[1][1])))
-##                                bound_center.append((mean_x,mean_y))
 
                         #Set flag for inside area
                         inside_area=False
@@ -916,15 +872,16 @@ class Motion:
                              
                                 #Place run inside try catch loop; in case of error, step to next video
                                 ##Run Motion Function
-                               
+                                #set the inDEST
+                                self.inDEST=vid
                                 try:
-                                        motion_frames=run()
+                                        motion_frames=self.run()
                                 except Exception, e:
                                         print( "Error %s " % e + "\n" )
-                                        time.sleep(5)
+                                        time.sleep(2)
                                         print 'Error in Video:',vid
-                                #if self.makeVID == "video":
-                                        #videoM(self.vid,self.makeVID)
+                                if self.makeVID in ("video","both"):
+                                        videoM(self.vid,self.makeVID)
 
                 ###If runtype is a single file - run file destination        
                 if (self.runtype == "file"):
@@ -934,8 +891,8 @@ class Motion:
                                 print( "Error %s " % e + "\n" )
                                 print 'Error in input file:',self.inDEST
                                 
-                        #if self.makeVID == "video":
-                                #self.videoM(self.inDEST,self.makeVID)
+                        if self.makeVID in ("video","both"):
+                                videoM(self.vid,self.makeVID)
         def report(self):
                 #Create log file
                 log_file_report = self.file_destination + "/" + "Parameters_Results.log"
@@ -946,10 +903,12 @@ class Motion:
                 log_report.write("\nRun type: %s" % self.runtype)
                 if self.runtype=="file":
                         log_report.write("\nInput file path: %s" % self.fileD)
+                        
                 else:
                         log_report.write("\nInput file path: %s" % self.batchpool)
                 log_report.write("\nOutput dir: %s" % self.inDEST)
                 log_report.write("\nAdapt accAvg? %s" % self.adapt)
+                
                 if self.adapt:
                         log_report.write("\nExpected hitrate: %s" % self.frameHIT)
                         log_report.write("\nMinimum accAvg: %s" % self.floorvalue)
@@ -957,6 +916,7 @@ class Motion:
                 log_report.write("\nMinimum contour area: %s" % self.minSIZE)
                 log_report.write("\nBurnin: %s" % self.burnin)
                 log_report.write("\nScan frames: %s" % self.scan)
+                
                 if self.frameSET:
                         log_report.write("\nManual framerate: %s" % self.frame_rate)
                 log_report.write("\nSet ROI: %s" % self.ROI_include)
