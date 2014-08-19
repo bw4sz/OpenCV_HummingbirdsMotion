@@ -52,7 +52,6 @@ todraw=True
 objectEdge=False
 
 #Start time
-start=time.time()
 
 #Set globals for mouse map, callback has unique syntax
 drawing = False # true if mouse is pressed
@@ -81,8 +80,7 @@ def display(window,t,image):
 
 class Motion:
 
-        def __init__(self,name):
-                self.name=name
+        def __init__(self):
                 #Empty list for time stamps
                 self.stamp=[]
 
@@ -139,7 +137,7 @@ class Motion:
                                 self.batchpool=raw_input("Enter folder containing videos:\n")
                         
                         #Destination of file
-                        self.fileD=raw_input("File Destination Folder:\n")   
+                        self.fileD=raw_input("File Destination Folder (C:/MotionMeerkat/):\n")   
                         if not self.fileD: self.fileD = "C:/MotionMeerkat/"
 
                         #Sensitivity to movement
@@ -154,14 +152,14 @@ class Motion:
                         #minimum size of contour object
                         self.minSIZE=raw_input("Minimum motion contour size (0.1):\n")
                         if not self.minSIZE: self.minSIZE = 0.15
-                        else: self.minSIZE=float(minSIZE)
+                        else: self.minSIZE=float(self.minSIZE)
 
                         self.advanced= 'y'==raw_input("Set advanced options? (n) :\n")
                         
                         if self.advanced:
 
                                 #Should accAVG be adapted every 10minutes based on an estimated hitrate
-                                self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on hitrate?:\n")      
+                                self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on hitrate? (n) :\n")      
                                         
                                 if self.adapt:
                                         self.accAvg=ask_acc()
@@ -188,7 +186,7 @@ class Motion:
                                 else: self.scan=int(self.scan)
 
                                 #Manually set framerate?
-                                self.frameSET= "y" == raw_input("Set frame rate in fps?:\n")
+                                self.frameSET= "y" == raw_input("Set frame rate in fps? (n):\n")
                                 
                                 #Set frame rate.
                                 if self.frameSET:
@@ -238,8 +236,11 @@ class Motion:
         #define video function
         #Find path of jpegs
 
-        def videoM(x,makeVID):
-                normFP=os.path.normpath(x)
+        def videoM(self):
+                if self.makeVID not in ("video","both"):
+                        return("")
+                
+                normFP=os.path.normpath(self.inDEST)
                 (filepath, filename)=os.path.split(normFP)
                 (shortname, extension) = os.path.splitext(filename)
                 (_,IDFL) = os.path.split(filepath)
@@ -266,7 +267,7 @@ class Motion:
                 jpgs=glob.glob(os.path.join(file_destination,"*.jpg"))                  
 
                 #Get frame rate and size of images
-                cap = cv2.VideoCapture(x)
+                cap = cv2.VideoCapture(self.inDEST)
 
                         #Get frame rate if the plotwatcher setting hasn't been called
                         # not the most elegant solution, but get global frame_rate
@@ -299,7 +300,7 @@ class Motion:
                 out.release()
 
                 #If video only, delete jpegs
-                if makeVID == "video":
+                if self.makeVID == "video":
                         for f in jpgs:
                                 os.remove(f)
                  
@@ -308,6 +309,9 @@ class Motion:
                 
                 #Report name of file
                 sys.stderr.write("Processing file %s\n" % (self.inDEST))
+                
+                #start timer
+                self.start=time.time()
                 
                 #Define directories, here assuming that we want to append the file structure of the last three folders to the file destination
                 normFP=os.path.normpath(self.inDEST)
@@ -353,7 +357,7 @@ class Motion:
                 # not the most elegant solution, but get global frame_rate
                 if not self.frameSET:
                                 
-                        frame_rate=round(cap.get(cv2.cv.CV_CAP_PROP_FPS))
+                        self.frame_rate=round(cap.get(cv2.cv.CV_CAP_PROP_FPS))
                 
                 #get frame time relative to start
                 frame_time=cap.get(cv.CV_CAP_PROP_POS_MSEC)     
@@ -421,13 +425,13 @@ class Motion:
                                 rect = (ix,iy,x,y)
                                 roi.extend(rect)
 
-                        cv2.namedWindow('image',cv2.CV_WINDOW_AUTOSIZE)
-                        cv2.setMouseCallback('image',onmouse)
+                        cv2.namedWindow('Set Region of Interest',cv2.CV_WINDOW_AUTOSIZE)
+                        cv2.setMouseCallback('Set Region of Interest',onmouse)
 
-                        print ("Please draw a single rectangle using right click!")
+                        print ("Please draw a single rectangle ROI using right click!")
                         while(1):
-                                cv2.namedWindow('image',cv2.CV_WINDOW_AUTOSIZE)                 
-                                cv2.imshow('image',iorig)
+                                cv2.namedWindow('Set Region of Interest',cv2.CV_WINDOW_AUTOSIZE)                 
+                                cv2.imshow('Set Region of Interest',iorig)
                                 k = cv2.waitKey(1) & 0xFF
                                 if k == 27:
                                         break
@@ -473,13 +477,13 @@ class Motion:
                                 rect = (ix,iy,abs(ix-x),abs(iy-y))
                                 area_box.extend(rect)
 
-                        cv2.namedWindow('image',cv2.CV_WINDOW_AUTOSIZE)
-                        cv2.setMouseCallback('image',onmouse)
+                        cv2.namedWindow('Set area counter',cv2.CV_WINDOW_AUTOSIZE)
+                        cv2.setMouseCallback('Set area counter',onmouse)
                         print ("Please draw a single rectangle using right click!")
 
                         while(1):
-                                cv2.namedWindow('image',cv2.CV_WINDOW_AUTOSIZE)                 
-                                cv2.imshow('image',orig)
+                                cv2.namedWindow('Set area counter',cv2.CV_WINDOW_AUTOSIZE)                 
+                                cv2.imshow('Set area counter',orig)
                                 k = cv2.waitKey(1) & 0xFF
                                 if k == 27:
                                         break
@@ -488,7 +492,7 @@ class Motion:
                         
                         #Draw and show the area to count inside
                         cv2.rectangle(orig, (area_box[1],area_box[3]), (area_box[0],area_box[2]), (255,0,0), 1)     
-                        display("Area counter",2000,orig)
+                        display("AreaCounter",2000,orig)
                         
                 # Greyscale image, thresholded to create the motion mask:
                 grey_image = np.uint8(display_image)
@@ -548,7 +552,6 @@ class Motion:
                                 self.nodiff=nodiff
                                 self.nocountr=nocountr
                                 self.toosmall=toosmall
-                                self.start=start
                                 self.file_destination=file_destination
                                 break
                                       
@@ -745,7 +748,10 @@ class Motion:
                         #shapely does a much faster job of polygon union
                         #format into shapely bounding feature
                         shape_list=[]
-                        shape_counter=0
+                        
+                        ## Centroids of each target
+                        bound_center=[]
+                        
                         for out in trimmed_box_list:
                                 sh_out=sg.box(out[0][0],out[0][1],out[1][0],out[1][1])
                                 shape_list.append(sh_out)
@@ -754,44 +760,32 @@ class Motion:
                         casc=cascaded_union(shape_list)
                         if casc.type=="MultiPolygon":
                             #draw shapely bounds
-                            for x in range(1,len(casc.geoms)):
-                                b=casc.geoms[x].bounds
-                                if casc.geoms[x].area > ((width * height) * (float(self.minSIZE)/100)):
+                            for p in range(1,len(casc.geoms)):
+                                b=casc.geoms[p].bounds
+                                if casc.geoms[p].area > ((width * height) * (float(self.minSIZE)/100)):
                                         if self.ROI_include == "exclude":
                                                 cv2.rectangle(camera_imageO,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
                                         else:
                                                 cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
-                                        shape_counter=shape_counter+1
-
+                                        #Return the centroid to list, rounded two decimals
+                                        x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
+                                        y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
+                                        bound_center.append((x,y)) 
                         else:
-                            b=casc.bounds
-                            if casc.area > ((width * height) * (float(self.minSIZE)/100)):
+                                b=casc.bounds
+                        if casc.area > ((width * height) * (float(self.minSIZE)/100)):
                                 if self.ROI_include == "exclude":
-                                        cv2.rectangle(camera_imageO,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                        cv2.rectangle(camera_imageO,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)                                 
                                 else:
                                         cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
-                                shape_counter=shape_counter+1
+                                x=round(casc.centroid.coords.xy[0][0],2)
+                                y=round(casc.centroid.coords.xy[1][0],2)
+                                bound_center.append((x,y))                                
 
-                        if shape_counter == 0:
+                        if len(bound_center) == 0:
                                 toosmall=toosmall+1
                                 noMotion=True                   
                                 continue
-                        
-                        ## Centroids of each target
-                        bound_center=[]
-
-                        if casc.type=="MultiPolygon":
-                            #draw shapely bounds
-                            for x in range(1,len(casc.geoms)):
-                                b=casc.geoms[x]      
-                                x=b.centroid.coords.xy[0][0]
-                                y=b.centroid.coords.xy[0][0]
-                                bound_center.append((x,y))
-
-                        else:      
-                                x=casc.centroid.coords.xy[0][0]
-                                y=casc.centroid.coords.xy[0][0]
-                                bound_center.append((x,y))
 
                         #Set flag for inside area
                         inside_area=False
@@ -799,7 +793,7 @@ class Motion:
                         #test drawing center circle
                                 for box in bound_center:
                                         
-                                        #cv2.circle(camera_imageO,box,5,(255, 255, 0), 3)
+                                        cv2.circle(camera_imageO,box,5,(255, 255, 0), 2)
                                         #Do this the simple way for now
 
                                         #is the x coordinate within
@@ -812,7 +806,7 @@ class Motion:
                         ##################################################
                         
                         if not self.makeVID == "none":
-                                if self.makeVID == "frames" or "both":
+                                if self.makeVID in ("frames","both"):
                                         if self.ROI_include == "exclude":
                                                 cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",camera_imageO)
                                         else:
@@ -822,7 +816,7 @@ class Motion:
                         #save the frame count and the time in video, in case user wants to check in the original
                         #create a time object, this relies on the frame_rate being correct!
                         #set seconds
-                        sec = timedelta(seconds=int(frame_count/float(frame_rate)))             
+                        sec = timedelta(seconds=int(frame_count/float(self.frame_rate)))             
                         d = datetime(1,1,1) + sec
 
                         for target in bound_center:
@@ -872,27 +866,26 @@ class Motion:
                              
                                 #Place run inside try catch loop; in case of error, step to next video
                                 ##Run Motion Function
-                                #set the inDEST
+                                #override to set the inDEST file to loop from batch videos
                                 self.inDEST=vid
                                 try:
-                                        motion_frames=self.run()
+                                        self.run()
+                                        self.videoM()
+                                        self.report()
                                 except Exception, e:
                                         print( "Error %s " % e + "\n" )
-                                        time.sleep(2)
                                         print 'Error in Video:',vid
-                                if self.makeVID in ("video","both"):
-                                        videoM(self.vid,self.makeVID)
 
                 ###If runtype is a single file - run file destination        
                 if (self.runtype == "file"):
-                        try:
-                                motion_frames=self.run()
-                        except Exception, e:
-                                print( "Error %s " % e + "\n" )
-                                print 'Error in input file:',self.inDEST
-                                
-                        if self.makeVID in ("video","both"):
-                                videoM(self.vid,self.makeVID)
+                        #try:
+                        self.run()
+                        self.videoM()
+                        self.report()                                
+                        #except Exception, e:
+                                #print( "Error %s " % e + "\n" )
+                                #print 'Error in input file:',self.inDEST
+
         def report(self):
                 #Create log file
                 log_file_report = self.file_destination + "/" + "Parameters_Results.log"
@@ -977,14 +970,12 @@ class Motion:
 
 if __name__ == "__main__":
         while True:
-                try:
-                        motionVid=Motion("video")
-                        motionVid.arguments()
-                        motionVid.wrap()
-                        motionVid.report()
-                except Exception, e:
-                        print( "Error %s " % e + "\n" )
-                        time.sleep(3)
+                #try:
+                motionVid=Motion()
+                motionVid.arguments()
+                motionVid.wrap()
+                #except Exception, e:
+                        #print( "Error %s " % e + "\n" )
 
                 #reboot or exit?
                 #if system arguments, immediately exit

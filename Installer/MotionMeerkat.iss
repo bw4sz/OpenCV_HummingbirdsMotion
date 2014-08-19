@@ -18,13 +18,13 @@ LicenseFile=C:\Users\Ben\Documents\OpenCV_HummingbirdsMotion\License.txt
 OutputBaseFilename=MotionMeerkatSetup
 Compression=lzma
 SolidCompression=yes
-                          
+                           
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-
+         
 [Files]
 Source: "C:\Users\Ben\Documents\OpenCV_HummingbirdsMotion\dist\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
 Source: "C:\FFmpeg\bin\ffmpeg.exe";DestDir: "{app}\FFmpeg"; Flags: ignoreversion
@@ -32,7 +32,7 @@ Source: "C:\FFmpeg\bin\ffmpeg.exe";DestDir: "{app}\FFmpeg"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\MotionMeerkat"; Filename: "{app}\motion_dev.exe"; IconFileName: "{app}\data\thumbnail.ico"
+Name: "{group}\MotionMeerkat"; Filename: "{app}\motion_dev.exe"; IconFileName: "{app}\thumbnail.ico"
 Name: "{commondesktop}\MotionMeerkat"; IconFileName: "{app}\thumbnail.ico"; Filename: "{app}\motion_dev.exe"; Tasks: desktopicon
 
 [Registry]
