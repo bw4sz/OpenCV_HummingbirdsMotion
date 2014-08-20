@@ -194,17 +194,17 @@ class Motion:
                                 else: self.frame_rate=0
                                 
                                 #There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean       
-                                self.plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera?:\n")
+                                self.plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera? (n) :\n")
                                 if not self.plotwatcher: self.plotwatcher = False
                                 #set ROI
-                                self.set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest?:\n")
+                                self.set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest? (n) :\n")
                                 
                                 if self.set_ROI:
                                         self.ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'?:\n")
                                 else: self.ROI_include='exclude'
 
                                 #Create area counter by highlighting a section of frame
-                                self.set_areacounter='y'==raw_input("Highlight region for area count? \n")
+                                self.set_areacounter='y'==raw_input("Highlight region for area count? (n) \n")
                                 if not self.set_areacounter: self.set_areacounter=False
 
                                 #make video by stringing the jpgs back into an avi
@@ -611,13 +611,13 @@ class Motion:
                                         #We've been counting frames output to file in the hitcounter
                                         
                                         print(str(hitcounter) + " files written in last 10minutes" + "\n" )             
-                                        if hitcounter > (fift*frameHIT) :
-                                                accAvg = accAvg + .05
-                                        if hitcounter < (fift*frameHIT) :
-                                                accAvg = accAvg - .025
+                                        if hitcounter > (fift*self.frameHIT) :
+                                                self.accAvg = self.accAvg + .05
+                                        if hitcounter < (fift*self.frameHIT) :
+                                                self.accAvg = self.accAvg - .025
                                                 
                                         #In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
-                                        print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg) + "\n")
+                                        print(file_destination + str(frame_count) + " accAvg is changed to: " + str(self.accAvg) + "\n")
                                         
                                         #Write change to log file
                                         
@@ -625,12 +625,12 @@ class Motion:
                                         hitcounter=0
                                                                                         
                                         #Build in a floor, the value can't be negative.
-                                        if accAvg < floorvalue:
+                                        if self.accAvg < self.floorvalue:
                                                 floor=floor + 1
                                         
                                 #Reset if needed.
                                         if floor == 1 :
-                                                accAvg=floorvalue
+                                                self.accAvg=self.floorvalue
 
                                                 print(file_destination + str(frame_count) + " accAvg is reset to: " + str(self.accAvg))
                                                 #Write change to log file
