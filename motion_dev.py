@@ -474,7 +474,7 @@ class Motion:
                             elif event == cv2.EVENT_RBUTTONUP:
                                 drawing = False
                                 cv2.rectangle(orig,(ix,iy),(x,y),BLUE,-1)
-                                rect = (ix,iy,abs(ix-x),abs(iy-y))
+                                rect = (ix,iy,x,y)
                                 area_box.extend(rect)
 
                         cv2.namedWindow('Set area counter',cv2.CV_WINDOW_AUTOSIZE)
@@ -582,7 +582,7 @@ class Motion:
                                 if not self.scan ==0 :a = countR.astype(np.float32, copy=False)
                                 else: a = frame_count
                                 #If percent compelted is a multiple of 10, print processing rate.
-                                if any((a/total_frameC)*100 %10 == 0):
+                                if any(round(a/float(total_frameC)*100,2) %10 ==0):
                                         
                                         fc=float(frame_count)/total_frameC*100
                                         #Give it a pause feature so it doesn't announce twice on the scan, i a bit ugly, but it doesn't run very often.
@@ -793,14 +793,18 @@ class Motion:
                         #test drawing center circle
                                 for box in bound_center:
                                         
-                                        #cv2.circle(camera_imageO,box,5,(255, 255, 0), 2)
                                         #Do this the simple way for now
 
                                         #is the x coordinate within
                                         if area_box[2] > box[0] > area_box[0]:
                                                 if area_box[3] > box[1] > area_box[1]:
                                                                 inside_area=invert(inside_area)
-     
+                                                                if self.ROI_include == "exclude":
+                                                                        cv2.rectangle(camera_imageO,(area_box[0],area_box[1]),(area_box[2],area_box[3]),(242,221,61),thickness=1,lineType=4)
+                                                                else:
+                                                                        cv2.rectangle(display_image,(area_box[0],area_box[1]),(area_box[2],area_box[3]),(242,221,61),thickness=1,lineType=4)
+                                                                
+                                                                
                         ##################################################
                         #Write image to file
                         ##################################################
@@ -826,8 +830,7 @@ class Motion:
                         #if inside area and counter is on, write stamp to a seperate file
                         if self.set_areacounter & inside_area:
                                 for target in bound_center:
-                                        stampadd=(str("%d:%d:%d "  % (d.hour,d.minute, d.second)), int(frame_count),
-                                                  target[0],target[1])
+                                        stampadd=(str("%d:%d:%d "  % (d.hour,d.minute, d.second)), int(frame_count),target[0],target[1])
                                         self.areaC.append(stampadd)
                                 
                        ##################################################
