@@ -194,17 +194,17 @@ class Motion:
                                 else: self.frame_rate=0
                                 
                                 #There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean       
-                                self.plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera?:\n")
+                                self.plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera? (n) :\n")
                                 if not self.plotwatcher: self.plotwatcher = False
                                 #set ROI
-                                self.set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest?:\n")
+                                self.set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest? (n) :\n")
                                 
                                 if self.set_ROI:
                                         self.ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'?:\n")
                                 else: self.ROI_include='exclude'
 
                                 #Create area counter by highlighting a section of frame
-                                self.set_areacounter='y'==raw_input("Highlight region for area count? \n")
+                                self.set_areacounter='y'==raw_input("Highlight region for area count? (n) \n")
                                 if not self.set_areacounter: self.set_areacounter=False
 
                                 #make video by stringing the jpgs back into an avi
@@ -474,7 +474,7 @@ class Motion:
                             elif event == cv2.EVENT_RBUTTONUP:
                                 drawing = False
                                 cv2.rectangle(orig,(ix,iy),(x,y),BLUE,-1)
-                                rect = (ix,iy,abs(ix-x),abs(iy-y))
+                                rect = (ix,iy,x,y)
                                 area_box.extend(rect)
 
                         cv2.namedWindow('Set area counter',cv2.CV_WINDOW_AUTOSIZE)
@@ -582,7 +582,7 @@ class Motion:
                                 if not self.scan ==0 :a = countR.astype(np.float32, copy=False)
                                 else: a = frame_count
                                 #If percent compelted is a multiple of 10, print processing rate.
-                                if any((a/total_frameC)*100 %10 == 0):
+                                if any(round(a/float(total_frameC)*100,2) %10 ==0):
                                         
                                         fc=float(frame_count)/total_frameC*100
                                         #Give it a pause feature so it doesn't announce twice on the scan, i a bit ugly, but it doesn't run very often.
@@ -611,13 +611,13 @@ class Motion:
                                         #We've been counting frames output to file in the hitcounter
                                         
                                         print(str(hitcounter) + " files written in last 10minutes" + "\n" )             
-                                        if hitcounter > (fift*frameHIT) :
-                                                accAvg = accAvg + .05
-                                        if hitcounter < (fift*frameHIT) :
-                                                accAvg = accAvg - .025
+                                        if hitcounter > (fift*self.frameHIT) :
+                                                self.accAvg = self.accAvg + .05
+                                        if hitcounter < (fift*self.frameHIT) :
+                                                self.accAvg = self.accAvg - .025
                                                 
                                         #In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
-                                        print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg) + "\n")
+                                        print(file_destination + str(frame_count) + " accAvg is changed to: " + str(self.accAvg) + "\n")
                                         
                                         #Write change to log file
                                         
@@ -625,12 +625,12 @@ class Motion:
                                         hitcounter=0
                                                                                         
                                         #Build in a floor, the value can't be negative.
-                                        if accAvg < floorvalue:
+                                        if self.accAvg < self.floorvalue:
                                                 floor=floor + 1
                                         
                                 #Reset if needed.
                                         if floor == 1 :
-                                                accAvg=floorvalue
+                                                self.accAvg=self.floorvalue
 
                                                 print(file_destination + str(frame_count) + " accAvg is reset to: " + str(self.accAvg))
                                                 #Write change to log file
@@ -794,14 +794,18 @@ class Motion:
                         #test drawing center circle
                                 for box in bound_center:
                                         
-                                        #cv2.circle(camera_imageO,box,5,(255, 255, 0), 2)
                                         #Do this the simple way for now
 
                                         #is the x coordinate within
                                         if area_box[2] > box[0] > area_box[0]:
                                                 if area_box[3] > box[1] > area_box[1]:
                                                                 inside_area=invert(inside_area)
-     
+                                                                if self.ROI_include == "exclude":
+                                                                        cv2.rectangle(camera_imageO,(area_box[0],area_box[1]),(area_box[2],area_box[3]),(242,221,61),thickness=1,lineType=4)
+                                                                else:
+                                                                        cv2.rectangle(display_image,(area_box[0],area_box[1]),(area_box[2],area_box[3]),(242,221,61),thickness=1,lineType=4)
+                                                                
+                                                                
                         ##################################################
                         #Write image to file
                         ##################################################
@@ -827,8 +831,7 @@ class Motion:
                         #if inside area and counter is on, write stamp to a seperate file
                         if self.set_areacounter & inside_area:
                                 for target in bound_center:
-                                        stampadd=(str("%d:%d:%d "  % (d.hour,d.minute, d.second)), int(frame_count),
-                                                  target[0],target[1])
+                                        stampadd=(str("%d:%d:%d "  % (d.hour,d.minute, d.second)), int(frame_count),target[0],target[1])
                                         self.areaC.append(stampadd)
                                 
                        ##################################################
