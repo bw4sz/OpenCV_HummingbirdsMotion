@@ -773,11 +773,12 @@ class Motion:
                                         bound_center.append((x,y)) 
                         else:
                                 b=casc.bounds
+                        #If bounding polygon is larger than the minsize, draw a rectangle
                         if casc.area > ((width * height) * (float(self.minSIZE)/100)):
                                 if self.ROI_include == "exclude":
-                                        cv2.rectangle(camera_imageO,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)                                 
+                                        cv2.rectangle(camera_imageO,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=1)                                 
                                 else:
-                                        cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                        cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=1)
                                 x=round(casc.centroid.coords.xy[0][0],2)
                                 y=round(casc.centroid.coords.xy[1][0],2)
                                 bound_center.append((x,y))                                
