@@ -60,6 +60,9 @@ roi=[]
 ix,iy = -1,-1
 #Global methods
 
+def myround(x, base=10):
+    return int(base * round(float(x)/base))
+
 def ask_acc():
         in_accAvg=raw_input("Fixed accumulated averaging (accAvg) sensitivity to motion (0.35):\n")
         if in_accAvg:
@@ -573,27 +576,31 @@ class Motion:
                                         
                         frame_count += 1
                         frame_t0 = time.time()
-                        
+                        #create iterable for scanner
+                
                         #Print trackbar
                         #for some videos this capture doesn't work, and we need to ignore frame
                         if not total_frameC == 0.0:
                                 #This is a bit convulted, but because of scanning, we might miss the flag to calculate time, give it a step size equal to scan size
                                 countR=frame_count - np.arange(0,self.scan+1)
-                                if not self.scan ==0 :a = countR.astype(np.float32, copy=False)
-                                else: a = frame_count
+                                
                                 #If percent compelted is a multiple of 10, print processing rate.
-                                if any(round(a/float(total_frameC)*100,2) %10 ==0):
+                                #format frame count to percentage and interger
+                                numbers = [ round(x/float(total_frameC),3)*100 for x in countR ]
+                                
+                                #is frame count a multiple of 10
+                                if any([x %10 ==0 for x in numbers]):
                                         
                                         fc=float(frame_count)/total_frameC*100
+                                        
                                         #Give it a pause feature so it doesn't announce twice on the scan, i a bit ugly, but it doesn't run very often.
                                         #if the last time the percent complete was printed was within the scan range, don't print again. 
-                                        if not 0.0 <= abs(frameC_announce - frame_count) <= self.scan:
+                                        if abs(frameC_announce - frame_count) >= self.scan:
                                                 print("%.0f %% completed" % fc)
                                                 print( "%.0f candidate motion frames" % total_count)
+                                                frameC_announce=frame_count                                                
                                                 
-                                        #tracktime=time.time()
                                         #Reset the last time it was printed. 
-                                        frameC_announce=frame_count
                                         
                         ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
                         #set floor flag, we can't have negative accAVG
@@ -882,13 +889,13 @@ class Motion:
 
                 ###If runtype is a single file - run file destination        
                 if (self.runtype == "file"):
-                        try:
-                                self.run()
-                                self.videoM()
-                                self.report()                                
-                        except Exception, e:
-                                print( "Error %s " % e + "\n" )
-                                print 'Error in input file:',self.inDEST
+                        #try:
+                        self.run()
+                        self.videoM()
+                        self.report()                                
+                        #except Exception, e:
+                                #print( "Error %s " % e + "\n" )
+                                #print 'Error in input file:',self.inDEST
 
         def report(self):
                 #Create log file
@@ -974,12 +981,12 @@ class Motion:
 
 if __name__ == "__main__":
         while True:
-                try:
-                        motionVid=Motion()
-                        motionVid.arguments()
-                        motionVid.wrap()
-                except Exception, e:
-                        print( "Error %s " % e + "\n" )
+                #try:
+                motionVid=Motion()
+                motionVid.arguments()
+                motionVid.wrap()
+                #except Exception, e:
+                        #print( "Error %s " % e + "\n" )
 
                 #reboot or exit?
                 #if system arguments, immediately exit
