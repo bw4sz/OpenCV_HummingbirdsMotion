@@ -10,15 +10,14 @@ For help, see the wiki: https://github.com/bw4sz/OpenCV_HummingbirdsMotion/wiki
 
 Default values for parameters are in parenthesis. To select default hit enter.
 
-Affirmative answers to questions are 'y', negative answers 'n'
+Affirmative answers to questions are y, negative answers n
+
+Please use double quotes for file paths, but no quotes for any other responses. 
 
 """
 import cv2
-import cv2.cv as cv
 import numpy as np
 import time
-from scipy import *
-from scipy.cluster import vq
 import sys, os, random, hashlib
 import re
 from math import *
@@ -28,8 +27,6 @@ import csv
 import argparse
 from shapely.ops import cascaded_union
 import shapely.geometry as sg
-#for py2exe needs manual
-from scipy.sparse.csgraph import _validation
 
 ##Global variables
 # BBoxes must be in the format:
@@ -72,6 +69,15 @@ def ask_acc():
                 except Exception, e:
                         print( "Error: accAvg much be a numeric value not character." )
                         ask_acc()
+
+def ask_file():
+        in_f=raw_input("Enter video input:\n")
+        if not in_f: in_f = "C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv"
+        if in_f:
+                if os.path.isfile(in_f): return(in_f)
+                else:
+                    print("File path does not exist!")
+                    ask_file()
         
 #define a display function
 def display(window,t,image):
@@ -100,29 +106,29 @@ class Motion:
                 if len(sys.argv)< 2:
                         print Usage
                 else:
-                       self.parser.add_argument("--runtype", help="Batch or single file",default='file')
-                       self.parser.add_argument("--batchpool", help="run directory of videos",type=str)
-                       self.parser.add_argument("--inDEST", help="path of single video",type=str,default="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv")
-                       self.parser.add_argument("--fileD", help="output directory",default="C:/MotionMeerkat")
-                       self.parser.add_argument("--adapt", help="Adaptive background averaging",action='store_true',default=False)
-                       self.parser.add_argument("--accAvg", help="Fixed background averaging rate",default=0.35,type=float)
-                       self.parser.add_argument("--frameHIT", help="expected percentage of motion frames",default=0.1,type=float)
-                       self.parser.add_argument("--floorvalue", help="minimum background averaging",default=0.01,type=float)
-                       self.parser.add_argument("--threshT", help="Threshold of movement",default=30,type=int)
-                       self.parser.add_argument("--minSIZE", help="Minimum size of contour",default=0.1,type=float)
-                       self.parser.add_argument("--burnin", help="Delay time",default=0,type=int)
-                       self.parser.add_argument("--scan", help="Scan one of every X frames for motion",default=0,type=int)
-                       self.parser.add_argument("--frameSET", help="Set frame_rate?",action='store_true',default=False)
-                       self.parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true",default=False)
-                       self.parser.add_argument("--frame_rate", help="frames per second",default=0)
-                       self.parser.add_argument("--set_ROI", help="Set region of interest?",action='store_true',default=False)
-                       self.parser.add_argument("--ROI_include", help="include or exclude?",default="include")
-                       self.parser.add_argument("--set_areacounter", help="Set region to count area",action="store_true",default=False)
-                       self.parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?",default='frames')
-                       self.args = self.parser.parse_args(namespace=self)
+                    self.parser.add_argument("--runtype", help="Batch or single file",default='file')
+                    self.parser.add_argument("--batchpool", help="run directory of videos",type=str)
+                    self.parser.add_argument("--inDEST", help="path of single video",type=str,default="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv")
+                    self.parser.add_argument("--fileD", help="output directory",default="C:/MotionMeerkat")
+                    self.parser.add_argument("--adapt", help="Adaptive background averaging",action='store_true',default=False)
+                    self.parser.add_argument("--accAvg", help="Fixed background averaging rate",default=0.35,type=float)
+                    self.parser.add_argument("--frameHIT", help="expected percentage of motion frames",default=0.1,type=float)
+                    self.parser.add_argument("--floorvalue", help="minimum background averaging",default=0.01,type=float)
+                    self.parser.add_argument("--threshT", help="Threshold of movement",default=30,type=int)
+                    self.parser.add_argument("--minSIZE", help="Minimum size of contour",default=0.1,type=float)
+                    self.parser.add_argument("--burnin", help="Delay time",default=0,type=int)
+                    self.parser.add_argument("--scan", help="Scan one of every X frames for motion",default=0,type=int)
+                    self.parser.add_argument("--frameSET", help="Set frame_rate?",action='store_true',default=False)
+                    self.parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true",default=False)
+                    self.parser.add_argument("--frame_rate", help="frames per second",default=0)
+                    self.parser.add_argument("--set_ROI", help="Set region of interest?",action='store_true',default=False)
+                    self.parser.add_argument("--ROI_include", help="include or exclude?",default="include")
+                    self.parser.add_argument("--set_areacounter", help="Set region to count area",action="store_true",default=False)
+                    self.parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?",default='frames')
+                    self.args = self.parser.parse_args(namespace=self)
 
-                       print "\n"
-                       print "\n"
+                    print "\n"
+                    print "\n"
                                 
         #########################################
         #Get user inputs if no system arguments
@@ -130,12 +136,12 @@ class Motion:
         def arguments(self):
                 if(len(sys.argv)< 2):
                         #Batch or single file
-                        self.runtype=raw_input("'batch' run or single 'file'?:\n")   
+                        self.runtype=raw_input("'batch' run or single 'file'? (file):\n")   
                         if not self.runtype: self.runtype="file"
-                        if(self.runtype=="file"):
-                                self.inDEST=raw_input("Enter video input:\n")
-                                if not self.inDEST: self.inDEST = "C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv"
                         
+                        if(self.runtype=="file"):
+                                self.inDEST=ask_file()
+                                        
                         if(self.runtype=="batch"):
                                 self.batchpool=raw_input("Enter folder containing videos:\n")
                         
@@ -153,8 +159,8 @@ class Motion:
                         else: self.threshT=float(self.threshT)
 
                         #minimum size of contour object
-                        self.minSIZE=raw_input("Minimum motion contour size (0.1):\n")
-                        if not self.minSIZE: self.minSIZE = 0.15
+                        self.minSIZE=raw_input("Minimum motion contour size (0.2):\n")
+                        if not self.minSIZE: self.minSIZE = 0.2
                         else: self.minSIZE=float(self.minSIZE)
 
                         self.advanced= 'y'==raw_input("Set advanced options? (n) :\n")
@@ -275,7 +281,7 @@ class Motion:
                         #Get frame rate if the plotwatcher setting hasn't been called
                         # not the most elegant solution, but get global frame_rate
                 if not self.frameSET:
-                        fr=round(cap.get(cv2.cv.CV_CAP_PROP_FPS))
+                        fr=round(cap.get(5))
                 else:
                         fr=self.frame_rate
 
@@ -287,8 +293,9 @@ class Motion:
                 frame_size=(width, height)                      
 
                 # Define the codec and create VideoWriter object
-                fourcc = cv2.cv.CV_FOURCC(*'XVID')
-                out = cv2.VideoWriter(vidDEST,fourcc, float(fr), frame_size)                    
+                fourcc = cap.get(6)
+                
+                out = cv2.VideoWriter(vidDEST,int(fourcc),float(fr), frame_size)                    
 
                 #split and sort the jpg names
                 jpgs.sort(key=self.getint)
@@ -360,13 +367,13 @@ class Motion:
                 # not the most elegant solution, but get global frame_rate
                 if not self.frameSET:
                                 
-                        self.frame_rate=round(cap.get(cv2.cv.CV_CAP_PROP_FPS))
+                        self.frame_rate=round(cap.get(5))
                 
                 #get frame time relative to start
-                frame_time=cap.get(cv.CV_CAP_PROP_POS_MSEC)     
+                frame_time=cap.get(0)     
                 
                 #get total number of frames
-                total_frameC=cap.get(cv.CV_CAP_PROP_FRAME_COUNT)     
+                total_frameC=cap.get(7)     
 
                 sys.stderr.write("frame rate: %s\n" % self.frame_rate)
                 
@@ -428,12 +435,12 @@ class Motion:
                                 rect = (ix,iy,x,y)
                                 roi.extend(rect)
 
-                        cv2.namedWindow('Set Region of Interest',cv2.CV_WINDOW_AUTOSIZE)
+                        cv2.namedWindow('Set Region of Interest',cv2.WINDOW_AUTOSIZE)
                         cv2.setMouseCallback('Set Region of Interest',onmouse)
 
                         print ("Please draw a single rectangle ROI using right click!")
                         while(1):
-                                cv2.namedWindow('Set Region of Interest',cv2.CV_WINDOW_AUTOSIZE)                 
+                                cv2.namedWindow('Set Region of Interest',cv2.WINDOW_AUTOSIZE)                 
                                 cv2.imshow('Set Region of Interest',iorig)
                                 k = cv2.waitKey(1) & 0xFF
                                 if k == 27:
@@ -480,12 +487,12 @@ class Motion:
                                 rect = (ix,iy,x,y)
                                 area_box.extend(rect)
 
-                        cv2.namedWindow('Set area counter',cv2.CV_WINDOW_AUTOSIZE)
+                        cv2.namedWindow('Set area counter',cv2.WINDOW_AUTOSIZE)
                         cv2.setMouseCallback('Set area counter',onmouse)
                         print ("Please draw a single rectangle using right click!")
 
                         while(1):
-                                cv2.namedWindow('Set area counter',cv2.CV_WINDOW_AUTOSIZE)                 
+                                cv2.namedWindow('Set area counter',cv2.WINDOW_AUTOSIZE)                 
                                 cv2.imshow('Set area counter',orig)
                                 k = cv2.waitKey(1) & 0xFF
                                 if k == 27:
@@ -515,14 +522,7 @@ class Motion:
                 
                 #Set time
                 t0 = time.time()
-                
-                # Prep for text drawing:
-                text_font = cv.InitFont(cv.CV_FONT_HERSHEY_COMPLEX, .5, .5, 0.0, 1, cv.CV_AA )
-                text_coord = ( 5, 15 )
-                text_color = (255,255,255)
 
-                # Set this to the max number of targets to look for (passed to k-means):
-                max_targets = 2
                 
                 #Start with motion flag on
                 noMotion=False
@@ -669,11 +669,11 @@ class Motion:
                         # Convert the image to greyscale.
                         grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
                         
-                        #If some difference is 0, jump to next frame
-                        if sum(grey_image)==0:
-                                nodiff=nodiff+1
-                                noMotion=True                   
-                                continue
+                        ##If some difference is 0, jump to next frame
+                        #if sum(sum(grey_image))==0:
+                                #nodiff=nodiff+1
+                                #noMotion=True                   
+                                #continue
                         
                         # Threshold the image to a black and white motion mask:
                         ret,grey_image = cv2.threshold(grey_image, self.threshT, 255, cv2.THRESH_BINARY )
@@ -697,7 +697,7 @@ class Motion:
                         bounding_box_list = []
 
                         # Now calculate movements using the white pixels as "motion" data
-                        contours,hierarchy = cv2.findContours(grey_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
+                        _,contours,hierarchy = cv2.findContours(grey_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
                         
                         if len(contours) == 0 :
                                 #No movement, add to counter
@@ -764,14 +764,17 @@ class Motion:
                                 shape_list.append(sh_out)
 
                         #shape_pol=sg.MultiPolygon(shape_list)
-                        casc=cascaded_union(shape_list)
+                        casc=cascaded_union(shape_list).buffer(1)
+                        
                         if casc.type=="MultiPolygon":
                             #draw shapely bounds
                             for p in range(1,len(casc.geoms)):
                                 b=casc.geoms[p].bounds
-                                if casc.geoms[p].area > ((width * height) * (float(self.minSIZE)/100)):
+                                if casc.geoms[p].area > ((width * height) * (float(self.minSIZE/100))):
                                         if self.ROI_include == "exclude":
                                                 cv2.rectangle(camera_imageO,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                                #cv2.putText(camera_imageO, str(round(casc.geoms[p].area/(width * height),3)*100), (int(b[0]),int(b[1])),cv2.FONT_HERSHEY_COMPLEX,1,(0,0,0),1,-1)
+                            
                                         else:
                                                 cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
                                         #Return the centroid to list, rounded two decimals
@@ -780,16 +783,17 @@ class Motion:
                                         bound_center.append((x,y)) 
                         else:
                                 b=casc.bounds
-                        #If bounding polygon is larger than the minsize, draw a rectangle
-                        if casc.area > ((width * height) * (float(self.minSIZE)/100)):
-                                if self.ROI_include == "exclude":
-                                        cv2.rectangle(camera_imageO,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=1)                                 
-                                else:
-                                        cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=1)
-                                x=round(casc.centroid.coords.xy[0][0],2)
-                                y=round(casc.centroid.coords.xy[1][0],2)
-                                bound_center.append((x,y))                                
-
+                                #If bounding polygon is larger than the minsize, draw a rectangle
+                                if casc.area > ((width * height) * (float(self.minSIZE/100))):
+                                        if self.ROI_include == "exclude":
+                                                cv2.rectangle(camera_imageO,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                                #cv2.putText(camera_imageO, str(round(casc.area/(width * height),3)*100),(int(b[0]),int(b[1])),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),1,-1)
+                                        else:
+                                                cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                        x=round(casc.centroid.coords.xy[0][0],2)
+                                        y=round(casc.centroid.coords.xy[1][0],2)
+                                        bound_center.append((x,y))                                
+    
                         if len(bound_center) == 0:
                                 toosmall=toosmall+1
                                 noMotion=True                   
@@ -806,7 +810,7 @@ class Motion:
                                         #is the x coordinate within
                                         if area_box[2] > box[0] > area_box[0]:
                                                 if area_box[3] > box[1] > area_box[1]:
-                                                                inside_area=invert(inside_area)
+                                                                inside_area= not inside_area
                                                                 if self.ROI_include == "exclude":
                                                                         cv2.rectangle(camera_imageO,(area_box[0],area_box[1]),(area_box[2],area_box[3]),(242,221,61),thickness=1,lineType=4)
                                                                 else:
@@ -889,13 +893,14 @@ class Motion:
 
                 ###If runtype is a single file - run file destination        
                 if (self.runtype == "file"):
-                        #try:
-                        self.run()
-                        self.videoM()
-                        self.report()                                
-                        #except Exception, e:
-                                #print( "Error %s " % e + "\n" )
-                                #print 'Error in input file:',self.inDEST
+                     
+                    try:
+                            self.run()
+                            self.videoM()
+                            self.report()                                
+                    except Exception, e:
+                                print( "Error %s " % e + "\n" )
+                                print 'Error in input file:',self.inDEST
 
         def report(self):
                 #Create log file
@@ -981,21 +986,22 @@ class Motion:
 
 if __name__ == "__main__":
         while True:
-                #try:
-                motionVid=Motion()
-                motionVid.arguments()
-                motionVid.wrap()
-                #except Exception, e:
-                        #print( "Error %s " % e + "\n" )
+          
+            try:
+                    motionVid=Motion()
+                    motionVid.arguments()
+                    motionVid.wrap()
+            except Exception, e:
+                        print( "Error %s " % e + "\n" )
 
-                #reboot or exit?
-                #if system arguments, immediately exit
-                if len(sys.argv)>=2:
-                        break
-                ch=raw_input("Press r to reboot, press any key to exit \n")
-                if ch=='r':
-                    continue
-                break
-                
+            #reboot or exit?
+            #if system arguments, immediately exit
+            if len(sys.argv)>=2:
+                    break
+            ch=raw_input("Press r to reboot, press any key to exit \n")
+            if ch=='r':
+                continue
+            break
+            
 
 
