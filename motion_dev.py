@@ -27,6 +27,7 @@ import csv
 import argparse
 from shapely.ops import cascaded_union
 import shapely.geometry as sg
+import traceback
 
 ##Global variables
 # BBoxes must be in the format:
@@ -43,6 +44,10 @@ RED = (0,0,255)        # rectangle color
 
 ##Visualize the frames, this should only be used for testing!
 vis=False
+
+#Subtraction method testing
+submeth="MOG2"
+
 
 #A few hard coded testing variables, only to be used by the developers.
 todraw=True
@@ -504,17 +509,18 @@ class Motion:
                         cv2.rectangle(orig, (area_box[1],area_box[3]), (area_box[0],area_box[2]), (255,0,0), 1)     
                         display("AreaCounter",2000,orig)
                         
-                # Greyscale image, thresholded to create the motion mask:
-                grey_image = np.uint8(display_image)
+                if submeth=="ACC":
+                    # Greyscale image, thresholded to create the motion mask:
+                    grey_image = np.uint8(display_image)
                 
-                # The RunningAvg() function requires a 32-bit or 64-bit image...
-                running_average_image = np.float32(display_image)
-                
-                # ...but the AbsDiff() function requires matching image depths:
-                running_average_in_display_color_depth = display_image.copy()
-                
-                # The difference between the running average and the current frame:
-                difference =  display_image.copy()
+                    # The RunningAvg() function requires a 32-bit or 64-bit image...
+                    running_average_image = np.float32(display_image)
+                    
+                    # ...but the AbsDiff() function requires matching image depths:
+                    running_average_in_display_color_depth = display_image.copy()
+                    
+                    # The difference between the running average and the current frame:
+                    difference =  display_image.copy()
                 
                 target_count = 1
                 last_frame_entity_list = []
@@ -526,12 +532,13 @@ class Motion:
                 
                 #Start with motion flag on
                 noMotion=False
-
-                #Subtraction method
-                #submeth="MOG2"
                 
-                #MOG method creator
-                #fgbg = cv2.createBackgroundSubtractorMOG()
+                if submeth=="MOG2":
+                    #MOG method creator
+                    fgbg = cv2.createBackgroundSubtractorMOG2()
+                if submeth=="KNN":
+                    #MOG method creator
+                    fgbg = cv2.createBackgroundSubtractorKNN()                
                 
                 while True:
                         
@@ -642,49 +649,58 @@ class Motion:
                                                 print(file_destination + str(frame_count) + " accAvg is reset to: " + str(self.accAvg))
                                                 #Write change to log file
 
-                        # Create an image with interactive feedback:
-                        display_image = camera_imageROI.copy()
-                        
-                        # Create a working "color image" to modify / blur
-                        color_image =  display_image.copy()\
-                        
-                        #if vis: display(Initial,2000,color_image)                    
-
-                        # Smooth to get rid of false positives
-                        color_image = cv2.GaussianBlur(color_image,(3,3),0)
-                        
-                        #if vis: display("Blur", 2000, color_image)
-                        
-                        # Use the Running Average as the static background
-                        cv2.accumulateWeighted(color_image,running_average_image,self.accAvg)                                  
-                        running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
-                                        
-                        #if vis: display("Running Average",5000,running_average_in_display_color_depth)                  
-                        
-                        # Subtract the current frame from the moving average.
-                        difference=cv2.absdiff( color_image, running_average_in_display_color_depth)
-                        
-                        #if vis: display("difference",5000,difference)
-                        
-                        # Convert the image to greyscale.
-                        grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
-                        
-                        ##If some difference is 0, jump to next frame
-                        #if sum(sum(grey_image))==0:
-                                #nodiff=nodiff+1
-                                #noMotion=True                   
-                                #continue
-                        
-                        # Threshold the image to a black and white motion mask:
-                        ret,grey_image = cv2.threshold(grey_image, self.threshT, 255, cv2.THRESH_BINARY )
+                        #############################
+                        ##BACKGROUND SUBTRACTION
+                        #############################
+                        ## accumulated averaging
+                        if submeth == "ACC":
+                            # Create an image with interactive feedback:
+                            display_image = camera_imageROI.copy()
+                            
+                            # Create a working "color image" to modify / blur
+                            color_image =  display_image.copy()\
+                            
+                            #if vis: display(Initial,2000,color_image)                    
+    
+                            # Smooth to get rid of false positives
+                            color_image = cv2.GaussianBlur(color_image,(3,3),0)
+                            
+                            #if vis: display("Blur", 2000, color_image)
+                            
+                            # Use the Running Average as the static background
+                            cv2.accumulateWeighted(color_image,running_average_image,self.accAvg)                                  
+                            running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
+                                            
+                            #if vis: display("Running Average",5000,running_average_in_display_color_depth)                  
+                            
+                            # Subtract the current frame from the moving average.
+                            difference=cv2.absdiff( color_image, running_average_in_display_color_depth)
+                            
+                            #if vis: display("difference",5000,difference)
+                            
+                            # Convert the image to greyscale.
+                            grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
+                            
+                            ##If some difference is 0, jump to next frame
+                            #if sum(sum(grey_image))==0:
+                                    #nodiff=nodiff+1
+                                    #noMotion=True                   
+                                    #continue
+                            
+                            # Threshold the image to a black and white motion mask:
+                            ret,grey_image = cv2.threshold(grey_image, self.threshT, 255, cv2.THRESH_BINARY )
 
                         #display("Before closing",1500,grey_image)
                         
+                        ##Mixture of Gaussians
+                        if submeth in ["MOG2","KNN"]:
+                            grey_image = fgbg.apply(camera_imageROI)
+                    
                         #Dilate the areas to merge bounded objects
-                        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(7,7))
-                        grey_image= cv2.morphologyEx(grey_image, cv2.MORPH_CLOSE, kernel)
+                        #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(7,7))
+                        #grey_image= cv2.morphologyEx(grey_image, cv2.MORPH_CLOSE, kernel)
 
-                        #display("Before dilation",1500,grey_image)
+                        display("Before dilation",1500,grey_image)
 
                         #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(7,7))
                         #grey_image=cv2.dilate(grey_image,kernel)
@@ -898,9 +914,9 @@ class Motion:
                             self.run()
                             self.videoM()
                             self.report()                                
-                    except Exception, e:
-                                print( "Error %s " % e + "\n" )
-                                print 'Error in input file:',self.inDEST
+                    except:
+                        traceback.print_exc()
+                        print 'Error in input file:',self.inDEST
 
         def report(self):
                 #Create log file
@@ -991,8 +1007,8 @@ if __name__ == "__main__":
                     motionVid=Motion()
                     motionVid.arguments()
                     motionVid.wrap()
-            except Exception, e:
-                        print( "Error %s " % e + "\n" )
+            except:
+                    traceback.print_exc()
 
             #reboot or exit?
             #if system arguments, immediately exit
