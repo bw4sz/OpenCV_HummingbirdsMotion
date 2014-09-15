@@ -28,68 +28,9 @@ import argparse
 from shapely.ops import cascaded_union
 import shapely.geometry as sg
 import traceback
-
-##Global variables
-# BBoxes must be in the format:
-# ( (topleft_x), (topleft_y) ), ( (bottomright_x), (bottomright_y) ) )
-top = 0
-bottom = 1
-left = 0
-right = 1
-
-BLUE = (255,0,0)        # rectangle color
-GREEN = (0,255,0)        # rectangle color
-RED = (0,0,255)        # rectangle color
-
-
-##Visualize the frames, this should only be used for testing!
-vis=False
-
-#Subtraction method testing
-submeth="MOG2"
-
-
-#A few hard coded testing variables, only to be used by the developers.
-todraw=True
-objectEdge=False
-
-#Start time
-
-#Set globals for mouse map, callback has unique syntax
-drawing = False # true if mouse is pressed
-drawing_area = False # true if mouse is pressed
-roi=[]  
-ix,iy = -1,-1
-#Global methods
-
-def myround(x, base=10):
-    return int(base * round(float(x)/base))
-
-def ask_acc():
-        in_accAvg=raw_input("Fixed accumulated averaging (accAvg) sensitivity to motion (0.35):\n")
-        if in_accAvg:
-                try:
-                        out=float(in_accAvg)
-                        return(out)
-                except Exception, e:
-                        print( "Error: accAvg much be a numeric value not character." )
-                        ask_acc()
-
-def ask_file():
-        in_f=raw_input("Enter video input:\n")
-        if not in_f: in_f = "C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv"
-        if in_f:
-                if os.path.isfile(in_f): return(in_f)
-                else:
-                    print("File path does not exist!")
-                    ask_file()
-        
-#define a display function
-def display(window,t,image):
-        cv2.namedWindow(window, cv2.WINDOW_NORMAL)
-        cv2.imshow(window,image)
-        cv2.waitKey(t)
-        cv2.destroyWindow(window)                        
+from sourceM import *
+import BackgroundSubtractor
+          
 ###Create motion class with sensible defaults
 
 class Motion:
@@ -115,6 +56,7 @@ class Motion:
                     self.parser.add_argument("--batchpool", help="run directory of videos",type=str)
                     self.parser.add_argument("--inDEST", help="path of single video",type=str,default="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv")
                     self.parser.add_argument("--fileD", help="output directory",default="C:/MotionMeerkat")
+                    self.parser.add_argument("--subMethod", help="Background Subtraction Method",type=str,default="Acc")                    
                     self.parser.add_argument("--adapt", help="Adaptive background averaging",action='store_true',default=False)
                     self.parser.add_argument("--accAvg", help="Fixed background averaging rate",default=0.35,type=float)
                     self.parser.add_argument("--frameHIT", help="expected percentage of motion frames",default=0.1,type=float)
@@ -171,11 +113,15 @@ class Motion:
                         self.advanced= 'y'==raw_input("Set advanced options? (n) :\n")
                         
                         if self.advanced:
-
-                                #Should accAVG be adapted every 10minutes based on an estimated hitrate
-                                self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on hitrate? (n) :\n")      
+                            
+                            #Set background subtractor
+                            self.subMethod=raw_input("Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (Acc)")
+                            if not self.subMethod: self.subMethod="Acc"
+                            
+                            #Should accAVG be adapted every 10minutes based on an estimated hitrate
+                            self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on hitrate? (n) :\n")      
                                         
-                                if self.adapt:
+                            if self.adapt:
                                         self.accAvg=ask_acc()
                                         if not self.accAvg: self.accAvg = 0.35
                                         
@@ -190,42 +136,44 @@ class Motion:
                                         else: self.floorvalue=float(self.floorvalue)
                         
                                 #Skip initial frames of video, in case of camera setup and shake.       
-                                self.burnin= raw_input("Burn in, skip initial minutes of video (0):\n")
-                                if not self.burnin: self.burnin = 0
-                                else: self.burnin=float(self.burnin)
+                            self.burnin= raw_input("Burn in, skip initial minutes of video (0):\n")
+                            if not self.burnin: self.burnin = 0
+                            else: self.burnin=float(self.burnin)
       
                                 #Decrease frame rate, downsample
-                                self.scan= raw_input("Scan one of every X frames (0):\n")
-                                if not self.scan: self.scan = 0
-                                else: self.scan=int(self.scan)
+                            self.scan= raw_input("Scan one of every X frames (0):\n")
+                            if not self.scan: self.scan = 0
+                            else: self.scan=int(self.scan)
 
-                                #Manually set framerate?
-                                self.frameSET= "y" == raw_input("Set frame rate in fps? (n):\n")
+                            #Manually set framerate?
+                            self.frameSET= "y" == raw_input("Set frame rate in fps? (n):\n")
                                 
-                                #Set frame rate.
-                                if self.frameSET:
-                                        self.frame_rate = raw_input("frames per second:\n")
-                                else: self.frame_rate=0
+                            #Set frame rate.
+                            if self.frameSET:
+                                    self.frame_rate = raw_input("frames per second:\n")
+                            else: self.frame_rate=0
                                 
-                                #There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean       
-                                self.plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera? (n) :\n")
-                                if not self.plotwatcher: self.plotwatcher = False
-                                #set ROI
-                                self.set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest? (n) :\n")
+                            #There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean       
+                            self.plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera? (n) :\n")
+                            if not self.plotwatcher: self.plotwatcher = False
+                            
+                            #set ROI
+                            self.set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest? (n) :\n")
                                 
-                                if self.set_ROI:
-                                        self.ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'?:\n")
-                                else: self.ROI_include='exclude'
+                            if self.set_ROI:
+                                    self.ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'?:\n")
+                            else: self.ROI_include='exclude'
 
-                                #Create area counter by highlighting a section of frame
-                                self.set_areacounter='y'==raw_input("Highlight region for area count? (n) \n")
-                                if not self.set_areacounter: self.set_areacounter=False
+                            #Create area counter by highlighting a section of frame
+                            self.set_areacounter='y'==raw_input("Highlight region for area count? (n) \n")
+                            if not self.set_areacounter: self.set_areacounter=False
 
-                                #make video by stringing the jpgs back into an avi
-                                self.makeVID=raw_input("Write output as 'video', 'frames','both','none'? (frames):\n")
-                                if not self.makeVID:self.makeVID="frames"
+                            #make video by stringing the jpgs back into an avi
+                            self.makeVID=raw_input("Write output as 'video', 'frames','both','none'? (frames):\n")
+                            if not self.makeVID:self.makeVID="frames"
 
                         else:
+                                self.subMethod="Acc"
                                 self.floorvalue=0
                                 self.frameHIT=0
                                 self.adapt=False
@@ -251,14 +199,15 @@ class Motion:
         #Find path of jpegs
 
         def videoM(self):
-                if self.makeVID not in ("video","both"):
-                        return("")
                 
+                ## Methods for video writing in the class Motion
+                if self.makeVID not in ("video","both"): return("")
+                                
                 normFP=os.path.normpath(self.inDEST)
                 (filepath, filename)=os.path.split(normFP)
                 (shortname, extension) = os.path.splitext(filename)
                 (_,IDFL) = os.path.split(filepath)
-
+                
                 #we want to name the output a folder from the output destination with the named extension 
                 if self.runtype == 'batch':
                         file_destination=os.path.join(self.fileD,IDFL)
@@ -266,60 +215,63 @@ class Motion:
                         
                 else:
                         file_destination=os.path.join(self.fileD,shortname)
-
+                
                 if self.fileD =='':
                         vidDEST=os.path.join(filepath, shortname,shortname +'.avi')
                 else:
                         vidDEST=os.path.join(self.fileD, shortname,shortname +'.avi')
-
+                
                 print("Video output path will be %s" % (vidDEST))
-
+                
                 if not os.path.exists(file_destination):
                         os.makedirs(file_destination)
-
+                
                 #Find all jpegs
                 jpgs=glob.glob(os.path.join(file_destination,"*.jpg"))                  
-
+                
                 #Get frame rate and size of images
                 cap = cv2.VideoCapture(self.inDEST)
-
+                
                         #Get frame rate if the plotwatcher setting hasn't been called
                         # not the most elegant solution, but get global frame_rate
                 if not self.frameSET:
                         fr=round(cap.get(5))
                 else:
                         fr=self.frame_rate
-
+                
                 orig_image = cap.read()[1]  
-
+                
                 ###Get information about camera and image
                 width = np.size(orig_image, 1)
                 height = np.size(orig_image, 0)
                 frame_size=(width, height)                      
-
+                
                 # Define the codec and create VideoWriter object
                 fourcc = cap.get(6)
                 
                 out = cv2.VideoWriter(vidDEST,int(fourcc),float(fr), frame_size)                    
-
+                
                 #split and sort the jpg names
                 jpgs.sort(key=self.getint)
-
+                
                 #Loop through every frame and write video
                 for f in jpgs:
                         fr=cv2.imread(f)
                         out.write(fr)
-
+                
                 # Release everything if job is finished
                 cap.release()
                 out.release()
-
+                
                 #If video only, delete jpegs
                 if self.makeVID == "video":
                         for f in jpgs:
                                 os.remove(f)
-                 
+        
+        ######################################        
         #Define the run function
+        ######################################
+        
         def run(self):
                 
                 #Report name of file
@@ -339,13 +291,13 @@ class Motion:
 
                 ###########Failure Classes, used to format output and illustrate number of frames
                 ##No motion, the frame was not different enough compared to the background due to accAvg 
-                nodiff=0
+                self.nodiff=0
                 
                 ##No contours, there was not enough motion compared to background, did not meet threshold
-                nocountr=0
+                self.nocountr=0
                 
                 ###Not large enough, the movement contour was too small to be included 
-                toosmall=0      
+                self.toosmall=0      
                 
                 #Hold all the output frames in an array
 
@@ -407,9 +359,7 @@ class Motion:
                         orig = orig_image[1:700,1:1280]
                 else:
                         orig = orig_image.copy()
-                
-                #if vis: display("origin", 100, orig)
-                
+                                
                 #make a copy of the image
                 orig_ROI=orig.copy()
 
@@ -460,7 +410,7 @@ class Motion:
                                 orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]=255
                                 display_image=orig_ROI
                         
-                        display("newImageNORMAL",3000,display_image)      
+                        #display("newImageNORMAL",3000,display_image)      
                         
                 else:
                         display_image=orig              
@@ -507,39 +457,19 @@ class Motion:
                         
                         #Draw and show the area to count inside
                         cv2.rectangle(orig, (area_box[1],area_box[3]), (area_box[0],area_box[2]), (255,0,0), 1)     
-                        display("AreaCounter",2000,orig)
-                        
-                if submeth=="ACC":
-                    # Greyscale image, thresholded to create the motion mask:
-                    grey_image = np.uint8(display_image)
+                        #display("AreaCounter",2000,orig)
                 
-                    # The RunningAvg() function requires a 32-bit or 64-bit image...
-                    running_average_image = np.float32(display_image)
-                    
-                    # ...but the AbsDiff() function requires matching image depths:
-                    running_average_in_display_color_depth = display_image.copy()
-                    
-                    # The difference between the running average and the current frame:
-                    difference =  display_image.copy()
-                
-                target_count = 1
-                last_frame_entity_list = []
-                frameC_announce=0
-                
-                #Set time
-                t0 = time.time()
 
+                ###Background Constructor, create class
+                BC=BackgroundSubtractor.Background(self.subMethod,display_image,self.accAvg,self.threshT)
                 
+                #Set time and frame constants
+                t0 = time.time()
+                frameC_announce=0
+    
                 #Start with motion flag on
-                noMotion=False
-                
-                if submeth=="MOG2":
-                    #MOG method creator
-                    fgbg = cv2.createBackgroundSubtractorMOG2()
-                if submeth=="KNN":
-                    #MOG method creator
-                    fgbg = cv2.createBackgroundSubtractorKNN()                
-                
+                noMotion=False                
+
                 while True:
                         
                         #Was the last frame no motion; if not, scan frames
@@ -559,9 +489,6 @@ class Motion:
                                 #finalize the counters for reporting
                                 self.frame_count=frame_count
                                 self.total_count=total_count
-                                self.nodiff=nodiff
-                                self.nocountr=nocountr
-                                self.toosmall=toosmall
                                 self.file_destination=file_destination
                                 break
                                       
@@ -652,64 +579,12 @@ class Motion:
                         #############################
                         ##BACKGROUND SUBTRACTION
                         #############################
-                        ## accumulated averaging
-                        if submeth == "ACC":
-                            # Create an image with interactive feedback:
-                            display_image = camera_imageROI.copy()
-                            
-                            # Create a working "color image" to modify / blur
-                            color_image =  display_image.copy()\
-                            
-                            #if vis: display(Initial,2000,color_image)                    
-    
-                            # Smooth to get rid of false positives
-                            color_image = cv2.GaussianBlur(color_image,(3,3),0)
-                            
-                            #if vis: display("Blur", 2000, color_image)
-                            
-                            # Use the Running Average as the static background
-                            cv2.accumulateWeighted(color_image,running_average_image,self.accAvg)                                  
-                            running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
-                                            
-                            #if vis: display("Running Average",5000,running_average_in_display_color_depth)                  
-                            
-                            # Subtract the current frame from the moving average.
-                            difference=cv2.absdiff( color_image, running_average_in_display_color_depth)
-                            
-                            #if vis: display("difference",5000,difference)
-                            
-                            # Convert the image to greyscale.
-                            grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
-                            
-                            ##If some difference is 0, jump to next frame
-                            #if sum(sum(grey_image))==0:
-                                    #nodiff=nodiff+1
-                                    #noMotion=True                   
-                                    #continue
-                            
-                            # Threshold the image to a black and white motion mask:
-                            ret,grey_image = cv2.threshold(grey_image, self.threshT, 255, cv2.THRESH_BINARY )
-
-                        #display("Before closing",1500,grey_image)
+                        grey_image=BC.BackGroundSub(camera_imageROI)
                         
-                        ##Mixture of Gaussians
-                        if submeth in ["MOG2","KNN"]:
-                            grey_image = fgbg.apply(camera_imageROI)
-                    
-                        #Dilate the areas to merge bounded objects
-                        #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(7,7))
-                        #grey_image= cv2.morphologyEx(grey_image, cv2.MORPH_CLOSE, kernel)
-
-                        display("Before dilation",1500,grey_image)
-
-                        #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(7,7))
-                        #grey_image=cv2.dilate(grey_image,kernel)
-
-                        #display("after dilation",1500,grey_image)
-
-                        #if vis: display("Threshold",1000,grey_image)
-                        
-                        points = []   # Was using this to hold either pixel coords or polygon coords.
+                        #############################
+                        ##Contour Analysis and Post-Proccessing
+                        #############################
+                        points = []   # Was using this to hold camera_imageROIeither pixel coords or polygon coords.
                         bounding_box_list = []
 
                         # Now calculate movements using the white pixels as "motion" data
@@ -717,7 +592,7 @@ class Motion:
                         
                         if len(contours) == 0 :
                                 #No movement, add to counter
-                                nocountr=nocountr+1
+                                self.nocountr=self.nocountr+1
                                 #NoMotion flag
                                 noMotion=True
                                 continue                    
@@ -811,7 +686,7 @@ class Motion:
                                         bound_center.append((x,y))                                
     
                         if len(bound_center) == 0:
-                                toosmall=toosmall+1
+                                self.toosmall=self.toosmall+1
                                 noMotion=True                   
                                 continue
 
@@ -830,9 +705,7 @@ class Motion:
                                                                 if self.ROI_include == "exclude":
                                                                         cv2.rectangle(camera_imageO,(area_box[0],area_box[1]),(area_box[2],area_box[3]),(242,221,61),thickness=1,lineType=4)
                                                                 else:
-                                                                        cv2.rectangle(display_image,(area_box[0],area_box[1]),(area_box[2],area_box[3]),(242,221,61),thickness=1,lineType=4)
-                                                                
-                                                                
+                                                                        cv2.rectangle(display_image,(area_box[0],area_box[1]),(area_box[2],area_box[3]),(242,221,61),thickness=1,lineType=4)                    
                         ##################################################
                         #Write image to file
                         ##################################################
@@ -844,7 +717,6 @@ class Motion:
                                         else:
                                                 cv2.imwrite(file_destination + "/"+str(frame_count)+".jpg",display_image)
 
-                        
                         #save the frame count and the time in video, in case user wants to check in the original
                         #create a time object, this relies on the frame_rate being correct!
                         #set seconds
@@ -998,26 +870,3 @@ class Motion:
                         with open(area_report, 'wb') as f:
                                 writer = csv.writer(f)
                                 writer.writerows(self.areaC)
-                                        
-
-if __name__ == "__main__":
-        while True:
-          
-            try:
-                    motionVid=Motion()
-                    motionVid.arguments()
-                    motionVid.wrap()
-            except:
-                    traceback.print_exc()
-
-            #reboot or exit?
-            #if system arguments, immediately exit
-            if len(sys.argv)>=2:
-                    break
-            ch=raw_input("Press r to reboot, press any key to exit \n")
-            if ch=='r':
-                continue
-            break
-            
-
-
