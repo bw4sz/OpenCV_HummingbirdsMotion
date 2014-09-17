@@ -42,7 +42,6 @@ def cont(orig,fram):
     morphc = cv2.morphologyEx(fram, cv2.MORPH_CLOSE, kernel)
     
     #fram = np.uint8(fram)
-    # Now calculate movements using the white pixels as "motion" data
     _,contours,hierarchy = cv2.findContours(morphc, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )    
     
     for cnt in contours:
