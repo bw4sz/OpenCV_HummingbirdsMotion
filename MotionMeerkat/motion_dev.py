@@ -29,6 +29,7 @@ from shapely.ops import cascaded_union
 import shapely.geometry as sg
 import traceback
 import sourceM
+import BackgroundSubtractor
           
 ###Create motion class with sensible defaults
 
@@ -187,12 +188,6 @@ class Motion:
                                 
         ###########Inputs Read in #################
 
-        #define a sorting function
-        def getint(self,name):
-                f=os.path.split(name)
-                (shortname, extension) = os.path.splitext(f[-1]) 
-                return int(shortname)
-
         #define video function
         #Find path of jpegs
 
@@ -249,7 +244,7 @@ class Motion:
                 out = cv2.VideoWriter(vidDEST,int(fourcc),float(fr), frame_size)                    
 
                 #split and sort the jpg names
-                jpgs.sort(key=self.getint)
+                jpgs.sort(key=getint)
 
                 #Loop through every frame and write video
                 for f in jpgs:
@@ -285,16 +280,12 @@ class Motion:
 
                 ###########Failure Classes, used to format output and illustrate number of frames
                 ##No motion, the frame was not different enough compared to the background due to accAvg 
-                nodiff=0
-                
+                self.nodiff=0
                 ##No contours, there was not enough motion compared to background, did not meet threshold
-                nocountr=0
-                
+                self.nocountr=0
                 ###Not large enough, the movement contour was too small to be included 
-                toosmall=0      
+                self.toosmall=0      
                 
-                #Hold all the output frames in an array
-
                 #If its batch, give an extra folder
                 if self.runtype == 'batch':
                         file_destination=os.path.join(self.fileD,IDFL,shortname)
@@ -331,7 +322,7 @@ class Motion:
                 ####Burnin and first image
                 #Count the number of frames returned
                 frame_count=0
-                total_count=0
+                self.total_count=0
                 
                 #apply burn in, skip the the first X frames according to user input
                 for x in range(1,int(float(self.burnin) * int(self.frame_rate) * 60)): 
@@ -354,8 +345,6 @@ class Motion:
                 else:
                         orig = orig_image.copy()
                 
-                #if vis: display("origin", 100, orig)
-                
                 #make a copy of the image
                 orig_ROI=orig.copy()
 
@@ -364,50 +353,13 @@ class Motion:
 
                 #Set region of interest 
                 if self.set_ROI:
-
-                        #make a copy of the image.
-
-                        def onmouse(event,x,y,flags,param):
-                            global ix,iy,roi,drawing
-
-                            # Draw Rectangle
-                            if event == cv2.EVENT_RBUTTONDOWN:
-                                drawing = True
-                                ix,iy = x,y
-
-                            elif event == cv2.EVENT_MOUSEMOVE:
-                                if drawing == True:
-                                    cv2.rectangle(iorig,(ix,iy),(x,y),BLUE,-1)
-                                    rect = (ix,iy,abs(ix-x),abs(iy-y))
-
-                            elif event == cv2.EVENT_RBUTTONUP:
-                                drawing = False
-                                cv2.rectangle(iorig,(ix,iy),(x,y),BLUE,-1)
-                                rect = (ix,iy,x,y)
-                                roi.extend(rect)
-
-                        cv2.namedWindow('Set Region of Interest',cv2.WINDOW_AUTOSIZE)
-                        cv2.setMouseCallback('Set Region of Interest',onmouse)
-
-                        print ("Please draw a single rectangle ROI using right click!")
-                        while(1):
-                                cv2.namedWindow('Set Region of Interest',cv2.WINDOW_AUTOSIZE)                 
-                                cv2.imshow('Set Region of Interest',iorig)
-                                k = cv2.waitKey(1) & 0xFF
-                                if k == 27:
-                                        break
                         
-                        cv2.destroyAllWindows()
-                        
-                        print(roi)
+                        roi=sourceM.Urect(iorig)
                         
                         if self.ROI_include == "include": display_image=orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]
                         else:
                                 orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]=255
-                                display_image=orig_ROI
-                        
-                        #display("newImageNORMAL",3000,display_image)      
-                        
+                                display_image=orig_ROI                        
                 else:
                         display_image=orig              
                         
@@ -416,76 +368,28 @@ class Motion:
                 frame_size=(width, height)
 
                 ###If set area counter, draw another box.
-                area_box=[]
+          
                 if self.set_areacounter:
-                        
-                        def onmouse(event,x,y,flags,param):
-                            global ix,iy,mode,roi,drawing
-
-                            # Draw Rectangle
-                            if event == cv2.EVENT_RBUTTONDOWN:
-                                drawing = True
-                                ix,iy = x,y
-
-                            elif event == cv2.EVENT_MOUSEMOVE:
-                                if drawing == True:
-                                    cv2.rectangle(orig,(ix,iy),(x,y),BLUE,-1)
-                                    rect = (ix,iy,abs(ix-x),abs(iy-y))
-
-                            elif event == cv2.EVENT_RBUTTONUP:
-                                drawing = False
-                                cv2.rectangle(orig,(ix,iy),(x,y),BLUE,-1)
-                                rect = (ix,iy,x,y)
-                                area_box.extend(rect)
-
-                        cv2.namedWindow('Set area counter',cv2.WINDOW_AUTOSIZE)
-                        cv2.setMouseCallback('Set area counter',onmouse)
-                        print ("Please draw a single rectangle using right click!")
-
-                        while(1):
-                                cv2.namedWindow('Set area counter',cv2.WINDOW_AUTOSIZE)                 
-                                cv2.imshow('Set area counter',orig)
-                                k = cv2.waitKey(1) & 0xFF
-                                if k == 27:
-                                        break
-                        
-                        cv2.destroyAllWindows()
-                        
+                        area_box=sourceM.Urect(orig,"Set Area Counter")
+                
                         #Draw and show the area to count inside
                         cv2.rectangle(orig, (area_box[1],area_box[3]), (area_box[0],area_box[2]), (255,0,0), 1)     
                         #display("AreaCounter",2000,orig)
                         
-                if self.subMethod=="ACC":
-                    # Greyscale image, thresholded to create the motion mask:
-                    grey_image = np.uint8(display_image)
+                ############################
+                #Initialize Background Subtraction
+                ############################
                 
-                    # The RunningAvg() function requires a 32-bit or 64-bit image...
-                    running_average_image = np.float32(display_image)
-                    
-                    # ...but the AbsDiff() function requires matching image depths:
-                    running_average_in_display_color_depth = display_image.copy()
-                    
-                    # The difference between the running average and the current frame:
-                    difference =  display_image.copy()
-                
-                target_count = 1
-                last_frame_entity_list = []
+                backgr=BackgroundSubtractor.Background(subMethod,orig_image,self.accAvg,self.threshT)
+        
                 frameC_announce=0
                 
                 #Set time
                 t0 = time.time()
 
-                
                 #Start with motion flag on
                 noMotion=False
-                
-                if self.subMethod=="MOG2":
-                    #MOG method creator
-                    fgbg = cv2.createBackgroundSubtractorMOG2()
-                if self.subMethod=="KNN":
-                    #MOG method creator
-                    fgbg = cv2.createBackgroundSubtractorKNN()                
-                
+        
                 while True:
                         
                         #Was the last frame no motion; if not, scan frames
@@ -504,10 +408,6 @@ class Motion:
                         if not ret:
                                 #finalize the counters for reporting
                                 self.frame_count=frame_count
-                                self.total_count=total_count
-                                self.nodiff=nodiff
-                                self.nocountr=nocountr
-                                self.toosmall=toosmall
                                 self.file_destination=file_destination
                                 break
                                       
@@ -559,205 +459,22 @@ class Motion:
                         #set floor flag, we can't have negative accAVG
                         floor=0
                         if self.adapt:
-                                        
-                                #Every 10min, reset the accAvg threshold, depending on expected level of movement
+                                       sourceM.adapt() 
 
-                                #Should be a integer, round it
-                                fift=round(10*60*float(self.frame_rate))
-                                
-                                if frame_count % fift == 0:  
-                                        
-                                       #If the total base is fift (10min window), then assuming 99% of images are junk the threshold should be
-                                        #We've been counting frames output to file in the hitcounter
-                                        
-                                        print(str(hitcounter) + " files written in last 10minutes" + "\n" )             
-                                        if hitcounter > (fift*self.frameHIT) :
-                                                self.accAvg = self.accAvg + .05
-                                        if hitcounter < (fift*self.frameHIT) :
-                                                self.accAvg = self.accAvg - .025
-                                                
-                                        #In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
-                                        print(file_destination + str(frame_count) + " accAvg is changed to: " + str(self.accAvg) + "\n")
-                                        
-                                        #Write change to log file
-                                        
-                                        #reset hitcoutner for another fifteen minutes
-                                        hitcounter=0
-                                                                                        
-                                        #Build in a floor, the value can't be negative.
-                                        if self.accAvg < self.floorvalue:
-                                                floor=floor + 1
-                                        
-                                #Reset if needed.
-                                        if floor == 1 :
-                                                self.accAvg=self.floorvalue
-
-                                                print(file_destination + str(frame_count) + " accAvg is reset to: " + str(self.accAvg))
-                                                #Write change to log file
 
                         #############################
                         ##BACKGROUND SUBTRACTION
                         #############################
-                        ## accumulated averaging
-                        if self.subMethod == "ACC":
-                            # Create an image with interactive feedback:
-                            display_image = camera_imageROI.copy()
-                            
-                            # Create a working "color image" to modify / blur
-                            color_image =  display_image.copy()\
-                            
-                            #if vis: display(Initial,2000,color_image)                    
-    
-                            # Smooth to get rid of false positives
-                            color_image = cv2.GaussianBlur(color_image,(3,3),0)
-                            
-                            #if vis: display("Blur", 2000, color_image)
-                            
-                            # Use the Running Average as the static background
-                            cv2.accumulateWeighted(color_image,running_average_image,self.accAvg)                                  
-                            running_average_in_display_color_depth = cv2.convertScaleAbs( running_average_image)
-                                            
-                            #if vis: display("Running Average",5000,running_average_in_display_color_depth)                  
-                            
-                            # Subtract the current frame from the moving average.
-                            difference=cv2.absdiff( color_image, running_average_in_display_color_depth)
-                            
-                            #if vis: display("difference",5000,difference)
-                            
-                            # Convert the image to greyscale.
-                            grey_image=cv2.cvtColor( difference,cv2.COLOR_BGR2GRAY)
-                            
-                            ##If some difference is 0, jump to next frame
-                            #if sum(sum(grey_image))==0:
-                                    #nodiff=nodiff+1
-                                    #noMotion=True                   
-                                    #continue
-                            
-                            # Threshold the image to a black and white motion mask:
-                            ret,grey_image = cv2.threshold(grey_image, self.threshT, 255, cv2.THRESH_BINARY )
-
-                        #display("Before closing",1500,grey_image)
+                        grey_image=backgr.BackGroundSub(camera_imageROI)
                         
-                        ##Mixture of Gaussians
-                        if self.subMethod in ["MOG2","KNN"]:
-                            grey_image = fgbg.apply(camera_imageROI)
-                    
-                        #Dilate the areas to merge bounded objects
-                        #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(7,7))
-                        #grey_image= cv2.morphologyEx(grey_image, cv2.MORPH_CLOSE, kernel)
-
-                        #display("Before dilation",1500,grey_image)
-
-                        #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(7,7))
-                        #grey_image=cv2.dilate(grey_image,kernel)
-
-                        #display("after dilation",1500,grey_image)
-
-                        #if vis: display("Threshold",1000,grey_image)
+                        #############################
+                        ###Contour filters
+                        #############################
                         
-                        points = []   # Was using this to hold either pixel coords or polygon coords.
-                        bounding_box_list = []
-
-                        # Now calculate movements using the white pixels as "motion" data
-                        _,contours,hierarchy = cv2.findContours(grey_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
-                        
-                        if len(contours) == 0 :
-                                #No movement, add to counter
-                                nocountr=nocountr+1
-                                #NoMotion flag
-                                noMotion=True
-                                continue                    
-                        
-                        #print(len(contours))
-                        cnt=contours[0]
-                        len(cnt)
-                                
-                        drawing = np.uint8(display_image)
-                        
-                        ##Draw the initial contours
-                        #if vis:
-
-                                #for cnt in contours:
-                                        #bx,by,bw,bh = cv2.boundingRect(cnt)
-                                        #cv2.drawContours(drawing,[cnt],0,(0,255,0),1)   # draw #contours in green color
-                                
-                                #display("contours", 2000, drawing)
-                                
-                        for cnt in contours:
-                                bounding_rect = cv2.boundingRect( cnt )
-                                point1 = ( bounding_rect[0], bounding_rect[1] )
-                                point2 = ( bounding_rect[0] + bounding_rect[2], bounding_rect[1] + bounding_rect[3] )
-                                bounding_box_list.append( ( point1, point2 ) )
-                                
-                                #polygon_points = cv2.approxPolyDP( cnt,0.1*cv2.arcLength(cnt,True),True)
-                                #approx = cv2.approxPolyDP(cnt,0.1*cv2.arcLength(cnt,True),True)
-                                
-                        # Find the average size of the bbox (targets), then
-                        # remove any tiny bboxes (which are probably just noise).
-                        # "Tiny" is defined as any box with 1/10th the area of the average box.
-                        # This reduces false positives on tiny "sparkles" noise.
-                        box_areas = []
-                        for box in bounding_box_list:
-                                box_width = box[right][0] - box[left][0]
-                                box_height = box[bottom][0] - box[top][0]
-                                box_areas.append( box_width * box_height )
-                                
-                        average_box_area = 0.0
-                        if len(box_areas): average_box_area = float( sum(box_areas) ) / len(box_areas)
-                        
-                        trimmed_box_list = []
-                        for box in bounding_box_list:
-                                box_width = box[right][0] - box[left][0]
-                                box_height = box[bottom][0] - box[top][0]
-                                
-                                # Only keep the box if it's not a tiny noise box:
-                                if (box_width * box_height) > average_box_area*.3: 
-                                        trimmed_box_list.append( box )
-
-                        #shapely does a much faster job of polygon union
-                        #format into shapely bounding feature
-                        shape_list=[]
-                        
-                        ## Centroids of each target
-                        bound_center=[]
-                        
-                        for out in trimmed_box_list:
-                                sh_out=sg.box(out[0][0],out[0][1],out[1][0],out[1][1])
-                                shape_list.append(sh_out)
-
-                        #shape_pol=sg.MultiPolygon(shape_list)
-                        casc=cascaded_union(shape_list).buffer(1)
-                        
-                        if casc.type=="MultiPolygon":
-                            #draw shapely bounds
-                            for p in range(1,len(casc.geoms)):
-                                b=casc.geoms[p].bounds
-                                if casc.geoms[p].area > ((width * height) * (float(self.minSIZE/100))):
-                                        if self.ROI_include == "exclude":
-                                                cv2.rectangle(camera_imageO,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
-                                                #cv2.putText(camera_imageO, str(round(casc.geoms[p].area/(width * height),3)*100), (int(b[0]),int(b[1])),cv2.FONT_HERSHEY_COMPLEX,1,(0,0,0),1,-1)
-                            
-                                        else:
-                                                cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
-                                        #Return the centroid to list, rounded two decimals
-                                        x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
-                                        y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
-                                        bound_center.append((x,y)) 
-                        else:
-                                b=casc.bounds
-                                #If bounding polygon is larger than the minsize, draw a rectangle
-                                if casc.area > ((width * height) * (float(self.minSIZE/100))):
-                                        if self.ROI_include == "exclude":
-                                                cv2.rectangle(camera_imageO,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
-                                                #cv2.putText(camera_imageO, str(round(casc.area/(width * height),3)*100),(int(b[0]),int(b[1])),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),1,-1)
-                                        else:
-                                                cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
-                                        x=round(casc.centroid.coords.xy[0][0],2)
-                                        y=round(casc.centroid.coords.xy[1][0],2)
-                                        bound_center.append((x,y))                                
+                        bound_center=backgr.contourFilter(grey_image)
     
                         if len(bound_center) == 0:
-                                toosmall=toosmall+1
+                                self.toosmall=self.toosmall+1
                                 noMotion=True                   
                                 continue
 
@@ -810,7 +527,7 @@ class Motion:
                        ##################################################
                         #Have a returned counter to balance hitRate
                         hitcounter=hitcounter+1
-                        total_count=total_count+1
+                        self.total_count=self.total_count+1
                         #set flag to motion
                         noMotion=False
         
@@ -945,25 +662,3 @@ class Motion:
                                 writer = csv.writer(f)
                                 writer.writerows(self.areaC)
                                         
-
-if __name__ == "__main__":
-        while True:
-          
-            try:
-                    motionVid=Motion()
-                    motionVid.arguments()
-                    motionVid.wrap()
-            except:
-                    traceback.print_exc()
-
-            #reboot or exit?
-            #if system arguments, immediately exit
-            if len(sys.argv)>=2:
-                    break
-            ch=raw_input("Press r to reboot, press any key to exit \n")
-            if ch=='r':
-                continue
-            break
-            
-
-
