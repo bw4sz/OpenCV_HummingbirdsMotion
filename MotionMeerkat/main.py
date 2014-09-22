@@ -1,6 +1,9 @@
 #!/usr/bin/env python
-from sourceM import *
-from motionClass import *
+import motionClass
+import wrapper
+import arguments
+import traceback
+import sys
 
 #==================
 # MAIN ENTRY POINT
@@ -9,9 +12,9 @@ from motionClass import *
 if __name__ == "__main__":
         while True:
                 try:
-                        motionVid=Motion()
-                        motionVid.arguments()
-                        motionVid.wrap()
+                        motionVid=motionClass.Motion()
+                        arguments.arguments(motionVid)
+                        wrapper.wrap(motionVid)
                 except:
                         traceback.print_exc()
         
