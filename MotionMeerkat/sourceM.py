@@ -108,7 +108,7 @@ def Urect(img,title):
     return(roi)    
 
 
-def adapt(frame_rate=self.frame_rate,accAvg=self.accAvg,file_destination=file_destination,floorvalue=self.floorvalue):
+def adapt(frame_rate,accAvg,file_destination,floorvalue):
     #Every 10min, reset the accAvg threshold, depending on expected level of movement
 
     #Should be a integer, round it

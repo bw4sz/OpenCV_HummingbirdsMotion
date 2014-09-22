@@ -66,7 +66,7 @@ class Background:
         self.grey_image= cv2.morphologyEx(self.grey_image, cv2.MORPH_OPEN, kernel)
         return(self.grey_image)
     
-    def contourFilter(grey_image,minSize=self.minSize,ROI_include=self.ROI_include):
+    def contourFilter(grey_image,minSize,ROI_include):
         
         global display_image, camera_imageO
         
@@ -81,7 +81,7 @@ class Background:
                 self.nocountr=self.nocountr+1
                 #NoMotion flag
                 noMotion=True
-                return(contours)
+                return("Empty")
         
         cnt=contours[0]
         len(cnt)
