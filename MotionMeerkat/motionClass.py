@@ -50,11 +50,15 @@ class Motion:
                 
                 #Count the number of frames returned
                 self.frame_count=0
-                self.total_count=0                
+                self.total_count=0
+                
+                #Set time and frame constants
+                self.frameC_announce=0
+    
+                #Start with motion flag on
+                self.noMotion=False                   
 
-        ######################################        
-        #Define the run function
-        ######################################
+
         
         def prep(self):
                 
@@ -87,8 +91,9 @@ class Motion:
                 #########################
                 ##Begin video capture
                 #########################
-                self.cap = cv2.VideoCapture(self.inDEST)
                 
+                ##Get Video Properties
+                self.cap = cv2.VideoCapture(self.inDEST)
                 #Get frame rate if the plotwatcher setting hasn't been called
                 # not the most elegant solution, but get global frame_rate
                 if not self.frameSET:
@@ -97,10 +102,8 @@ class Motion:
                 
                 #get frame time relative to start
                 frame_time=self.cap.get(0)     
-                
                 #get total number of frames
                 self.total_frameC=self.cap.get(7)     
-
                 sys.stderr.write("frame rate: %s\n" % self.frame_rate)
                 
                 ####Burnin and first image
@@ -111,6 +114,7 @@ class Motion:
                         self.frame_count=self.frame_count+1
                         
                 print("Beginning Motion Detection")
+                
                 #Set frame skip counter if downsampling 
                 frameSKIP=0
                 
@@ -138,18 +142,16 @@ class Motion:
                         
                         print(roi)
                         
-                        if self.ROI_include == "include": display_image=orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]
+                        if self.ROI_include == "include": self.display_image=orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]
                         else:
                                 orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]=255
-                                display_image=orig_ROI
-                        
-                        #display("newImageNORMAL",3000,display_image)      
-                        
+                                self.display_image=orig_ROI
+                                                
                 else:
-                        display_image=orig              
+                        self.display_image=orig              
                         
-                self.width = np.size(display_image, 1)
-                self.height = np.size(display_image, 0)
+                self.width = np.size(self.display_image, 1)
+                self.height = np.size(self.display_image, 0)
                 frame_size=(self.width, self.height)
 
                 ###If set area counter, draw another box.
@@ -158,27 +160,20 @@ class Motion:
 
                         #Draw and show the area to count inside
                         cv2.rectangle(orig, (area_box[1],area_box[3]), (area_box[0],area_box[2]), (255,0,0), 1)     
-                        #display("AreaCounter",2000,orig)
                 
                 ###Background Constructor, create class
-                self.BC=BackgroundSubtractor.Background(self.subMethod,display_image,self.accAvg,self.threshT)
-                
-                #Set time and frame constants
-                t0 = time.time()
-                self.frameC_announce=0
-    
-                #Start with motion flag on
-                noMotion=False         
-                
-##Function to compute background during the loop
-                
+                self.BC=BackgroundSubtractor.Background(self.subMethod,self.display_image,self.accAvg,self.threshT,self.moghistory)
+           
+######################################################             
+##Function to compute background during the video loop
+######################################################
         def run(self):
 
                 while True:
                         
                         #Was the last frame no motion; if not, scan frames
                         if not self.scan ==0:
-                                if noMotion:
+                                if self.noMotion:
                                         for x in range(1,self.scan):
                                                 self.cap.grab()
                                                 self.frame_count=self.frame_count+1
@@ -188,26 +183,26 @@ class Motion:
                                 pass
                                         
                         # Capture frame from file
-                        ret,camera_imageO = self.cap.read()
+                        ret,current_image = self.cap.read()
                         if not ret:
-                                #finalize the counters for reporting
+                                #If there are no more frames, break
                                 break
                                       
                         #Cut off the self.bottom 5% if the plotwatcher option is called. 
                         if not self.plotwatcher:
-                                camera_image = camera_imageO.copy()     
+                                camera_image = current_image   
                         else:
-                                camera_image = camera_imageO[1:700,1:1280]
+                                camera_image = current_image[1:700,1:1280]
                         
                         #If set roi, subset the image
                         if not self.set_ROI:
-                                camera_imageROI=camera_image
+                                current_imageROI=camera_image
                         else:
-                                if self.ROI_include == "include":camera_imageROI=camera_image[roi[1]:roi[3], roi[0]:roi[2]]
+                                if self.ROI_include == "include":current_imageROI=camera_image[roi[1]:roi[3], roi[0]:roi[2]]
                                 else: 
                                         #Exclude area by making it a white square
-                                        camera_imageROI=camera_image.copy()
-                                        camera_imageROI[roi[1]:roi[3], roi[0]:roi[2]]=255
+                                        current_imageROI=camera_image.copy()
+                                        current_imageROI[roi[1]:roi[3], roi[0]:roi[2]]=255
                                         
                         self.frame_count += 1
                         frame_t0 = time.time()
@@ -237,7 +232,7 @@ class Motion:
                                                 
                                         #Reset the last time it was printed. 
                                         
-                        ####Adaptively set the aggregate threshold, we know that about 95% of data are negatives. 
+                        ####Adaptively set the aggregate threshold 
                         #set floor flag, we can't have negative accAVG
                         floor=0
                         if self.adapt:
@@ -246,7 +241,7 @@ class Motion:
                         #############################
                         ##BACKGROUND SUBTRACTION
                         #############################
-                        grey_image=self.BC.BackGroundSub(camera_imageROI)
+                        grey_image=self.BC.BackGroundSub(current_imageROI)
                         
                         #############################
                         ##Contour Analysis and Post-Proccessing
@@ -260,8 +255,8 @@ class Motion:
                         if len(contours) == 0 :
                                 #No movement, add to counter
                                 self.nocountr=self.nocountr+1
-                                #NoMotion flag
-                                noMotion=True
+                                #self.noMotion flag
+                                self.noMotion=True
                                 continue                    
                         
                         for cnt in contours:
@@ -311,59 +306,49 @@ class Motion:
                             for p in range(1,len(casc.geoms)):
                                 b=casc.geoms[p].bounds
                                 if casc.geoms[p].area > ((self.width * self.height) * (float(self.minSIZE/100))):
-                                        if self.ROI_include == "exclude":
-                                                cv2.rectangle(camera_imageO,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
-                                                #cv2.putText(camera_imageO, str(round(casc.geoms[p].area/(width * height),3)*100), (int(b[0]),int(b[1])),cv2.FONT_HERSHEY_COMPLEX,1,(0,0,0),1,-1)
-                            
-                                        else:
-                                                cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
-                                        #Return the centroid to list, rounded two decimals
-                                        x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
-                                        y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
-                                        bound_center.append((x,y)) 
+                                                cv2.rectangle(current_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                                #Return the centroid to list, rounded two decimals
+                                                x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
+                                                y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
+                                                bound_center.append((x,y)) 
                         else:
                                 b=casc.bounds
                                 #If bounding polygon is larger than the minsize, draw a rectangle
                                 if casc.area > ((self.width * self.height) * (float(self.minSIZE/100))):
-                                        if self.ROI_include == "exclude":
-                                                cv2.rectangle(camera_imageO,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
-                                        else:
-                                                cv2.rectangle(display_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
-                                        x=round(casc.centroid.coords.xy[0][0],2)
-                                        y=round(casc.centroid.coords.xy[1][0],2)
-                                        bound_center.append((x,y))                                
-    
+                                                cv2.rectangle(current_imageROI,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                                x=round(casc.centroid.coords.xy[0][0],2)
+                                                y=round(casc.centroid.coords.xy[1][0],2)
+                                                bound_center.append((x,y))                                
+            
                         if len(bound_center) == 0:
                                 self.toosmall=self.toosmall+1
-                                noMotion=True                   
+                                self.noMotion=True                   
                                 continue
-
+                        
+                        ################################
+                        #Grabcut Image Segmentation
+                        ################################
+                        
                         #Set flag for inside area
                         inside_area=False
                         if self.set_areacounter:
                         #test drawing center circle
                                 for box in bound_center:
                                         
-                                        #Do this the simple way for now
-
                                         #is the x coordinate within
                                         if area_box[2] > box[0] > area_box[0]:
                                                 if area_box[3] > box[1] > area_box[1]:
                                                                 inside_area= not inside_area
                                                                 if self.ROI_include == "exclude":
-                                                                        cv2.rectangle(camera_imageO,(area_box[0],area_box[1]),(area_box[2],area_box[3]),(242,221,61),thickness=1,lineType=4)
-                                                                else:
-                                                                        cv2.rectangle(display_image,(area_box[0],area_box[1]),(area_box[2],area_box[3]),(242,221,61),thickness=1,lineType=4)                    
+                                                                        cv2.rectangle(current_imageROI,(area_box[0],area_box[1]),(area_box[2],area_box[3]),(242,221,61),thickness=1,lineType=4)
+  
                         ##################################################
                         #Write image to file
                         ##################################################
                         
                         if not self.makeVID == "none":
                                 if self.makeVID in ("frames","both"):
-                                        if self.ROI_include == "exclude":
-                                                cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",camera_imageO)
-                                        else:
-                                                cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",display_image)
+                                        cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",current_imageROI)
 
                         #save the frame count and the time in video, in case user wants to check in the original
                         #create a time object, this relies on the frame_rate being correct!
@@ -385,8 +370,9 @@ class Motion:
                         #Have a returned counter to balance hitRate
                         self.hitcounter=self.hitcounter+1
                         self.total_count=self.total_count+1
+                        
                         #set flag to motion
-                        noMotion=False
+                        self.noMotion=False
                                 
         def videoM(self):
                 

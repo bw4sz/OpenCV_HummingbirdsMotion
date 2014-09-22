@@ -42,8 +42,9 @@ def arguments(self):
                                 self.parser.add_argument("--frameSET", help="Set frame_rate?",action='store_true',default=False)
                                 self.parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true",default=False)
                                 self.parser.add_argument("--frame_rate", help="frames per second",default=0)
+                                self.parser.add_argument("--moghistory", help="Length of history for MOG background detector",default=500,type=int)
                                 self.parser.add_argument("--set_ROI", help="Set region of interest?",action='store_true',default=False)
-                                self.parser.add_argument("--ROI_include", help="include or exclude?",default="include")
+                                self.parser.add_argument("--ROI_include", help="include or exclude?",default="exclude")
                                 self.parser.add_argument("--set_areacounter", help="Set region to count area",action="store_true",default=False)
                                 self.parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?",default='frames')
                                 self.args = self.parser.parse_args(namespace=self)
@@ -87,7 +88,7 @@ def arguments(self):
                                                 self.subMethod=raw_input("Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (Acc) :\n")
                                                 if not self.subMethod: self.subMethod="Acc"
                                                     
-                                                if self.subMethod="Acc":
+                                                if self.subMethod=="Acc":
                                                                 #Should accAVG be adapted every 10minutes based on an estimated hitrate
                                                                 self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on hitrate? (n) :\n")      
                                                                 
@@ -104,7 +105,11 @@ def arguments(self):
                                                                                 self.floorvalue=raw_input("Minimum allowed sensitivity (0.05):\n")
                                                                                 if not self.floorvalue: self.floorvalue = 0.05
                                                                                 else: self.floorvalue=float(self.floorvalue)
-                                                    
+                                                if self.subMethod=="MOG":
+                                                                #Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
+                                                                self.moghistory=raw_input("History of Frames for Gaussian (500):\n")
+                                                                if not self.moghistory: self.moghistory = 500
+                                                                
                                             #Skip initial frames of video, in case of camera setup and shake.       
                                                 self.burnin= raw_input("Burn in, skip initial minutes of video (0):\n")
                                                 if not self.burnin: self.burnin = 0
@@ -155,3 +160,4 @@ def arguments(self):
                                                 self.set_ROI=False
                                                 self.set_areacounter=False
                                                 self.subMethod="Acc"
+                                                self.moghistory = int(500)
