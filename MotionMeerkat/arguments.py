@@ -108,9 +108,10 @@ def arguments(self):
                                                 if self.subMethod=="MOG":
                                                                 #Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
                                                                 self.moghistory=raw_input("History of Frames for Gaussian (500):\n")
-                                                                if not self.moghistory: self.moghistory = 500
-                                                                
-                                            #Skip initial frames of video, in case of camera setup and shake.       
+                                               #Still need to set moghistory to pass to argument, even if it isn't used.  
+                                                if not self.moghistory: self.moghistory = 500
+                                               
+                                               #Skip initial frames of video, in case of camera setup and shake.       
                                                 self.burnin= raw_input("Burn in, skip initial minutes of video (0):\n")
                                                 if not self.burnin: self.burnin = 0
                                                 else: self.burnin=float(self.burnin)
@@ -160,4 +161,4 @@ def arguments(self):
                                                 self.set_ROI=False
                                                 self.set_areacounter=False
                                                 self.subMethod="Acc"
-                                                self.moghistory = int(500)
+                                                self.moghistory = 500

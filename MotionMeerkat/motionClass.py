@@ -138,13 +138,13 @@ class Motion:
 
                 #Set region of interest 
                 if self.set_ROI:
-                        roi=sourceM.Urect(iorig)
+                        self.roi_selected=sourceM.Urect(iorig,"Region of Interest")
                         
-                        print(roi)
+                        print(self.roi_selected)
                         
-                        if self.ROI_include == "include": self.display_image=orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]
+                        if self.ROI_include == "include": self.display_image=orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]
                         else:
-                                orig_ROI[roi[1]:roi[3], roi[0]:roi[2]]=255
+                                orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]=255
                                 self.display_image=orig_ROI
                                                 
                 else:
@@ -170,7 +170,6 @@ class Motion:
         def run(self):
 
                 while True:
-                        
                         #Was the last frame no motion; if not, scan frames
                         if not self.scan ==0:
                                 if self.noMotion:
@@ -198,11 +197,11 @@ class Motion:
                         if not self.set_ROI:
                                 current_imageROI=camera_image
                         else:
-                                if self.ROI_include == "include":current_imageROI=camera_image[roi[1]:roi[3], roi[0]:roi[2]]
+                                if self.ROI_include == "include":current_imageROI=camera_image[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]
                                 else: 
                                         #Exclude area by making it a white square
                                         current_imageROI=camera_image.copy()
-                                        current_imageROI[roi[1]:roi[3], roi[0]:roi[2]]=255
+                                        current_imageROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]=255
                                         
                         self.frame_count += 1
                         frame_t0 = time.time()
@@ -236,7 +235,7 @@ class Motion:
                         #set floor flag, we can't have negative accAVG
                         floor=0
                         if self.adapt:
-                                sourceM.adapt(frame_rate=self.frame_rate,accAvg=self.accAvg,file_destination=self.file_destination,floorvalue=self.floorvalue) 
+                                sourceM.adapt(frame_rate=self.frame_rate,accAvg=self.accAvg,file_destination=self.file_destination,floorvalue=self.floorvalue,frame_count=self.frame_count) 
                         
                         #############################
                         ##BACKGROUND SUBTRACTION
@@ -250,7 +249,7 @@ class Motion:
                         bounding_box_list = []
 
                         # Now calculate movements using the white pixels as "motion" data
-                        _,contours,hierarchy = cv2.findContours(grey_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
+                        _,contours,hierarchy = cv2.findContours(grey_image.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
                         
                         if len(contours) == 0 :
                                 #No movement, add to counter
@@ -293,6 +292,7 @@ class Motion:
                         
                         ## Centroids of each target
                         bound_center=[]
+                        bound_casc_box=[]
                         
                         for out in trimmed_box_list:
                                 sh_out=sg.box(out[0][0],out[0][1],out[1][0],out[1][1])
@@ -325,10 +325,24 @@ class Motion:
                                 self.noMotion=True                   
                                 continue
                         
-                        ################################
-                        #Grabcut Image Segmentation
-                        ################################
+                        #################################
+                        ##Grabcut Image Segmentation
+                        #################################
+                        ##get bounding box of the current blob
+                        for blob in casc.geoms:
+                                b=blob.buffer(2).bounds
+                                rect=tuple([int(x) for x in b])
+                                                          
+                                mask = np.zeros(current_imageROI.shape[:2],np.uint8)
                         
+                                bgdModel = np.zeros((1,65),np.float64)
+                                fgdModel = np.zeros((1,65),np.float64)                        
+                        
+                                cv2.grabCut(current_imageROI,mask,rect,bgdModel,fgdModel,5,cv2.GC_INIT_WITH_RECT)
+                        
+                        mask2 = np.where((mask==2)|(mask==0),0,1).astype('uint8')
+                        cGB = current_imageROI*mask2[:,:,np.newaxis]                        
+
                         #Set flag for inside area
                         inside_area=False
                         if self.set_areacounter:
