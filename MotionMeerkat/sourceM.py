@@ -2,6 +2,7 @@
 #!/usr/bin/env python
 
 import os
+import cv2
 
 ##Global variables
 # BBoxes must be in the format:
@@ -15,6 +16,11 @@ BLUE = (255,0,0)        # rectangle color
 GREEN = (0,255,0)        # rectangle color
 RED = (0,0,255)        # rectangle color
 
+#Set globals for mouse map, callback has unique syntax
+drawing = False # true if mouse is pressed
+drawing_area = False # true if mouse is pressed
+roi=[]  
+ix,iy = -1,-1
 
 ##Visualize the frames, this should only be used for testing!
 vis=False
@@ -25,11 +31,7 @@ objectEdge=False
 
 #Start time
 
-#Set globals for mouse map, callback has unique syntax
-drawing = False # true if mouse is pressed
-drawing_area = False # true if mouse is pressed
-roi=[]  
-ix,iy = -1,-1
+
 #Global methods
 
 def myround(x, base=10):
@@ -70,8 +72,6 @@ def getint(name):
 ##User drawn rectangles
 
 def Urect(img,title):
-    #make a copy of the image.
-    roi=[]
 
     def onmouse(event,x,y,flags,param):
         global ix,iy,roi,drawing
@@ -108,7 +108,7 @@ def Urect(img,title):
     return(roi)    
 
 
-def adapt(frame_rate,accAvg,file_destination,floorvalue):
+def adapt(frame_rate,accAvg,file_destination,floorvalue,frame_count):
     #Every 10min, reset the accAvg threshold, depending on expected level of movement
 
     #Should be a integer, round it
