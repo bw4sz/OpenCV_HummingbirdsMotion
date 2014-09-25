@@ -57,8 +57,6 @@ class Motion:
     
                 #Start with motion flag on
                 self.noMotion=False                   
-
-
         
         def prep(self):
                 
@@ -75,7 +73,8 @@ class Motion:
                 (_,IDFL) = os.path.split(filepath)
                 
                 #we want to name the output a folder from the output destination with the named extension        
-                print("AccAvg begin value is: %s" % (self.accAvg))
+                if self.subMethod=="Acc":
+                        print("AccAvg begin value is: %s" % (self.accAvg))
 
                 #If its batch, give an extra folder
                 if self.runtype == 'batch':
@@ -167,6 +166,7 @@ class Motion:
 ######################################################             
 ##Function to compute background during the video loop
 ######################################################
+
         def run(self):
 
                 while True:
@@ -231,25 +231,26 @@ class Motion:
                                                 
                                         #Reset the last time it was printed. 
                                         
-                        ####Adaptively set the aggregate threshold 
+                        ###Adaptively set the aggregate threshold 
                         #set floor flag, we can't have negative accAVG
                         floor=0
                         if self.adapt:
                                 sourceM.adapt(frame_rate=self.frame_rate,accAvg=self.accAvg,file_destination=self.file_destination,floorvalue=self.floorvalue,frame_count=self.frame_count) 
                         
                         #############################
-                        ##BACKGROUND SUBTRACTION
+                        ###BACKGROUND SUBTRACTION
                         #############################
                         grey_image=self.BC.BackGroundSub(current_imageROI)
                         
-                        #############################
+                        #######################################
                         ##Contour Analysis and Post-Proccessing
-                        #############################
+                        #######################################
                         points = []   # Was using this to hold camera_imageROIeither pixel coords or polygon coords.
                         bounding_box_list = []
-
+                        
+                        contourImage=grey_image.copy()
                         # Now calculate movements using the white pixels as "motion" data
-                        _,contours,hierarchy = cv2.findContours(grey_image.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
+                        _,contours,hierarchy = cv2.findContours(contourImage, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
                         
                         if len(contours) == 0 :
                                 #No movement, add to counter
@@ -290,9 +291,10 @@ class Motion:
                         #format into shapely bounding feature
                         shape_list=[]
                         
-                        ## Centroids of each target
+                        ## Centroids of each target and hold on to target blobs
                         bound_center=[]
                         bound_casc_box=[]
+                        #grabCUTimage=current_imageROI.copy()
                         
                         for out in trimmed_box_list:
                                 sh_out=sg.box(out[0][0],out[0][1],out[1][0],out[1][1])
@@ -306,42 +308,51 @@ class Motion:
                             for p in range(1,len(casc.geoms)):
                                 b=casc.geoms[p].bounds
                                 if casc.geoms[p].area > ((self.width * self.height) * (float(self.minSIZE/100))):
-                                                cv2.rectangle(current_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                                cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                                        
                                                 #Return the centroid to list, rounded two decimals
                                                 x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
                                                 y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
-                                                bound_center.append((x,y)) 
+                                                bound_center.append((x,y))
+                                                bound_casc_box.append(casc.geoms[p])
                         else:
                                 b=casc.bounds
                                 #If bounding polygon is larger than the minsize, draw a rectangle
                                 if casc.area > ((self.width * self.height) * (float(self.minSIZE/100))):
-                                                cv2.rectangle(current_imageROI,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
-                                                x=round(casc.centroid.coords.xy[0][0],2)
+                                                cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
                                                 y=round(casc.centroid.coords.xy[1][0],2)
-                                                bound_center.append((x,y))                                
-            
+                                                bound_center.append((x,y))
+                                                bound_casc_box.append(casc)
+                                                
                         if len(bound_center) == 0:
                                 self.toosmall=self.toosmall+1
                                 self.noMotion=True                   
                                 continue
                         
-                        #################################
-                        ##Grabcut Image Segmentation
-                        #################################
-                        ##get bounding box of the current blob
-                        for blob in casc.geoms:
-                                b=blob.buffer(2).bounds
-                                rect=tuple([int(x) for x in b])
-                                                          
-                                mask = np.zeros(current_imageROI.shape[:2],np.uint8)
+                        ##############################
+                        ###Grabcut Image Segmentation#
+                        ##############################
                         
-                                bgdModel = np.zeros((1,65),np.float64)
-                                fgdModel = np.zeros((1,65),np.float64)                        
+                        ####get bounding box of the current blob
+                        #for blob in bound_casc_box:
+                                #b=blob.buffer(100).bounds
+                                #rect=[int(x) for x in b]
+                                
+                                ###Format into x,y,w,h shapely is different from opencv
+                                #rectf=tuple([rect[0],rect[1],rect[2]-rect[0],rect[3]-rect[1]])
+                                                                                 
+                                #mask = np.zeros(grabCUTimage.shape[:2],np.uint8)
+                                #mask[grey_image == 0] = 2
+                                #mask[grey_image == 255] = 1    
+                                
+                                #bgdModel = np.zeros((1,65),np.float64)
+                                #fgdModel = np.zeros((1,65),np.float64)                        
                         
-                                cv2.grabCut(current_imageROI,mask,rect,bgdModel,fgdModel,5,cv2.GC_INIT_WITH_RECT)
+                                #cv2.grabCut(grabCUTimage,mask,rectf,bgdModel,fgdModel,4,cv2.GC_INIT_WITH_RECT)
                         
-                        mask2 = np.where((mask==2)|(mask==0),0,1).astype('uint8')
-                        cGB = current_imageROI*mask2[:,:,np.newaxis]                        
+                        #mask2 = np.where((mask==2)|(mask==0),0,1).astype('uint8')
+                        #cGB =grabCUTimage*mask2[:,:,np.newaxis]
+                        #sourceM.display("a", 0,cGB)
 
                         #Set flag for inside area
                         inside_area=False
@@ -353,16 +364,15 @@ class Motion:
                                         if area_box[2] > box[0] > area_box[0]:
                                                 if area_box[3] > box[1] > area_box[1]:
                                                                 inside_area= not inside_area
-                                                                if self.ROI_include == "exclude":
-                                                                        cv2.rectangle(current_imageROI,(area_box[0],area_box[1]),(area_box[2],area_box[3]),(242,221,61),thickness=1,lineType=4)
+                                                                cv2.rectangle(camera_image,(area_box[0],area_box[1]),(area_box[2],area_box[3]),(242,221,61),thickness=1,lineType=4)
   
                         ##################################################
-                        #Write image to file
+                        ###############Write image to file################
                         ##################################################
                         
                         if not self.makeVID == "none":
                                 if self.makeVID in ("frames","both"):
-                                        cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",current_imageROI)
+                                        cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",camera_image)
 
                         #save the frame count and the time in video, in case user wants to check in the original
                         #create a time object, this relies on the frame_rate being correct!
@@ -380,7 +390,6 @@ class Motion:
                                         stampadd=(str("%d:%d:%d "  % (d.hour,d.minute, d.second)), int(self.frame_count),target[0],target[1])
                                         self.areaC.append(stampadd)
                                 
-                       ##################################################
                         #Have a returned counter to balance hitRate
                         self.hitcounter=self.hitcounter+1
                         self.total_count=self.total_count+1
