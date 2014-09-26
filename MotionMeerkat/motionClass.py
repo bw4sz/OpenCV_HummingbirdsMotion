@@ -144,8 +144,7 @@ class Motion:
                         if self.ROI_include == "include": self.display_image=orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]
                         else:
                                 orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]=255
-                                self.display_image=orig_ROI
-                                                
+                                self.display_image=orig_ROI                             
                 else:
                         self.display_image=orig              
                         
@@ -215,7 +214,7 @@ class Motion:
                                 
                                 #If percent compelted is a multiple of 10, print processing rate.
                                 #format frame count to percentage and interger
-                                numbers = [ round(x/float(self.total_frameC),3)*100 for x in countR ]
+                                numbers = [ round(x/float(self.total_frameC),4)*100 for x in countR ]
                                 
                                 #is frame count a multiple of 10
                                 if any([x %10 ==0 for x in numbers]):
@@ -294,7 +293,7 @@ class Motion:
                         ## Centroids of each target and hold on to target blobs
                         bound_center=[]
                         bound_casc_box=[]
-                        #grabCUTimage=current_imageROI.copy()
+                        grabCUTimage=camera_image.copy()
                         
                         for out in trimmed_box_list:
                                 sh_out=sg.box(out[0][0],out[0][1],out[1][0],out[1][1])
@@ -332,28 +331,37 @@ class Motion:
                         ##############################
                         ###Grabcut Image Segmentation#
                         ##############################
-                        
-                        ####get bounding box of the current blob
-                        #for blob in bound_casc_box:
-                                #b=blob.buffer(100).bounds
-                                #rect=[int(x) for x in b]
+                        if self.segment:
+                                ####get bounding box of the current blob
+                                for blob in bound_casc_box:
+                                        b=blob.buffer(100).bounds
+                                        rect=[int(x) for x in b]
+                                        
+                                        ###Format into x,y,w,h shapely is different from opencv
+                                        rectf=tuple([rect[0],rect[1],rect[2]-rect[0],rect[3]-rect[1]])
+                                                                                         
+                                        mask = np.zeros(grabCUTimage.shape[:2],np.uint8)
+                                        mask[grey_image == 0] = 0
+                                        
+                                        #Set the rectangle as probable background                                
+                                        mask[rect[1]:rect[3],rect[0]:rect[2]] = 2
+                                        
+                                        #Add the background subtracted image
+                                        mask[grey_image == 255] = 1
+                                        bgdModel = np.zeros((1,65),np.float64)
+                                        fgdModel = np.zeros((1,65),np.float64)    
+                                        
+                                        if not mask.sum()==0:
+                                                cv2.grabCut(grabCUTimage,mask,rectf,bgdModel,fgdModel,4,cv2.GC_INIT_WITH_MASK)
+                                                mask2 = np.where((mask==2)|(mask==0),0,1).astype('uint8')
                                 
-                                ###Format into x,y,w,h shapely is different from opencv
-                                #rectf=tuple([rect[0],rect[1],rect[2]-rect[0],rect[3]-rect[1]])
-                                                                                 
-                                #mask = np.zeros(grabCUTimage.shape[:2],np.uint8)
-                                #mask[grey_image == 0] = 2
-                                #mask[grey_image == 255] = 1    
-                                
-                                #bgdModel = np.zeros((1,65),np.float64)
-                                #fgdModel = np.zeros((1,65),np.float64)                        
-                        
-                                #cv2.grabCut(grabCUTimage,mask,rectf,bgdModel,fgdModel,4,cv2.GC_INIT_WITH_RECT)
-                        
-                        #mask2 = np.where((mask==2)|(mask==0),0,1).astype('uint8')
-                        #cGB =grabCUTimage*mask2[:,:,np.newaxis]
-                        #sourceM.display("a", 0,cGB)
-
+                                                _,contours,hierarchy = cv2.findContours(mask2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE )
+                                                for cnt in contours:
+                                                        bounding_rect = cv2.boundingRect( cnt )
+                                                        point1 = ( bounding_rect[0], bounding_rect[1] )
+                                                        point2 = ( bounding_rect[0] + bounding_rect[2], bounding_rect[1] + bounding_rect[3] )                                
+                                                        cv2.rectangle(camera_image,point1,point2,(0,255,255),thickness=2)
+                                        
                         #Set flag for inside area
                         inside_area=False
                         if self.set_areacounter:
@@ -400,7 +408,7 @@ class Motion:
         def videoM(self):
                 
                 ## Methods for video writing in the class Motion
-                if self.makeVID not in ("video","both"): return("")
+                if self.makeVID not in ("video","both"): return("No Video Output")
                                 
                 normFP=os.path.normpath(self.inDEST)
                 (filepath, filename)=os.path.split(normFP)
@@ -451,7 +459,7 @@ class Motion:
                 out = cv2.VideoWriter(vidDEST,int(fourcc),float(fr), frame_size)                    
                 
                 #split and sort the jpg names
-                jpgs.sort(key=self.getint)
+                jpgs.sort(key=sourceM.getint)
                 
                 #Loop through every frame and write video
                 for f in jpgs:

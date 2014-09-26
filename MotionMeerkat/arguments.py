@@ -43,10 +43,11 @@ def arguments(self):
                                 self.parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true",default=False)
                                 self.parser.add_argument("--frame_rate", help="frames per second",default=0)
                                 self.parser.add_argument("--moghistory", help="Length of history for MOG background detector",default=500,type=int)
+                                self.parser.add_argument("--segment", help="Image segmentation using grabcut?",action='store_true',default=False)                                
                                 self.parser.add_argument("--set_ROI", help="Set region of interest?",action='store_true',default=False)
                                 self.parser.add_argument("--ROI_include", help="include or exclude?",default="exclude")
                                 self.parser.add_argument("--set_areacounter", help="Set region to count area",action="store_true",default=False)
-                                self.parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?",default='frames')
+                                self.parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?",default='frames',type=str)
                                 self.args = self.parser.parse_args(namespace=self)
 
                                 print "\n"
@@ -105,11 +106,12 @@ def arguments(self):
                                                                                 self.floorvalue=raw_input("Minimum allowed sensitivity (0.05):\n")
                                                                                 if not self.floorvalue: self.floorvalue = 0.05
                                                                                 else: self.floorvalue=float(self.floorvalue)
+                                                #Still need to set moghistory to pass to argument, even if it isn't used.  
+                                                self.moghistory = 500            
+                                                
                                                 if self.subMethod=="MOG":
                                                                 #Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
                                                                 self.moghistory=raw_input("History of Frames for Gaussian (500):\n")
-                                               #Still need to set moghistory to pass to argument, even if it isn't used.  
-                                                if not self.moghistory: self.moghistory = 500
                                                
                                                #Skip initial frames of video, in case of camera setup and shake.       
                                                 self.burnin= raw_input("Burn in, skip initial minutes of video (0):\n")
@@ -131,6 +133,9 @@ def arguments(self):
                                         #There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean       
                                                 self.plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera? (n) :\n")
                                                 if not self.plotwatcher: self.plotwatcher = False
+
+                                                self.segment='y'==raw_input("Segment image using grabcut? (n) :\n")
+                                                if not self.segment: self.segment = False
                                                 
                                                 #set ROI
                                                 self.set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest? (n) :\n")
@@ -162,3 +167,4 @@ def arguments(self):
                                                 self.set_areacounter=False
                                                 self.subMethod="Acc"
                                                 self.moghistory = 500
+                                                self.segment = False
