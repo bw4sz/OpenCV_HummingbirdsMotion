@@ -10,12 +10,12 @@ class Background:
         self.subMethod=subMethod
         
         ####Create Background Constructor
-        if self.subMethod=="Acc":
+        if self.subMethod in ["Acc","Both"]:
                 self.running_average_image = np.float32(display_image)
                 self.accAvg=acc
                 self.threshT=thresh
     
-        if self.subMethod=="MOG":
+        if self.subMethod in ["MOG","Both"]:
             #MOG method creator
             self.fgbg = cv2.createBackgroundSubtractorMOG2(history=moghistory, detectShadows=False)
         if self.subMethod=="KNN":
@@ -25,15 +25,13 @@ class Background:
     #Frame Subtraction
     def BackGroundSub(self,camera_imageROI):
         ## accumulated averaging
-        if self.subMethod == "Acc":
+        if self.subMethod in ["Acc","Both"]:
             # Create an image with interactive feedback:
             self.display_image = camera_imageROI.copy()
             
             # Create a working "color image" to modify / blur
             self.color_image =  self.display_image.copy()
-            
-            #if vis: display(Initial,2000,color_image)                    
-        
+                    
             # Smooth to get rid of false positives
             self.color_image = cv2.GaussianBlur(self.color_image,(3,3),0)
                        
@@ -53,7 +51,7 @@ class Background:
             ret,self.grey_image = cv2.threshold(self.grey_image, self.threshT, 255, cv2.THRESH_BINARY )
                 
         ##Mixture of Gaussians
-        if self.subMethod in ["MOG","KNN"]:
+        if self.subMethod in ["MOG","KNN","Both"]:
             self.grey_image = self.fgbg.apply(camera_imageROI)
         
         #Dilate the areas to merge bounded objects
