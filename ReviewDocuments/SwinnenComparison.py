@@ -19,10 +19,10 @@ parser.add_argument("-f", help="path of single video",type=str,default="C:/Progr
 #threshold for variance
 parser.add_argument("-t", help="threshold",type=int)
 
-f="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv"
+#f="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv"
 #f ='C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/ReviewDocuments/tinyshark.avi'
 #f='C:\Users\Ben\Dropbox\Thesis\Automated_Monitering\sharkpass2.avi'
-#f ='C:/Users/Ben/Desktop/MeerkatTest/Bird.mpg'
+f ='C:/Users/Ben/Desktop/00011.MTS'
 
 #read in video file
 cap=cv2.VideoCapture(f)
@@ -34,8 +34,8 @@ _,img=cap.read()
 
 ##Initiate two background subtractors
 motion=SwinnenSource.MotionM(f,70,0.35)
-static=SwinnenSource.Static(f,70)
-mog=SwinnenSource.MOG(f,20,9)
+#static=SwinnenSource.Static(f,70)
+mog=SwinnenSource.MOG(f,100,16)
 
 
 cap=cv2.VideoCapture(f)
@@ -50,15 +50,15 @@ while (1):
     ret,i = cap.read()
     if not ret:
         break
-    s=static.staticA(i.copy())
-    m=motion.accAvg(img=i,towrite=s)
-    #g=mog.run(img=i,towrite=s)
-    motion_holder.append(m)
+    #s=static.staticA(i.copy())
+    m=motion.accAvg(img=i,towrite=i)
+    g=mog.run(img=i,towrite=m)
+    motion_holder.append(g)
                          
 
 ##Output location
 #file destination folder
-dest="C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/ReviewDocuments/"
+dest="C:/MotionMeerkat/"
 
 #make folder to hold output using the file name
 flname=os.path.splitext(os.path.basename(f))[0]
