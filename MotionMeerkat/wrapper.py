@@ -24,7 +24,7 @@ def wrap(ob) :
                 #Create Pool of Videos
                 for (root, dirs, files) in os.walk(ob.batchpool):
                         for files in files:
-                                if files.endswith((".TLV",".AVI",".avi",".MPG",".mp4",".MOD",".MTS",".wmv",".WMV","mpg")):
+                                if files.endswith((".TLV",".AVI",".avi",".MPG",".mp4",".MOD",".MTS",".wmv",".WMV",".mpg")):
                                         videoPool.append(os.path.join(root, files))
                 
                 for vid in videoPool:      

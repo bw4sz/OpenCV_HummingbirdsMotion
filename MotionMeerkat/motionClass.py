@@ -160,7 +160,7 @@ class Motion:
                         cv2.rectangle(orig, (area_box[1],area_box[3]), (area_box[0],area_box[2]), (255,0,0), 1)     
                 
                 ###Background Constructor, create class
-                self.BC=BackgroundSubtractor.Background(self.subMethod,self.display_image,self.accAvg,self.threshT,self.moghistory)
+                self.BC=BackgroundSubtractor.Background(self.subMethod,self.display_image,self.accAvg,self.threshT,self.moghistory,self.mogvariance)
            
 ######################################################             
 ##Function to compute background during the video loop

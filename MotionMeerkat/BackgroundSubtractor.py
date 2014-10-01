@@ -4,7 +4,7 @@ import cv2
 #takes in the constructor and the method chosen
 
 class Background:
-    def __init__(self,subMethod,display_image,acc,thresh,moghistory):
+    def __init__(self,subMethod,display_image,acc,thresh,moghistory,mogvariance):
     
         ##Subtractor Method
         self.subMethod=subMethod
