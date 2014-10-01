@@ -55,98 +55,90 @@ class MotionM:
 
         # Subtract the current frame from the moving average.
         self.difference=cv2.absdiff(img, self.running_average_in_display_color_depth)
-
         
         # Convert the image to greyscale.
-        self.grey_image=cv2.cvtColor(self.difference,cv2.COLOR_BGR2GRAY)
+        grey_image=cv2.cvtColor(self.difference,cv2.COLOR_BGR2GRAY)
         
         # Threshold the image to a black and white motion mask:
-        ret,self.grey_image = cv2.threshold(self.grey_image, self.threshT, 255, cv2.THRESH_BINARY )        
+        ret,grey_image = cv2.threshold(grey_image, self.threshT, 255, cv2.THRESH_BINARY )        
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
-        self.grey_image= cv2.morphologyEx(self.grey_image, cv2.MORPH_CLOSE, kernel)  
+        grey_image= cv2.morphologyEx(grey_image, cv2.MORPH_CLOSE, kernel)  
 
         
         points = []   # Was using this to hold camera_imageROIeither pixel coords or polygon coords.
         bounding_box_list = []
         
         # Now calculate movements using the white pixels as "motion" data
-        _,contours,hierarchy = cv2.findContours(self.grey_image.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
+        
+        _,contours,hierarchy = cv2.findContours(grey_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
 
         if len(contours)==0:
-            return(img)
-        
-        cnt=contours[0]
-                
-        drawing = np.uint8(img)
-                    
-        for cnt in contours:
-                bounding_rect = cv2.boundingRect( cnt )
-                point1 = ( bounding_rect[0], bounding_rect[1] )
-                point2 = ( bounding_rect[0] + bounding_rect[2], bounding_rect[1] + bounding_rect[3] )
-                bounding_box_list.append( ( point1, point2 ) )
-                
-        # Find the average size of the bbox (targets), then
-        # remove any tiny bboxes (which are probably just noise).
-        # "Tiny" is defined as any box with 1/10th the area of the average box.
-        # This reduces false positives on tiny "sparkles" noise.
-        box_areas = []
-        for box in bounding_box_list:
-                box_width = box[self.right][0] - box[self.left][0]
-                box_height = box[self.bottom][0] - box[self.top][0]
-                box_areas.append( box_width * box_height )
-                
-        average_box_area = 0.0
-        if len(box_areas): average_box_area = float( sum(box_areas) ) / len(box_areas)
-        
-        trimmed_box_list = []
-        for box in bounding_box_list:
-                box_width = box[self.right][0] - box[self.left][0]
-                box_height = box[self.bottom][0] - box[self.top][0]
-                
-                # Only keep the box if it's not a tiny noise box:
-                if (box_width * box_height) > average_box_area*.3: 
-                        trimmed_box_list.append( box )
-        
-        #shapely does a much faster job of polygon union
-        #format into shapely bounding feature
-        shape_list=[]
-        
-        ## Centroids of each target
-        bound_center=[]
-        
-        for out in trimmed_box_list:
-                sh_out=sg.box(out[0][0],out[0][1],out[1][0],out[1][1])
-                shape_list.append(sh_out)
-        
-        #shape_pol=sg.MultiPolygon(shape_list)
-        casc=cascaded_union(shape_list).buffer(1)
-        
-        if casc.type=="MultiPolygon":
-            #draw shapely bounds
-            for p in range(1,len(casc.geoms)):
-                b=casc.geoms[p].bounds
-                if casc.geoms[p].area > ((self.width * self.height) * (float(0.15/100))):
-                        cv2.rectangle(towrite,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(255,255,0),thickness=3)
-                        #Return the centroid to list, rounded two decimals
-                        x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
-                        y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
-                        bound_center.append((x,y)) 
+            return(towrite)
         else:
-                b=casc.bounds
-                #If bounding polygon is larger than the minsize, draw a rectangle
-                if casc.area > ((self.width * self.height) * (float(0.15/100))):
-                        cv2.rectangle(towrite,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(255,255,0),thickness=3)
-                        x=round(casc.centroid.coords.xy[0][0],2)
-                        y=round(casc.centroid.coords.xy[1][0],2)
-                        bound_center.append((x,y))  
-                        
-        del self.running_average_in_display_color_depth
-        del self.grey_image
-        del self.difference
-        del img
-        
-        gc.collect()        
-        return(towrite)
+            cnt=contours[0]
+                                            
+            for cnt in contours:
+                    bounding_rect = cv2.boundingRect( cnt )
+                    point1 = ( bounding_rect[0], bounding_rect[1] )
+                    point2 = ( bounding_rect[0] + bounding_rect[2], bounding_rect[1] + bounding_rect[3] )
+                    bounding_box_list.append( ( point1, point2 ) )
+                    
+            # Find the average size of the bbox (targets), then
+            # remove any tiny bboxes (which are probably just noise).
+            # "Tiny" is defined as any box with 1/10th the area of the average box.
+            # This reduces false positives on tiny "sparkles" noise.
+            box_areas = []
+            for box in bounding_box_list:
+                    box_width = box[self.right][0] - box[self.left][0]
+                    box_height = box[self.bottom][0] - box[self.top][0]
+                    box_areas.append( box_width * box_height )
+                    
+            average_box_area = 0.0
+            if len(box_areas): average_box_area = float( sum(box_areas) ) / len(box_areas)
+            
+            trimmed_box_list = []
+            for box in bounding_box_list:
+                    box_width = box[self.right][0] - box[self.left][0]
+                    box_height = box[self.bottom][0] - box[self.top][0]
+                    
+                    # Only keep the box if it's not a tiny noise box:
+                    if (box_width * box_height) > average_box_area*.3: 
+                            trimmed_box_list.append( box )
+            
+            #shapely does a much faster job of polygon union
+            #format into shapely bounding feature
+            shape_list=[]
+            
+            ## Centroids of each target
+            bound_center=[]
+            
+            for out in trimmed_box_list:
+                    sh_out=sg.box(out[0][0],out[0][1],out[1][0],out[1][1])
+                    shape_list.append(sh_out)
+            
+            #shape_pol=sg.MultiPolygon(shape_list)
+            casc=cascaded_union(shape_list).buffer(1)
+            
+            if casc.type=="MultiPolygon":
+                #draw shapely bounds
+                for p in range(1,len(casc.geoms)):
+                    b=casc.geoms[p].bounds
+                    if casc.geoms[p].area > ((self.width * self.height) * (float(0.3/100))):
+                            cv2.rectangle(towrite,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(255,255,0),thickness=3)
+                            #Return the centroid to list, rounded two decimals
+                            x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
+                            y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
+                            bound_center.append((x,y)) 
+            else:
+                    b=casc.bounds
+                    #If bounding polygon is larger than the minsize, draw a rectangle
+                    if casc.area > ((self.width * self.height) * (float(0.3/100))):
+                            cv2.rectangle(towrite,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(255,255,0),thickness=3)
+                            x=round(casc.centroid.coords.xy[0][0],2)
+                            y=round(casc.centroid.coords.xy[1][0],2)
+                            bound_center.append((x,y))  
+                    
+            return(towrite)
 
 
 
@@ -214,13 +206,12 @@ class Static:
 
 class MOG:
     def __init__(self,f,history,vt):
-        self.fgbg = cv2.createBackgroundSubtractorMOG2(varThreshold=vt)
+        self.fgbg = cv2.createBackgroundSubtractorMOG2(varThreshold=vt,detectShadows=True)
         self.history=history
         
 
-        
     def run(self,img,towrite):
-        self.grey_image = self.fgbg.apply(img)
+        grey_image = self.fgbg.apply(img)
     
         self.top = 0
         self.bottom = 1
@@ -232,80 +223,80 @@ class MOG:
         
         #Dilate the areas to merge bounded objects
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
-        self.grey_image= cv2.morphologyEx(self.grey_image, cv2.MORPH_OPEN, kernel)
+        grey_image= cv2.morphologyEx(grey_image, cv2.MORPH_OPEN, kernel)
         
         points = []   # Was using this to hold camera_imageROIeither pixel coords or polygon coords.
         bounding_box_list = []
         
         # Now calculate movements using the white pixels as "motion" data
-        _,contours,hierarchy = cv2.findContours(self.grey_image.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
+        _,contours,hierarchy = cv2.findContours(grey_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
 
         if len(contours)==0:
-            return(img)
-        
-        cnt=contours[0]
-                
-        drawing = np.uint8(img)
-                    
-        for cnt in contours:
-                bounding_rect = cv2.boundingRect( cnt )
-                point1 = ( bounding_rect[0], bounding_rect[1] )
-                point2 = ( bounding_rect[0] + bounding_rect[2], bounding_rect[1] + bounding_rect[3] )
-                bounding_box_list.append( ( point1, point2 ) )
-                
-        # Find the average size of the bbox (targets), then
-        # remove any tiny bboxes (which are probably just noise).
-        # "Tiny" is defined as any box with 1/10th the area of the average box.
-        # This reduces false positives on tiny "sparkles" noise.
-        box_areas = []
-        for box in bounding_box_list:
-                box_width = box[self.right][0] - box[self.left][0]
-                box_height = box[self.bottom][0] - box[self.top][0]
-                box_areas.append( box_width * box_height )
-                
-        average_box_area = 0.0
-        if len(box_areas): average_box_area = float( sum(box_areas) ) / len(box_areas)
-        
-        trimmed_box_list = []
-        for box in bounding_box_list:
-                box_width = box[self.right][0] - box[self.left][0]
-                box_height = box[self.bottom][0] - box[self.top][0]
-                
-                # Only keep the box if it's not a tiny noise box:
-                if (box_width * box_height) > average_box_area*.3: 
-                        trimmed_box_list.append( box )
-        
-        #shapely does a much faster job of polygon union
-        #format into shapely bounding feature
-        shape_list=[]
-        
-        ## Centroids of each target
-        bound_center=[]
-        
-        for out in trimmed_box_list:
-                sh_out=sg.box(out[0][0],out[0][1],out[1][0],out[1][1])
-                shape_list.append(sh_out)
-        
-        #shape_pol=sg.MultiPolygon(shape_list)
-        casc=cascaded_union(shape_list).buffer(1)
-        
-        if casc.type=="MultiPolygon":
-            #draw shapely bounds
-            for p in range(1,len(casc.geoms)):
-                b=casc.geoms[p].bounds
-                if casc.geoms[p].area > ((self.width * self.height) * (float(0.1/100))):
-                        cv2.rectangle(towrite,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,0),thickness=3)
-                        #Return the centroid to list, rounded two decimals
-                        x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
-                        y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
-                        bound_center.append((x,y)) 
+            return(towrite)
         else:
-                b=casc.bounds
-                #If bounding polygon is larger than the minsize, draw a rectangle
-                if casc.area > ((self.width * self.height) * (float(0.1/100))):
-                        cv2.rectangle(towrite,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,0),thickness=3)
-                        x=round(casc.centroid.coords.xy[0][0],2)
-                        y=round(casc.centroid.coords.xy[1][0],2)
-                        bound_center.append((x,y))          
-        return(towrite)
+            cnt=contours[0]
+                
+            drawing = np.uint8(img)
+                    
+            for cnt in contours:
+                    bounding_rect = cv2.boundingRect( cnt )
+                    point1 = ( bounding_rect[0], bounding_rect[1] )
+                    point2 = ( bounding_rect[0] + bounding_rect[2], bounding_rect[1] + bounding_rect[3] )
+                    bounding_box_list.append( ( point1, point2 ) )
+                    
+            # Find the average size of the bbox (targets), then
+            # remove any tiny bboxes (which are probably just noise).
+            # "Tiny" is defined as any box with 1/10th the area of the average box.
+            # This reduces false positives on tiny "sparkles" noise.
+            box_areas = []
+            for box in bounding_box_list:
+                    box_width = box[self.right][0] - box[self.left][0]
+                    box_height = box[self.bottom][0] - box[self.top][0]
+                    box_areas.append( box_width * box_height )
+                    
+            average_box_area = 0.0
+            if len(box_areas): average_box_area = float( sum(box_areas) ) / len(box_areas)
+            
+            trimmed_box_list = []
+            for box in bounding_box_list:
+                    box_width = box[self.right][0] - box[self.left][0]
+                    box_height = box[self.bottom][0] - box[self.top][0]
+                    
+                    # Only keep the box if it's not a tiny noise box:
+                    if (box_width * box_height) > average_box_area*.3: 
+                            trimmed_box_list.append( box )
+            
+            #shapely does a much faster job of polygon union
+            #format into shapely bounding feature
+            shape_list=[]
+            
+            ## Centroids of each target
+            bound_center=[]
+            
+            for out in trimmed_box_list:
+                    sh_out=sg.box(out[0][0],out[0][1],out[1][0],out[1][1])
+                    shape_list.append(sh_out)
+            
+            #shape_pol=sg.MultiPolygon(shape_list)
+            casc=cascaded_union(shape_list).buffer(1)
+            
+            if casc.type=="MultiPolygon":
+                #draw shapely bounds
+                for p in range(1,len(casc.geoms)):
+                    b=casc.geoms[p].bounds
+                    if casc.geoms[p].area > ((self.width * self.height) * (float(0.4/100))):
+                            cv2.rectangle(towrite,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=3)
+                            #Return the centroid to list, rounded two decimals
+                            x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
+                            y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
+                            bound_center.append((x,y)) 
+            else:
+                    b=casc.bounds
+                    #If bounding polygon is larger than the minsize, draw a rectangle
+                    if casc.area > ((self.width * self.height) * (float(0.4/100))):
+                            cv2.rectangle(towrite,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=3)
+                            x=round(casc.centroid.coords.xy[0][0],2)
+                            y=round(casc.centroid.coords.xy[1][0],2)
+                            bound_center.append((x,y))          
+            return(towrite)
         
