@@ -49,10 +49,20 @@ if not os.path.exists(outdr): os.mkdir(outdr)
     
 vidname=os.path.join(dest,flname,"Comparison.avi")
 
-height=np.size(img,1)
-width=np.size(img,0)
 
 codec=cv2.VideoWriter_fourcc('D','I','V','X')
+
+r = 500.0 / img.shape[1]
+dim = (100, int(img.shape[0] * r))
+
+ 
+# perform the actual resizing of the image and show it
+resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)    
+
+
+height=np.size(resized,1)
+width=np.size(resized,0)
+
 out = cv2.VideoWriter(vidname,codec,20,(height,width),True)    
                          
 ##Capture next frame, if there is no next frame; break.
