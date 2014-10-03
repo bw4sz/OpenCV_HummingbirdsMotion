@@ -20,9 +20,8 @@ parser.add_argument("-f", help="path of single video",type=str,default="C:/Progr
 parser.add_argument("-t", help="threshold",type=int)
 
 #f="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv"
-#f ='C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/ReviewDocuments/tinyshark.avi'
-#f='C:\Users\Ben\Dropbox\Thesis\Automated_Monitering\sharkpass2.avi'
-f ='C:/Users/Ben/Desktop/MotionMeerkatTest/Rees.avi'
+
+f ='C:/Users/Ben/Desktop/MotionMeerkatTest/00011.MTS'
 
 #read in video file
 cap=cv2.VideoCapture(f)
@@ -33,7 +32,7 @@ _,img=cap.read()
 
 ##Initiate two background subtractors
 motion=SwinnenSource.MotionM(f,5,0.25)
-mog=SwinnenSource.MOG(f,1000,15)
+mog=SwinnenSource.MOG(f,1000,16)
 
 cap=cv2.VideoCapture(f)
 
@@ -53,7 +52,7 @@ vidname=os.path.join(dest,flname,"Comparison.avi")
 height=np.size(img,1)
 width=np.size(img,0)
 
-codec=cv2.VideoWriter_fourcc('X','V','I','D')
+codec=cv2.VideoWriter_fourcc('D','I','V','X')
 out = cv2.VideoWriter(vidname,codec,20,(height,width),True)    
                          
 ##Capture next frame, if there is no next frame; break.
@@ -67,8 +66,15 @@ while (1):
     m=motion.accAvg(img=i,towrite=i)
     g=mog.run(img=i,towrite=m)
     p=os.path.join(outdr,str(counter) +".jpg")
-    cv2.imwrite(p, g)
-    out.write(g)
+    #cv2.imwrite(p, g)
+    
+    #resize object
+    r = 500.0 / g.shape[1]
+    dim = (100, int(g.shape[0] * r))
+     
+    # perform the actual resizing of the image and show it
+    resized = cv2.resize(g, dim, interpolation = cv2.INTER_AREA)    
+    out.write(resized)
 
 out.release()
 cv2.destroyAllWindows()        

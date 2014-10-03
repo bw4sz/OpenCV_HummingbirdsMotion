@@ -7,6 +7,7 @@ require(plyr)
 require(reshape2)
 ##get data
 
+setwd("C:/Users/Ben/Dropbox/Thesis/Automated_Monitering/Figures/")
 fil<-list.files("C:/Users/Ben/Desktop/MotionMeerkatTest/",full.names=TRUE,pattern="Frames.csv",recursive = T)
 
 d<-lapply(fil,function(a){
@@ -35,14 +36,13 @@ ggplot(d,aes(col=Detector,x=value,y=Returned)) + facet_wrap(~File,scales="free",
 
 #How many frames in each file
 File<-c("00011","garcon_test","Rees","MoyTest","Schiavicci")
-Feature<-c("Low Frame Rate - Deep Water","High Frame - Pelagic Baited Camera","High Frame Rate - Shallow Baited Camera","High Frame Rate - Avian Nest Box","Low Frame Rate - Avian Nest Camera")
-Total<-c(2987,6415,1609,1609,55417)
-True<-c(1202,0,546,873,0)
+Feature<-c("Low Light - Deep Water","Slow Moving Animal - Pelagic Baited Camera","Low Visibility - Shallow Baited Camera","Variable Background - Avian Nest Box","Low Frame Rate - Avian Nest Camera")
+Total<-c(2987,6415,1609,1609,44963)
+True<-c(1202,3468,546,873,1794)
 
 m<-data.frame(File,Total,Feature,True)
 
 #Rees
-(1-95) + (803-163)
 f<-merge(d,m)
 
 head(f)
@@ -58,10 +58,10 @@ f$TR<-f$True/f$Total
 #Create labels with the correct levels
 f$DetectorLabel<-factor(paste(f$Detector,f$value),levels=c('Acc 15',"Acc 25", "Acc 35" ,"MOG 100","MOG 500","MOG 1000","MOG 1500","MOG 2000"))
 
-p<-ggplot(f,aes(col=Detector,x=DetectorLabel,y=PR,shape=Threshold)) + facet_wrap(~Feature,nrow=3,scales="free_y") + geom_point(size=5) + theme_bw()
+p<-ggplot(f,aes(col=Detector,x=DetectorLabel,y=PR,shape=Threshold)) + facet_wrap(~Feature,nrow=3,scales="free") + geom_point(size=5) + theme_bw()
 p<-p + labs(x="Background Subtractor",y="Total Frames Returned")
 p + geom_hline(aes(yintercept=TR),linetype='dashed',size=.75,col="black") + scale_y_continuous(labels=percent)
-ggsave("SensitivityThreshold.jpg",dpi=300,height=9,width=13)
+ggsave("SensitivityThreshold.jpg",dpi=1000,height=9.5,width=13.5)
 ggsave("SensitivityThreshold.eps",dpi=300,height=5,width=8)
 
 save.image("Sensitivity.Rdata")
