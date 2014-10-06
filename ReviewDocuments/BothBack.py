@@ -21,7 +21,7 @@ parser.add_argument("-t", help="threshold",type=int)
 
 #f="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv"
 
-f ='C:/Users/Ben/Desktop/MotionMeerkatTest/00011.MTS'
+f ='C:/Users/Ben/Desktop/MotionMeerkatTest/short.asf'
 
 #read in video file
 cap=cv2.VideoCapture(f)
@@ -31,8 +31,8 @@ cap=cv2.VideoCapture(f)
 _,img=cap.read()
 
 ##Initiate two background subtractors
-motion=SwinnenSource.MotionM(f,5,0.25)
-mog=SwinnenSource.MOG(f,1000,16)
+motion=SwinnenSource.MotionM(f,40,0.25)
+mog=SwinnenSource.MOG(f,1500,20)
 
 cap=cv2.VideoCapture(f)
 
@@ -53,7 +53,7 @@ vidname=os.path.join(dest,flname,"Comparison.avi")
 codec=cv2.VideoWriter_fourcc('D','I','V','X')
 
 r = 500.0 / img.shape[1]
-dim = (100, int(img.shape[0] * r))
+dim = (500, int(img.shape[0] * r))
 
  
 # perform the actual resizing of the image and show it
@@ -80,7 +80,7 @@ while (1):
     
     #resize object
     r = 500.0 / g.shape[1]
-    dim = (100, int(g.shape[0] * r))
+    dim = (500, int(g.shape[0] * r))
      
     # perform the actual resizing of the image and show it
     resized = cv2.resize(g, dim, interpolation = cv2.INTER_AREA)    

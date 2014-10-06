@@ -55,13 +55,27 @@ f$PR<-round(f$PReturned,2)
 #True ratio
 f$TR<-f$True/f$Total
 
+#relevel the decimals for acc
+
 #Create labels with the correct levels
-f$DetectorLabel<-factor(paste(f$Detector,f$value),levels=c('Acc 15',"Acc 25", "Acc 35" ,"MOG 100","MOG 500","MOG 1000","MOG 1500","MOG 2000"))
+f$DetectorLabel<-paste(f$Detector,f$value)
+
+f$DetectorLabel[f$DetectorLabel %in% "Acc 15"]<-"Acc .15"
+f$DetectorLabel[f$DetectorLabel %in% "Acc 25"]<-"Acc .25"
+f$DetectorLabel[f$DetectorLabel %in% "Acc 35"]<-"Acc .35"
+
+#reorder
+f$DetectorLabel<-factor(f$DetectorLabel,levels=c('Acc .15',"Acc .25", "Acc .35" ,"MOG 100","MOG 500","MOG 1000","MOG 1500","MOG 2000"))
+
+
+
 
 p<-ggplot(f,aes(col=Detector,x=DetectorLabel,y=PR,shape=Threshold)) + facet_wrap(~Feature,nrow=3,scales="free") + geom_point(size=5) + theme_bw()
 p<-p + labs(x="Background Subtractor",y="Total Frames Returned")
 p + geom_hline(aes(yintercept=TR),linetype='dashed',size=.75,col="black") + scale_y_continuous(labels=percent)
 ggsave("SensitivityThreshold.jpg",dpi=1000,height=9.5,width=13.5)
+ggsave("SensitivityThreshold.tiff",dpi=1000,height=9.5,width=13.5)
+
 ggsave("SensitivityThreshold.eps",dpi=300,height=5,width=8)
 
 save.image("Sensitivity.Rdata")
