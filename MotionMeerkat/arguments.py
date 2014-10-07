@@ -43,7 +43,7 @@ def arguments(self):
                                 self.parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true",default=False)
                                 self.parser.add_argument("--frame_rate", help="frames per second",default=0)
                                 self.parser.add_argument("--moghistory", help="Length of history for MOG background detector",default=1000,type=int)
-                                self.parser.add_argument("--segment", help="Image segmentation using grabcut?",action='store_true',default=False)                                
+                                self.parser.add_argument("--subMethod", help="Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method",default='Acc',type=str)                                
                                 self.parser.add_argument("--mogvariance", help="Variance in MOG to select background",default=16,type=int)                                
                                 self.parser.add_argument("--set_ROI", help="Set region of interest?",action='store_true',default=False)
                                 self.parser.add_argument("--ROI_include", help="include or exclude?",default="exclude")
@@ -168,4 +168,5 @@ def arguments(self):
                                                 self.set_areacounter=False
                                                 self.subMethod="Acc"
                                                 self.moghistory = 500
+                                                self.mogvariance = 16
                                                 self.segment = False

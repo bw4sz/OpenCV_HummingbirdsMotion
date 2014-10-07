@@ -15,8 +15,10 @@ if __name__ == "__main__":
                         motionVid=motionClass.Motion()
                         arguments.arguments(motionVid)
                         wrapper.wrap(motionVid)
-                except:
-                        traceback.print_exc()
+                        
+                except ValueError, e:
+                        if e.message!= 'Failed to load OpenCL runtime':
+                                raise ValueError, e
         
                 #reboot or exit?
                 #if there were system arguments, immediately exit
