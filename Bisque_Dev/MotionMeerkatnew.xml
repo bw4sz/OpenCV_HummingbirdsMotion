@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<module name="MotionMeerkat" type="runtime">
+
+    <!-- Comments are OK -->  
+    <tag name="inputs">
+		<tag name="mex_url" type="system-input"/>
+		<tag name="bisque_token" type="system-input"/>
+		<tag name="image_url" type="dataset"/>
+		<tag name = "subMethod" value="MOG" type="string"/>
+	</tag>
+    <tag name="outputs">
+    <tag name="title" type="string" value="Motion Detection" /> 
+    <tag name="authors" type="string" value="Ben Weinstein - Stony Brook University" /> 
+    <tag name="description" type="string" value="This module extracts potential motion events from video files" />
+    <tag name="citation" type="string" value="Please cite this resource as XXX" /> 
+	<tag name="thumbnail" type="file" value="public/thumbnail.ico" /> 
+</module>
