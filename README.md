@@ -6,7 +6,7 @@ MotionMeerkat is a standalone python executable that identifies candidate motion
 
 Executable can be found here: http://benweinstein.weebly.com/motionmeerkat.html
 
-Current Version (1.5)
+Current Version (1.6.4)
 ---------------------
 
 New features : [https://github.com/bw4sz/OpenCV_HummingbirdsMotion/issues/16]
@@ -30,7 +30,7 @@ Contents
 /Results: Folder to hold all the figures made in R
 Motion_dev.py: Core function. A Python script which takes in video file and parameters, and returns candidate motion frames.
 
-Motion_dev.py
+main.py
 -----------
 Python executable - can be run from shell or IDLE, first time users should just open .py file up in IDLE (or any python interpreter)
 
