@@ -4,6 +4,7 @@ import wrapper
 import arguments
 import traceback
 import sys
+import numpy
 
 #==================
 # MAIN ENTRY POINT
