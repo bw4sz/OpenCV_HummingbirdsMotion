@@ -8,13 +8,13 @@
 		<tag name="image_url" type="dataset"/>
 		<tag name = "subMethod" value="MOG" type="string"/>
 	</tag>
- <tag name="execute_options">
+	<tag name="execute_options">
     <tag name="iterable" value="image_url" type="dataset" />
-    </tag>
+	</tag>
     <tag name="outputs">
     <tag name="title" type="string" value="Motion Detection" /> 
     <tag name="authors" type="string" value="Ben Weinstein - Stony Brook University" /> 
     <tag name="description" type="string" value="Extract potential motion events from video files" />
-    <tag name="citation" type="string" value="Please cite this resource as MotionMeerkat: Integrating motion video detection and ecological monitoring. B. Weinstein. Methods in Ecology and Evolution. Accepted. 2014" /> 
+    <tag name="citation" type="string" value="Integrating motion video detection and ecological monitoring. B. Weinstein. Methods in Ecology and Evolution. Accepted. 2014" /> 
 	<tag name="thumbnail" type="file" value="public/thumbnail.ico" /> 
 </module>

@@ -7,7 +7,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{5C784574-7162-4518-849C-B2C13F88B122}
 AppName=MotionMeerkat
-AppVersion=1.6.0  
+AppVersion=1.6.3           
 AppPublisher=Ben Weinstein                                   
 AppPublisherURL=benweinstein.weebly.com
 AppSupportURL=benweinstein.weebly.com
@@ -32,13 +32,13 @@ Source: "C:\FFmpeg\bin\ffmpeg.exe";DestDir: "{app}\FFmpeg"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
          
 [Icons]
-Name: "{group}\MotionMeerkat"; Filename: "{app}\motion_dev.exe"; IconFileName: "{app}\thumbnail.ico"
-Name: "{commondesktop}\MotionMeerkat"; IconFileName: "{app}\thumbnail.ico"; Filename: "{app}\motion_dev.exe"; Tasks: desktopicon
+Name: "{group}\MotionMeerkat"; Filename: "{app}\main.exe"; IconFileName: "{app}\thumbnail.ico"
+Name: "{commondesktop}\MotionMeerkat"; IconFileName: "{app}\thumbnail.ico"; Filename: "{app}\main.exe"; Tasks: desktopicon
 
 [Registry]
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}\FFmpeg";
 
 [Run]
-Filename: "{app}\motion_dev.exe"; Description: "{cm:LaunchProgram,MotionMeerkat}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\main.exe"; Description: "{cm:LaunchProgram,MotionMeerkat}"; Flags: nowait postinstall skipifsilent
 Filename: "https://github.com/bw4sz/OpenCV_HummingbirdsMotion/wiki"; Flags: shellexec runasoriginaluser postinstall; Description: "Open the Wiki."
              
