@@ -1,20 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <module name="MotionMeerkat" type="runtime">
-
-    <!-- Comments are OK -->  
     <tag name="inputs">
-		<tag name="mex_url" type="system-input"/>
-		<tag name="bisque_token" type="system-input"/>
-		<tag name="image_url" type="dataset"/>
-		<tag name = "subMethod" value="MOG" type="string"/>
-	</tag>
-	<tag name="execute_options">
-    <tag name="iterable" value="image_url" type="dataset" />
-	</tag>
+		  <tag name="mex_url" type="system-input"/>
+		  <tag name="bisque_token" type="system-input"/>
+		  <tag name="image_url" type="dataset"/>
+      <tag name="minThresh" type="number">
+	      <value>0.15</value>
+        <template>
+            <tag name="label" value="Minimum motion contour size"/>
+            <tag name="minValue" value="0" type="number"/>
+            <tag name="maxValue" value="1" type="number"/>
+            <tag name="allowDecimals" value="true" type="boolean"/>
+            <tag name="decimalPrecision" value="2" type="number"/>
+            <tag name="step" value="0.05" type="number"/>
+            <tag name="units" value="%"/>
+            <tag name="showSlider" value="true" type="boolean"/>
+            <tag name="hideNumberPicker" value="true" type="boolean"/>
+        </template>             
+      </tag>           
+      <tag name="newcombo" value="choice1" type="combo">
+            <template>
+                <tag name="label" value="Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (ACC)"/>
+                <tag name="select">
+                    <value>ACC</value>
+                    <value>MOG</value>
+                </tag>
+                <tag name="editable" value="false" type="boolean"/>             
+            </template>             
+        </tag>
+	  </tag>
+	  <tag name="execute_options">
+      <tag name="iterable" value="image_url" type="dataset"/>
+	  </tag>
     <tag name="outputs">
-    <tag name="title" type="string" value="Motion Detection" /> 
-    <tag name="authors" type="string" value="Ben Weinstein - Stony Brook University" /> 
-    <tag name="description" type="string" value="Extract potential motion events from video files" />
-    <tag name="citation" type="string" value="Integrating motion video detection and ecological monitoring. B. Weinstein. Methods in Ecology and Evolution. Accepted. 2014" /> 
-	<tag name="thumbnail" type="file" value="public/thumbnail.ico" /> 
+    </tag>
+    <tag name="title" type="string" value="Motion Detection"/> 
+    <tag name="authors" type="string" value="Ben Weinstein - Stony Brook University"/> 
+    <tag name="description" type="string" value="Extract potential motion events from video files"/>
+    <tag name="citation" type="string" value="Integrating motion video detection and ecological monitoring. B. Weinstein. Methods in Ecology and Evolution. Accepted. 2014"/> 
+	  <tag name="thumbnail" type="file" value="public/thumbnail.ico"/> 
 </module>
