@@ -69,6 +69,12 @@ def report(ob):
         rate=float(ob.total_count)/ob.frame_count*100
         print("Hitrate: %.2f %% \n" % rate)
 
+        #reset frame count if in batch loop
+        ob.frame_count=0
+        ob.total_count=0
+        ob.toosmall=0
+        ob.nocountr=0
+        
         #Write csv of time stamps and frame counts
         #file name
         time_stamp_report = ob.file_destination + "/" + "Frames.csv"

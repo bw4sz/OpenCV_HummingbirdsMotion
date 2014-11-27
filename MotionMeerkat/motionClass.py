@@ -20,7 +20,12 @@ import BackgroundSubtractor
 
 class Motion:
 
-        def __init__(self):
+        def __init__(self):                  
+                print("Motion Detection Object Created")
+                
+        def prep(self):
+                
+                #Create initial conditions
                 #Empty list for time stamps
                 self.stamp=[]
 
@@ -56,10 +61,7 @@ class Motion:
                 self.frameC_announce=0
     
                 #Start with motion flag on
-                self.noMotion=False                   
-        
-        def prep(self):
-                
+                self.noMotion=False                 
                 #Report name of file
                 sys.stderr.write("Processing file %s\n" % (self.inDEST))
                 
@@ -232,10 +234,42 @@ class Motion:
                                         
                         ###Adaptively set the aggregate threshold 
                         #set floor flag, we can't have negative accAVG
-                        floor=0
+                        self.floor=0
                         if self.adapt:
-                                sourceM.adapt(frame_rate=self.frame_rate,accAvg=self.accAvg,file_destination=self.file_destination,floorvalue=self.floorvalue,frame_count=self.frame_count) 
-                        
+                                #Every 10min, reset the accAvg threshold, depending on expected level of movement
+                                #Should be a integer, round it
+                                fift=round(10*60*float(self.frame_rate))
+                                
+                                if self.frame_count % fift == 0:  
+                                        
+                                       #If the total base is fift (10min window), then assuming 99% of images are junk the threshold should be
+                                        #We've been counting frames output to file in the hitcounter
+                                        
+                                        print(str(self.hitcounter) + " files written in last 10minutes" + "\n" )             
+                                        if self.hitcounter > (fift*self.frameHIT) :
+                                                self.accAvg = self.accAvg + .05
+                                        if self.hitcounter < (fift*self.frameHIT) :
+                                                self.accAvg = self.accAvg - .025
+                                                
+                                        #In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
+                                        print(self.file_destination + str(self.frame_count) + " accAvg is changed to: " + str(self.accAvg) + "\n")
+                                        
+                                        #Write change to log file
+                                        
+                                        #reset hitcoutner for another fifteen minutes
+                                        self.hitcounter=0
+                                                                                        
+                                        #Build in a floor, the value can't be negative.
+                                        if self.accAvg < self.floorvalue:
+                                                self.floor=self.floor + 1
+                                        
+                                #Reset if needed.
+                                        if self.floor == 1 :
+                                                self.accAvg=self.floorvalue
+                                
+                                                print(self.file_destination + str(self.frame_count) + " accAvg is reset to: " + str(self.accAvg))
+                                                #Write change to log file    
+                                        
                         #############################
                         ###BACKGROUND SUBTRACTION
                         #############################
