@@ -107,42 +107,42 @@ def Urect(img,title):
     
     return(roi)    
 
-
-def adapt(frame_rate,accAvg,file_destination,floorvalue,frame_count):
-    #Every 10min, reset the accAvg threshold, depending on expected level of movement
-
-    #Should be a integer, round it
-    fift=round(10*60*float(frame_rate))
     
-    if frame_count % fift == 0:  
-            
-           #If the total base is fift (10min window), then assuming 99% of images are junk the threshold should be
-            #We've been counting frames output to file in the hitcounter
-            
-            print(str(hitcounter) + " files written in last 10minutes" + "\n" )             
-            if hitcounter > (fift*frameHIT) :
-                    accAvg = accAvg + .05
-            if hitcounter < (fift*frameHIT) :
-                    accAvg = accAvg - .025
-                    
-            #In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
-            print(file_destination + str(frame_count) + " accAvg is changed to: " + str(accAvg) + "\n")
-            
-            #Write change to log file
-            
-            #reset hitcoutner for another fifteen minutes
-            hitcounter=0
-                                                            
-            #Build in a floor, the value can't be negative.
-            if accAvg < floorvalue:
-                    floor=floor + 1
-            
-    #Reset if needed.
-            if floor == 1 :
-                    accAvg=floorvalue
-
-                    print(file_destination + str(frame_count) + " accAvg is reset to: " + str(self.accAvg))
-                    #Write change to log file    
-                    
-    #return new accAvg setting
-    return(accAvg)
+def adaptF():
+        #Every 10min, reset the accAvg threshold, depending on expected level of movement
+    
+        #Should be a integer, round it
+        fift=round(10*60*float(self.frame_rate))
+        
+        if self.frame_count % fift == 0:  
+                
+               #If the total base is fift (10min window), then assuming 99% of images are junk the threshold should be
+                #We've been counting frames output to file in the hitcounter
+                
+                print(str(self.hitcounter) + " files written in last 10minutes" + "\n" )             
+                if self.hitcounter > (fift*self.frameHIT) :
+                        self.accAvg = self.accAvg + .05
+                if self.hitcounter < (fift*self.frameHIT) :
+                        self.accAvg = self.accAvg - .025
+                        
+                #In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
+                print(self.file_destination + str(self.frame_count) + " accAvg is changed to: " + str(self.accAvg) + "\n")
+                
+                #Write change to log file
+                
+                #reset hitcoutner for another fifteen minutes
+                self.hitcounter=0
+                                                                
+                #Build in a floor, the value can't be negative.
+                if self.accAvg < self.floorvalue:
+                        self.floor=self.floor + 1
+                
+        #Reset if needed.
+                if self.floor == 1 :
+                        self.accAvg=self.floorvalue
+    
+                        print(self.file_destination + str(self.frame_count) + " accAvg is reset to: " + str(self.accAvg))
+                        #Write change to log file    
+                        
+        #return new accAvg setting
+        return(self.accAvg)
