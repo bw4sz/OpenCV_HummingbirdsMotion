@@ -77,6 +77,8 @@ class Motion:
                 #we want to name the output a folder from the output destination with the named extension        
                 if self.subMethod=="Acc":
                         print("AccAvg begin value is: %s" % (self.accAvg))
+                        #set an original to reset at the end
+                        self.accAvgBegin=self.accAvg
 
                 #If its batch, give an extra folder
                 if self.runtype == 'batch':
@@ -185,7 +187,8 @@ class Motion:
                         # Capture frame from file
                         ret,current_image = self.cap.read()
                         if not ret:
-                                #If there are no more frames, break
+                                #If there are no more frames, break, need to reset
+                                self.accAvg=self.accAvgBegin
                                 break
                                       
                         #Cut off the self.bottom 5% if the plotwatcher option is called. 
