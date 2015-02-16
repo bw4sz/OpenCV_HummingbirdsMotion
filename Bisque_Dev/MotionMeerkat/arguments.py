@@ -28,8 +28,9 @@ def arguments(self):
                 else:
                                 self.parser.add_argument("--runtype", help="Batch or single file",default='file')
                                 self.parser.add_argument("--batchpool", help="run directory of videos",type=str)
-                                self.parser.add_argument("--inDEST", help="path of single video",type=str,default='/home/bw4sz/bisque/modules/MotionMeerkat/MotionMeerkat/PlotwatcherTest.tlv')
-                                self.parser.add_argument("--fileD", help="output directory",default="")
+                                self.parser.add_argument("--inDEST", help="path of single video",type=str,default="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv")
+                                self.parser.add_argument("--fileD", help="output directory",default="C:/MotionMeerkat")
+                                self.parser.add_argument("--subMethod", help="Background Subtraction Method",type=str,default="Acc")                    
                                 self.parser.add_argument("--adapt", help="Adaptive background averaging",action='store_true',default=False)
                                 self.parser.add_argument("--accAvg", help="Fixed background averaging rate",default=0.35,type=float)
                                 self.parser.add_argument("--frameHIT", help="expected percentage of motion frames",default=0.1,type=float)
@@ -65,8 +66,8 @@ def arguments(self):
                                                 self.batchpool=raw_input("Enter folder containing videos:\n")
                                 
                                 #Destination of file
-                                self.fileD=raw_input("File Destination Folder (Current Directory):\n")   
-                                if not self.fileD: self.fileD = ""
+                                self.fileD=raw_input("File Destination Folder (C:/MotionMeerkat/):\n")   
+                                if not self.fileD: self.fileD = "C:/MotionMeerkat/"
                 
                                 #Sensitivity to movement
                                 self.accAvg=sourceM.ask_acc()
