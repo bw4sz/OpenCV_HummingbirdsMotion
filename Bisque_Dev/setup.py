@@ -4,7 +4,7 @@ from bq.setup.module_setup import python_setup, require, read_config
 
 
 def setup(params, *args, **kw):
-    python_setup('MotionMeerkat.py',  params=params )
+    python_setup('MotionMeerkat/main.py',  params=params )
     
 if __name__ =="__main__":
     params = read_config('runtime-bisque.cfg')
