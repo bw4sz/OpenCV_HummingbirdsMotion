@@ -4,31 +4,67 @@
 		  <tag name="mex_url" type="system-input"/>
 		  <tag name="bisque_token" type="system-input"/>
 		  <tag name="image_url" type="dataset"/>
-      <tag name="minThresh" type="number">
-	      <value>0.15</value>
-        <template>
-            <tag name="label" value="Minimum motion contour size"/>
-            <tag name="minValue" value="0" type="number"/>
-            <tag name="maxValue" value="1" type="number"/>
-            <tag name="allowDecimals" value="true" type="boolean"/>
-            <tag name="decimalPrecision" value="2" type="number"/>
-            <tag name="step" value="0.05" type="number"/>
-            <tag name="units" value="%"/>
-            <tag name="showSlider" value="true" type="boolean"/>
-            <tag name="hideNumberPicker" value="true" type="boolean"/>
-        </template>             
-      </tag>           
+      <tag name="minThresh" value="0.15" type="number">
+	            <template>
+	                <tag name="label" value="Minimum contour threshold" />
+            		  <tag name="minValue" value="0" type="number"/>
+		         <tag name="allowDecimals" value="true" type="boolean"/>
+		         <tag name="units" value="%"/>
+ 		         <tag name="maxValue" value="1" type="number"/>
+	                <tag name="reference" value="resource_url" />
+	                <tag name="allowNone" value="false" type="boolean" />
+	                <tag name="description" value="Minimum size of the contour for motion detected object" />
+	            </template>
+	        </tag>
       <tag name="newcombo" value="MOG" type="combo">
             <template>
-                <tag name="label" value="Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (ACC)"/>
+                <tag name="label" value="Background method? (ACC)"/>
                 <tag name="select">
                     <value>ACC</value>
                     <value>MOG</value>
                 </tag>
-                <tag name="editable" value="false" type="boolean"/>             
+                <tag name="editable" value="false" type="boolean"/>
+	         <tag name="description" value="Accumulated Averaging (Acc) or Mixture of Gaussian (MOG)" />
             </template>             
         </tag>
-	  </tag>
+
+      <tag name="moghistory" value="500" type="number">
+	            <template>
+	                <tag name="label" value="MOG History" />
+	                <tag name="reference" value="resource_url" />
+	                <tag name="allowNone" value="true" type="boolean" />
+	                <tag name="description" value="Background update rate for mixture model" />
+	            </template>
+	        </tag>
+      <tag name="mogvariance" value="500" type="number">
+	            <template>
+	                <tag name="label" value="MOG History" />
+	                <tag name="reference" value="resource_url" />
+	                <tag name="allowNone" value="true" type="boolean" />
+	                <tag name="description" value="MOG Variance threshold between foreground and background distributions" />
+	            </template>
+	        </tag>
+      <tag name="accAvg" value="0.35" type="number">
+	            <template>
+	                <tag name="label" value="Accumulated averaging threshold" />
+            		  <tag name="minValue" value="0.01" type="number"/>
+		         <tag name="allowDecimals" value="true" type="boolean"/>
+	                <tag name="reference" value="resource_url" />
+	                <tag name="allowNone" value="true" type="boolean" />
+	                <tag name="description" value="Minimum size of the contour for motion detected object" />
+	            </template>
+	        </tag>
+      <tag name="burnin" value="0.35" type="number">
+	            <template>
+	                <tag name="label" value="Delay" />
+		         <tag name="allowDecimals" value="true" type="boolean"/>
+	                <tag name="reference" value="resource_url" />
+		         <tag name="units" value="min"/>
+	                <tag name="allowNone" value="true" type="boolean" />
+	                <tag name="description" value="Time to delay motion detection in minutes" />
+	            </template>
+	        </tag>
+	 </tag>
     <tag name="title" type="string" value="Motion Detection"/> 
     <tag name="authors" type="string" value="Ben Weinstein - Stony Brook University"/> 
     <tag name="description" type="string" value="Extract potential motion events from video files. Citation: Integrating motion video detection and ecological monitoring. B. Weinstein. Methods in Ecology and Evolution. Accepted. 2014"/>
