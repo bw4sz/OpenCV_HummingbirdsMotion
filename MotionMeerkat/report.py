@@ -9,12 +9,12 @@ def report(ob):
         #Print parameters
         #Batch or single file
         log_report.write("\nRun type: %s" % ob.runtype)
-        if ob.runtype=="file":
-                log_report.write("\nInput file path: %s" % ob.fileD)
+        if ob.runtype in ["file","pictures"]:
+                log_report.write("\nInput file path: %s" % ob.inDEST)
                 
         else:
                 log_report.write("\nInput file path: %s" % ob.batchpool)
-        log_report.write("\nOutput dir: %s" % ob.inDEST)
+        log_report.write("\nOutput dir: %s" % ob.fileD)
         log_report.write("\nAdapt accAvg? %s" % ob.adapt)
         
         if ob.adapt:

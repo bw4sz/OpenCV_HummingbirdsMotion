@@ -95,35 +95,40 @@ class Motion:
                 ##Begin video capture
                 #########################
                 
-                ##Get Video Properties
-                self.cap = cv2.VideoCapture(self.inDEST)
-                #Get frame rate if the plotwatcher setting hasn't been called
-                # not the most elegant solution, but get global frame_rate
-                if not self.frameSET:
+                if not self.pictures:
+                        ##Get Video Properties
+                        self.cap = cv2.VideoCapture(self.inDEST)
+                        #Get frame rate if the plotwatcher setting hasn't been called
+                        # not the most elegant solution, but get global frame_rate
+                        if not self.frameSET:
+                                        
+                                self.frame_rate=round(self.cap.get(5))
+                        
+                        #get frame time relative to start
+                        frame_time=self.cap.get(0)     
+                        #get total number of frames
+                        self.total_frameC=self.cap.get(7)     
+                        sys.stderr.write("frame rate: %s\n" % self.frame_rate)
+                        
+                        ####Burnin and first image
+                        
+                        #apply burn in, skip the the first X frames according to user input
+                        for x in range(1,int(float(self.burnin) * int(self.frame_rate) * 60)): 
+                                self.cap.grab()
+                                self.frame_count=self.frame_count+1
                                 
-                        self.frame_rate=round(self.cap.get(5))
-                
-                #get frame time relative to start
-                frame_time=self.cap.get(0)     
-                #get total number of frames
-                self.total_frameC=self.cap.get(7)     
-                sys.stderr.write("frame rate: %s\n" % self.frame_rate)
-                
-                ####Burnin and first image
-                
-                #apply burn in, skip the the first X frames according to user input
-                for x in range(1,int(float(self.burnin) * int(self.frame_rate) * 60)): 
-                        self.cap.grab()
-                        self.frame_count=self.frame_count+1
+                        print("Beginning Motion Detection")
                         
-                print("Beginning Motion Detection")
-                
-                #Set frame skip counter if downsampling 
-                frameSKIP=0
-                
-                # Capture the first frame from file for image properties
-                orig_image = self.cap.read()[1]  
+                        #Set frame skip counter if downsampling 
+                        frameSKIP=0
                         
+                        # Capture the first frame from file for image properties
+                        orig_image = self.cap.read()[1]  
+                else:
+                        self.jpgs=glob.glob(os.path.join(self.inDEST,"*.jpg"))
+                        orig_image=cv2.imread(self.jpgs[0])
+                        self.total_frameC=len(self.jpgs)
+                        self.frame_rate=1
                 #Have to set global for the callback, feedback welcome. 
                 global orig
                 
@@ -177,7 +182,10 @@ class Motion:
                         if not self.scan ==0:
                                 if self.noMotion:
                                         for x in range(1,self.scan):
-                                                self.cap.grab()
+                                                if not self.pictures:
+                                                        self.cap.grab()
+                                                else:
+                                                        current_image=jpgs.pop()
                                                 self.frame_count=self.frame_count+1
                                 else:
                                         pass
@@ -185,12 +193,18 @@ class Motion:
                                 pass
                                         
                         # Capture frame from file
-                        ret,current_image = self.cap.read()
-                        if not ret:
-                                #If there are no more frames, break, need to reset
-                                self.accAvg=self.accAvgBegin
-                                break
-                                      
+                        if not self.pictures:
+                                ret,current_image = self.cap.read()
+                                if not ret:
+                                        #If there are no more frames, break, need to reset
+                                        self.accAvg=self.accAvgBegin
+                                        break
+                        else:
+                                if len(self.jpgs)==0:
+                                        break
+                                else:
+                                        current_image=cv2.imread(self.jpgs.pop())
+                                
                         #Cut off the self.bottom 5% if the plotwatcher option is called. 
                         if not self.plotwatcher:
                                 camera_image = current_image   
@@ -474,17 +488,17 @@ class Motion:
                 jpgs=glob.glob(os.path.join(self.file_destination,"*.jpg"))                  
                 
                 #Get frame rate and size of images
-                self.cap = cv2.VideoCapture(self.inDEST)
-                
-                        #Get frame rate if the plotwatcher setting hasn't been called
-                        # not the most elegant solution, but get global frame_rate
-                if not self.frameSET:
-                        fr=round(self.cap.get(5))
-                else:
-                        fr=self.frame_rate
-                
-                orig_image = self.cap.read()[1]  
-                
+                if not self.pictures:
+                        self.cap = cv2.VideoCapture(self.inDEST)
+                                #Get frame rate if the plotwatcher setting hasn't been called
+                                # not the most elegant solution, but get global frame_rate
+                        if not self.frameSET:
+                                fr=round(self.cap.get(5))
+                        else:
+                                fr=self.frame_rate
+                        
+                        orig_image = self.cap.read()[1]  
+        
                 ###Get information about camera and image
                 width = np.size(orig_image, 1)
                 height = np.size(orig_image, 0)
