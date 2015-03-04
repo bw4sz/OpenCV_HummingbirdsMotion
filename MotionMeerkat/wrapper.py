@@ -11,10 +11,14 @@ def wrap(ob) :
                 if os.path.isfile(ob.inDEST): pass
                 else:
                         print("File path does not exist!")
-        else:
+        elif ob.runtype=="batch":
                 if os.path.isdir(ob.batchpool): pass
                 else:
                         print("Directory does not exist!")
+        elif ob.runtype=="pictures":                
+                if os.path.isdir(ob.inDEST): pass
+                else:
+                        print("File path does not exist!")                
 
         ###Run Batch Mode                
         if (ob.runtype == "batch"):
@@ -52,3 +56,14 @@ def wrap(ob) :
                 except:
                         traceback.print_exc()
                         print 'Error in input file:',ob.inDEST
+
+        ###If runtype is a single file - run file destination        
+        if (ob.runtype == "pictures"):
+                try:
+                        ob.prep()
+                        ob.run()
+                        ob.videoM()
+                        report.report(ob)                                
+                except:
+                        traceback.print_exc()
+                        print 'Error in input file:',ob.inDEST        

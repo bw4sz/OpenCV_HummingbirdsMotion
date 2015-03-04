@@ -55,18 +55,21 @@ def arguments(self):
                     
                 if(len(sys.argv)< 2):
                                 #Batch or single file
-                                self.runtype=raw_input("'batch' run or single 'file'? (file):\n")   
+                                self.runtype=raw_input("'batch' run, single video 'file' or folder of ordered 'pictures'? (file):\n")   
                                 if not self.runtype: self.runtype="file"
                                 
                                 if(self.runtype=="file"):
                                                 self.inDEST=sourceM.ask_file()
-                                                
+                                                self.pictures=False
                                 if(self.runtype=="batch"):
                                                 self.batchpool=raw_input("Enter folder containing videos:\n")
-                                
+                                                self.pictures=False
+                                if(self.runtype=="pictures"):
+                                                self.inDEST=raw_input("Enter folder containing pictures\n Please note that filenames need to be chronological order \n")                             
+                                                self.pictures=True
                                 #Destination of file
-                                self.fileD=raw_input("File Destination Folder (Current Directory):\n")   
-                                if not self.fileD: self.fileD = ""
+                                self.fileD=raw_input("File Destination Folder (C:\MotionMeerkat):\n")   
+                                if not self.fileD: self.fileD = str("C:\MotionMeerkat")
                 
                                 #Sensitivity to movement
                                 self.accAvg=sourceM.ask_acc()
