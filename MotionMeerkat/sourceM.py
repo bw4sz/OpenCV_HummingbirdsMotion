@@ -146,3 +146,4 @@ def adaptF():
                         
         #return new accAvg setting
         return(self.accAvg)
+    
