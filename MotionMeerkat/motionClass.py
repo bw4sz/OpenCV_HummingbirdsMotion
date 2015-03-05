@@ -77,8 +77,8 @@ class Motion:
                 #we want to name the output a folder from the output destination with the named extension        
                 if self.subMethod=="Acc":
                         print("AccAvg begin value is: %s" % (self.accAvg))
-                        #set an original to reset at the end
-                        self.accAvgBegin=self.accAvg
+                #set an original to reset at the end
+                self.accAvgBegin=self.accAvg
 
                 #If its batch, give an extra folder
                 if self.runtype == 'batch':

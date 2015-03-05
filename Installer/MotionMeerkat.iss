@@ -30,7 +30,7 @@ Source: "C:\Users\Ben\Documents\OpenCV_HummingbirdsMotion\MotionMeerkat\dist\*";
 Source: "C:\FFmpeg\bin\ffmpeg.exe";DestDir: "{app}\FFmpeg"; Flags: ignoreversion
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-         
+                                                                
 [Icons]
 Name: "{group}\MotionMeerkat"; Filename: "{app}\main.exe"; IconFileName: "{app}\thumbnail.ico"
 Name: "{commondesktop}\MotionMeerkat"; IconFileName: "{app}\thumbnail.ico"; Filename: "{app}\main.exe"; Tasks: desktopicon
