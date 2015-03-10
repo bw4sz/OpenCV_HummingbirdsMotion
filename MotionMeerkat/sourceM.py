@@ -92,12 +92,12 @@ def Urect(img,title):
             rect = (ix,iy,x,y)
             roi.extend(rect)
 
-    cv2.namedWindow(title,cv2.WINDOW_AUTOSIZE)
+    cv2.namedWindow(title,cv2.WINDOW_NORMAL)
     cv2.setMouseCallback(title,onmouse)
 
     print ("Please draw a single rectangle ROI using right click!")
     while(1):
-            cv2.namedWindow(title,cv2.WINDOW_AUTOSIZE)                 
+            cv2.namedWindow(title,cv2.WINDOW_NORMAL)                 
             cv2.imshow(title,img)
             k = cv2.waitKey(1) & 0xFF
             if k == 27:

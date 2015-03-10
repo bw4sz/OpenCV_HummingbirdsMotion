@@ -150,12 +150,20 @@ class Motion:
                         
                         print(self.roi_selected)
                         
-                        if self.ROI_include == "include": self.display_image=orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]
+                        if self.ROI_include == "include": 
+                                self.display_image=orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]
                         else:
                                 orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]=255
                                 self.display_image=orig_ROI                             
                 else:
                         self.display_image=orig              
+                 
+                #show the display image
+                if self.set_ROI:
+                        cv2.namedWindow("Result",cv2.WINDOW_NORMAL)
+                        cv2.imshow("Result", self.display_image)
+                        cv2.waitKey(1200) 
+                        cv2.destroyAllWindows()
                         
                 self.width = np.size(self.display_image, 1)
                 self.height = np.size(self.display_image, 0)

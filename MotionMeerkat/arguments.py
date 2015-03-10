@@ -14,7 +14,7 @@ Default values for parameters are in parenthesis. To select default hit enter.
 
 Affirmative answers to questions are y, negative answers n
 
-Please use double quotes for file paths, but no quotes for any other responses. 
+Please do not use quotes for any responses. 
 
 """
 
@@ -146,7 +146,7 @@ def arguments(self):
                                                 if not self.segment: self.segment = False
                                                 
                                                 #set ROI
-                                                self.set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest? (n) :\n")
+                                                self.set_ROI= "y" == raw_input("Exclude a portion of the image? (n) :\n")
                                                     
                                                 if self.set_ROI:
                                                                 self.ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'?:\n")
