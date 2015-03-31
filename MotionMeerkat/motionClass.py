@@ -515,15 +515,15 @@ class Motion:
                 # Define the codec and create VideoWriter object
                 fourcc = self.cap.get(6)
                 
-                out = cv2.VideoWriter(vidDEST,int(fourcc),float(fr), frame_size)                    
+                out = cv2.VideoWriter(vidDEST,cv2.VideoWriter_fourcc('M','J','P',"G"),float(fr),frame_size)                    
                 
                 #split and sort the jpg names
                 jpgs.sort(key=sourceM.getint)
                 
                 #Loop through every frame and write video
                 for f in jpgs:
-                        fr=cv2.imread(f)
-                        out.write(fr)
+                        cf=cv2.imread(f)
+                        out.write(cf)
                 
                 # Release everything if job is finished
                 self.cap.release()
