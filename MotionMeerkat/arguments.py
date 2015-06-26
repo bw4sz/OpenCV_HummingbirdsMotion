@@ -176,4 +176,5 @@ def arguments(self):
                                                 self.subMethod="Acc"
                                                 self.moghistory = 500
                                                 self.mogvariance = 16
+                                                self.pictures = False
                                                 self.segment = False

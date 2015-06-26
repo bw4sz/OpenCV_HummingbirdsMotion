@@ -9,12 +9,12 @@ def report(ob):
         #Print parameters
         #Batch or single file
         log_report.write("\nRun type: %s" % ob.runtype)
-        if ob.runtype=="file":
-                log_report.write("\nInput file path: %s" % ob.fileD)
+        if ob.runtype in ["file","pictures"]:
+                log_report.write("\nInput file path: %s" % ob.inDEST)
                 
         else:
                 log_report.write("\nInput file path: %s" % ob.batchpool)
-        log_report.write("\nOutput dir: %s" % ob.inDEST)
+        log_report.write("\nOutput dir: %s" % ob.fileD)
         log_report.write("\nAdapt accAvg? %s" % ob.adapt)
         
         if ob.adapt:
@@ -48,7 +48,6 @@ def report(ob):
         #log
         log_report.write("\n Thank you for using MotionMeerkat! \n")
         log_report.write("Candidate motion events: %.0f \n " % ob.total_count )
-        log_report.write("Frames skipped due to AccAvg: %.0f \n " % ob.nodiff)
         log_report.write("Frames skipped due to Threshold: %.0f \n " % ob.nocountr)
         log_report.write("Frames skipped due to minSIZE: %.0f \n " % ob.toosmall)
         log_report.write("Total frames in files: %.0f \n " % ob.frame_count)
@@ -69,6 +68,12 @@ def report(ob):
         rate=float(ob.total_count)/ob.frame_count*100
         print("Hitrate: %.2f %% \n" % rate)
 
+        #reset frame count if in batch loop
+        ob.frame_count=0
+        ob.total_count=0
+        ob.toosmall=0
+        ob.nocountr=0
+        
         #Write csv of time stamps and frame counts
         #file name
         time_stamp_report = ob.file_destination + "/" + "Frames.csv"

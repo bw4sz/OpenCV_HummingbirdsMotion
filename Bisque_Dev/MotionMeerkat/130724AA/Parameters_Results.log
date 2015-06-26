@@ -1,0 +1,25 @@
+
+Run type: pictures
+Run type: pictures
+Input file path: C:\Users\Ben\Dropbox\Thesis\Maquipucuna_SantaLucia\MotionTest\FL072\130724AA
+Output dir: 
+Adapt accAvg? False
+Threshold 30
+Minimum contour area: 0.2
+Burnin: 0
+Scan frames: 0
+Set ROI: exclude
+Area counter?: False
+Output type?: frames
+
+Total run time (min): 0.51 
+ Average frames per second: 7.80 
+ 
+ Thank you for using MotionMeerkat! 
+Candidate motion events: 167 
+ Frames skipped due to AccAvg: 0 
+ Frames skipped due to Threshold: 0 
+ Frames skipped due to minSIZE: 71 
+ Total frames in files: 238 
+ Hitrate: 70.17 % 
+Exiting

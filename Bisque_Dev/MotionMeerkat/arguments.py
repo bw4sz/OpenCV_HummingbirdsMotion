@@ -14,7 +14,7 @@ Default values for parameters are in parenthesis. To select default hit enter.
 
 Affirmative answers to questions are y, negative answers n
 
-Please use double quotes for file paths, but no quotes for any other responses. 
+Please do not use quotes for any responses. 
 
 """
 
@@ -28,9 +28,8 @@ def arguments(self):
                 else:
                                 self.parser.add_argument("--runtype", help="Batch or single file",default='file')
                                 self.parser.add_argument("--batchpool", help="run directory of videos",type=str)
-                                self.parser.add_argument("--inDEST", help="path of single video",type=str,default="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv")
-                                self.parser.add_argument("--fileD", help="output directory",default="C:/MotionMeerkat")
-                                self.parser.add_argument("--subMethod", help="Background Subtraction Method",type=str,default="Acc")                    
+                                self.parser.add_argument("--inDEST", help="path of single video",type=str,default='/home/bw4sz/bisque/modules/MotionMeerkat/MotionMeerkat/PlotwatcherTest.tlv')
+                                self.parser.add_argument("--fileD", help="output directory",default="")
                                 self.parser.add_argument("--adapt", help="Adaptive background averaging",action='store_true',default=False)
                                 self.parser.add_argument("--accAvg", help="Fixed background averaging rate",default=0.35,type=float)
                                 self.parser.add_argument("--frameHIT", help="expected percentage of motion frames",default=0.1,type=float)
@@ -56,18 +55,21 @@ def arguments(self):
                     
                 if(len(sys.argv)< 2):
                                 #Batch or single file
-                                self.runtype=raw_input("'batch' run or single 'file'? (file):\n")   
+                                self.runtype=raw_input("'batch' run, single video 'file' or folder of ordered 'pictures'? (file):\n")   
                                 if not self.runtype: self.runtype="file"
                                 
                                 if(self.runtype=="file"):
                                                 self.inDEST=sourceM.ask_file()
-                                                
+                                                self.pictures=False
                                 if(self.runtype=="batch"):
                                                 self.batchpool=raw_input("Enter folder containing videos:\n")
-                                
+                                                self.pictures=False
+                                if(self.runtype=="pictures"):
+                                                self.inDEST=raw_input("Enter folder containing pictures\n Please note that filenames need to be chronological order \n")                             
+                                                self.pictures=True
                                 #Destination of file
-                                self.fileD=raw_input("File Destination Folder (C:/MotionMeerkat/):\n")   
-                                if not self.fileD: self.fileD = "C:/MotionMeerkat/"
+                                self.fileD=raw_input("File Destination Folder (C:\MotionMeerkat):\n")   
+                                if not self.fileD: self.fileD = str("C:\MotionMeerkat")
                 
                                 #Sensitivity to movement
                                 self.accAvg=sourceM.ask_acc()
@@ -144,7 +146,7 @@ def arguments(self):
                                                 if not self.segment: self.segment = False
                                                 
                                                 #set ROI
-                                                self.set_ROI= "y" == raw_input("Subsect the image by selecting a region of interest? (n) :\n")
+                                                self.set_ROI= "y" == raw_input("Exclude a portion of the image? (n) :\n")
                                                     
                                                 if self.set_ROI:
                                                                 self.ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'?:\n")
@@ -174,4 +176,5 @@ def arguments(self):
                                                 self.subMethod="Acc"
                                                 self.moghistory = 500
                                                 self.mogvariance = 16
+                                                self.pictures = False
                                                 self.segment = False

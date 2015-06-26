@@ -20,7 +20,12 @@ import BackgroundSubtractor
 
 class Motion:
 
-        def __init__(self):
+        def __init__(self):                  
+                print("Motion Detection Object Created")
+                
+        def prep(self):
+                
+                #Create initial conditions
                 #Empty list for time stamps
                 self.stamp=[]
 
@@ -56,10 +61,7 @@ class Motion:
                 self.frameC_announce=0
     
                 #Start with motion flag on
-                self.noMotion=False                   
-        
-        def prep(self):
-                
+                self.noMotion=False                 
                 #Report name of file
                 sys.stderr.write("Processing file %s\n" % (self.inDEST))
                 
@@ -75,6 +77,8 @@ class Motion:
                 #we want to name the output a folder from the output destination with the named extension        
                 if self.subMethod=="Acc":
                         print("AccAvg begin value is: %s" % (self.accAvg))
+                #set an original to reset at the end
+                self.accAvgBegin=self.accAvg
 
                 #If its batch, give an extra folder
                 if self.runtype == 'batch':
@@ -91,35 +95,40 @@ class Motion:
                 ##Begin video capture
                 #########################
                 
-                ##Get Video Properties
-                self.cap = cv2.VideoCapture(self.inDEST)
-                #Get frame rate if the plotwatcher setting hasn't been called
-                # not the most elegant solution, but get global frame_rate
-                if not self.frameSET:
+                if not self.pictures:
+                        ##Get Video Properties
+                        self.cap = cv2.VideoCapture(self.inDEST)
+                        #Get frame rate if the plotwatcher setting hasn't been called
+                        # not the most elegant solution, but get global frame_rate
+                        if not self.frameSET:
+                                        
+                                self.frame_rate=round(self.cap.get(5))
+                        
+                        #get frame time relative to start
+                        frame_time=self.cap.get(0)     
+                        #get total number of frames
+                        self.total_frameC=self.cap.get(7)     
+                        sys.stderr.write("frame rate: %s\n" % self.frame_rate)
+                        
+                        ####Burnin and first image
+                        
+                        #apply burn in, skip the the first X frames according to user input
+                        for x in range(1,int(float(self.burnin) * int(self.frame_rate) * 60)): 
+                                self.cap.grab()
+                                self.frame_count=self.frame_count+1
                                 
-                        self.frame_rate=round(self.cap.get(5))
-                
-                #get frame time relative to start
-                frame_time=self.cap.get(0)     
-                #get total number of frames
-                self.total_frameC=self.cap.get(7)     
-                sys.stderr.write("frame rate: %s\n" % self.frame_rate)
-                
-                ####Burnin and first image
-                
-                #apply burn in, skip the the first X frames according to user input
-                for x in range(1,int(float(self.burnin) * int(self.frame_rate) * 60)): 
-                        self.cap.grab()
-                        self.frame_count=self.frame_count+1
+                        print("Beginning Motion Detection")
                         
-                print("Beginning Motion Detection")
-                
-                #Set frame skip counter if downsampling 
-                frameSKIP=0
-                
-                # Capture the first frame from file for image properties
-                orig_image = self.cap.read()[1]  
+                        #Set frame skip counter if downsampling 
+                        frameSKIP=0
                         
+                        # Capture the first frame from file for image properties
+                        orig_image = self.cap.read()[1]  
+                else:
+                        self.jpgs=glob.glob(os.path.join(self.inDEST,"*.jpg"))
+                        orig_image=cv2.imread(self.jpgs[0])
+                        self.total_frameC=len(self.jpgs)
+                        self.frame_rate=1
                 #Have to set global for the callback, feedback welcome. 
                 global orig
                 
@@ -141,12 +150,20 @@ class Motion:
                         
                         print(self.roi_selected)
                         
-                        if self.ROI_include == "include": self.display_image=orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]
+                        if self.ROI_include == "include": 
+                                self.display_image=orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]
                         else:
                                 orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]=255
                                 self.display_image=orig_ROI                             
                 else:
                         self.display_image=orig              
+                 
+                #show the display image
+                if self.set_ROI:
+                        cv2.namedWindow("Result",cv2.WINDOW_NORMAL)
+                        cv2.imshow("Result", self.display_image)
+                        cv2.waitKey(1200) 
+                        cv2.destroyAllWindows()
                         
                 self.width = np.size(self.display_image, 1)
                 self.height = np.size(self.display_image, 0)
@@ -173,7 +190,10 @@ class Motion:
                         if not self.scan ==0:
                                 if self.noMotion:
                                         for x in range(1,self.scan):
-                                                self.cap.grab()
+                                                if not self.pictures:
+                                                        self.cap.grab()
+                                                else:
+                                                        current_image=jpgs.pop()
                                                 self.frame_count=self.frame_count+1
                                 else:
                                         pass
@@ -181,11 +201,18 @@ class Motion:
                                 pass
                                         
                         # Capture frame from file
-                        ret,current_image = self.cap.read()
-                        if not ret:
-                                #If there are no more frames, break
-                                break
-                                      
+                        if not self.pictures:
+                                ret,current_image = self.cap.read()
+                                if not ret:
+                                        #If there are no more frames, break, need to reset
+                                        self.accAvg=self.accAvgBegin
+                                        break
+                        else:
+                                if len(self.jpgs)==0:
+                                        break
+                                else:
+                                        current_image=cv2.imread(self.jpgs.pop())
+                                
                         #Cut off the self.bottom 5% if the plotwatcher option is called. 
                         if not self.plotwatcher:
                                 camera_image = current_image   
@@ -232,10 +259,42 @@ class Motion:
                                         
                         ###Adaptively set the aggregate threshold 
                         #set floor flag, we can't have negative accAVG
-                        floor=0
+                        self.floor=0
                         if self.adapt:
-                                sourceM.adapt(frame_rate=self.frame_rate,accAvg=self.accAvg,file_destination=self.file_destination,floorvalue=self.floorvalue,frame_count=self.frame_count) 
-                        
+                                #Every 10min, reset the accAvg threshold, depending on expected level of movement
+                                #Should be a integer, round it
+                                fift=round(10*60*float(self.frame_rate))
+                                
+                                if self.frame_count % fift == 0:  
+                                        
+                                       #If the total base is fift (10min window), then assuming 99% of images are junk the threshold should be
+                                        #We've been counting frames output to file in the hitcounter
+                                        
+                                        print(str(self.hitcounter) + " files written in last 10minutes" + "\n" )             
+                                        if self.hitcounter > (fift*self.frameHIT) :
+                                                self.accAvg = self.accAvg + .05
+                                        if self.hitcounter < (fift*self.frameHIT) :
+                                                self.accAvg = self.accAvg - .025
+                                                
+                                        #In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
+                                        print(self.file_destination + str(self.frame_count) + " accAvg is changed to: " + str(self.accAvg) + "\n")
+                                        
+                                        #Write change to log file
+                                        
+                                        #reset hitcoutner for another fifteen minutes
+                                        self.hitcounter=0
+                                                                                        
+                                        #Build in a floor, the value can't be negative.
+                                        if self.accAvg < self.floorvalue:
+                                                self.floor=self.floor + 1
+                                        
+                                #Reset if needed.
+                                        if self.floor == 1 :
+                                                self.accAvg=self.floorvalue
+                                
+                                                print(self.file_destination + str(self.frame_count) + " accAvg is reset to: " + str(self.accAvg))
+                                                #Write change to log file    
+                                        
                         #############################
                         ###BACKGROUND SUBTRACTION
                         #############################
@@ -437,17 +496,17 @@ class Motion:
                 jpgs=glob.glob(os.path.join(self.file_destination,"*.jpg"))                  
                 
                 #Get frame rate and size of images
-                self.cap = cv2.VideoCapture(self.inDEST)
-                
-                        #Get frame rate if the plotwatcher setting hasn't been called
-                        # not the most elegant solution, but get global frame_rate
-                if not self.frameSET:
-                        fr=round(self.cap.get(5))
-                else:
-                        fr=self.frame_rate
-                
-                orig_image = self.cap.read()[1]  
-                
+                if not self.pictures:
+                        self.cap = cv2.VideoCapture(self.inDEST)
+                                #Get frame rate if the plotwatcher setting hasn't been called
+                                # not the most elegant solution, but get global frame_rate
+                        if not self.frameSET:
+                                fr=round(self.cap.get(5))
+                        else:
+                                fr=self.frame_rate
+                        
+                        orig_image = self.cap.read()[1]  
+        
                 ###Get information about camera and image
                 width = np.size(orig_image, 1)
                 height = np.size(orig_image, 0)
@@ -456,15 +515,15 @@ class Motion:
                 # Define the codec and create VideoWriter object
                 fourcc = self.cap.get(6)
                 
-                out = cv2.VideoWriter(vidDEST,int(fourcc),float(fr), frame_size)                    
+                out = cv2.VideoWriter(vidDEST,cv2.VideoWriter_fourcc('M','J','P',"G"),float(fr),frame_size)                    
                 
                 #split and sort the jpg names
                 jpgs.sort(key=sourceM.getint)
                 
                 #Loop through every frame and write video
                 for f in jpgs:
-                        fr=cv2.imread(f)
-                        out.write(fr)
+                        cf=cv2.imread(f)
+                        out.write(cf)
                 
                 # Release everything if job is finished
                 self.cap.release()
