@@ -10,7 +10,7 @@ setup(
     options = {"py2exe":{
         'packages':['shapely'],
         'includes':['numpy'],
-        "dll_excludes": ["MSVCP90.dll"]
+        "dll_excludes": ["MSVCP90.dll","libzmq.pyd"]
     }}    
 )
 

@@ -49,7 +49,9 @@ def arguments(self):
                                 self.parser.add_argument("--set_areacounter", help="Set region to count area",action="store_true",default=False)
                                 self.parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?",default='frames',type=str)
                                 self.args = self.parser.parse_args(namespace=self)
-
+				if not self.runtype=="pictures":
+						self.pictures=False
+				self.segment = False
                                 print "\n"
                                 print "\n"
                     
