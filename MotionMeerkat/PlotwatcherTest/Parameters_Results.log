@@ -44,3 +44,26 @@ Candidate motion events: 3
  Total frames in files: 49 
  Hitrate: 6.12 % 
 Exiting
+Run type: file
+Input file path: PlotwatcherTest.avi
+Output dir: 
+Adapt accAvg? False
+Threshold 30
+Minimum contour area: 0.1
+Burnin: 0
+Scan frames: 0
+Manual framerate: 1
+Set ROI: exclude
+Area counter?: False
+Output type?: frames
+
+Total run time (min): 0.03 
+ Average frames per second: 30.31 
+ 
+ Thank you for using MotionMeerkat! 
+Candidate motion events: 3 
+ Frames skipped due to Threshold: 31 
+ Frames skipped due to minSIZE: 15 
+ Total frames in files: 49 
+ Hitrate: 6.12 % 
+Exiting

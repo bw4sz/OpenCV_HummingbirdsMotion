@@ -7,6 +7,7 @@
 #Following here
 #install dependencies
 sudo pip install numpy
+sudo pip install shapely
 
 sudo yum install gtk2-devel libdc1394-devel libv4l-devel install ffmpeg-devel install gstreamer-plugins-base-devel libjpeg-turbo-devel jasper-devel openexr-devel libpng-devel libtiff-devel libwebp-devel
 
@@ -36,10 +37,6 @@ make
 
 sudo make install
 
-#transfer libraries
-
-sudo mv cat /home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/cv2.so /home/bw4sz/bisque/engine/lib/python2.6/site-packages
-
 #run a test
 
 python
@@ -52,4 +49,5 @@ quit()
 
 cd /home/bw4sz/bisque/engine/modules/motionmeerkat/MotionMeerkat
 
-./main.py --i PlotwatcherTest.avi
+#test if working
+./main.py --i PlotwatcherTest.avi --frameSET --frame_rate 1
