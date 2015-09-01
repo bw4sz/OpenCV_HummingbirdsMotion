@@ -5,7 +5,4 @@ git config --global user.email "benweinstein2010@gmail.com"
 
 git remote set-url origin https://bw4sz@github.com/bw4sz/OpenCV_HummingbirdsMotion.git
 
-
-#unset
 unset SSH_ASKPASS
-
