@@ -1,0 +1,25 @@
+FETCHING http://bovary.iplantcollaborative.org/data_service/00-dJkjj9ka9vHMhXaymXfa2m
+FETCHING http://bovary.iplantcollaborative.org/data_service/00-bb4UZ3xUfe2bz9PeCENAFE
+{'http://bovary.iplantcollaborative.org/data_service/00-dJkjj9ka9vHMhXaymXfa2m': 'images/18stj955125.tif', 'http://bovary.iplantcollaborative.org/data_service/00-bb4UZ3xUfe2bz9PeCENAFE': 'images/test4.tif'}
+FETCHING http://bovary.iplantcollaborative.org/data_service/00-Wr8axXU86YEi67tR6E368f
+Traceback (most recent call last):
+  File "motionmeerkat.py", line 64, in <module>
+    M.main(image_url, mex_url, auth_token)
+  File "motionmeerkat.py", line 21, in main
+    dataset = fetch_dataset (bq, image_url, 'images')
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 297, in fetch_dataset
+    x = fetch_image_pixels(session, uri, dest, uselocalpath=uselocalpath)
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 251, in fetch_image_pixels
+    ip = image.pixels().format('tiff')
+AttributeError: 'BQResource' object has no attribute 'pixels'
+FETCHING http://bovary.iplantcollaborative.org/data_service/00-Wr8axXU86YEi67tR6E368f
+Traceback (most recent call last):
+  File "motionmeerkat.py", line 64, in <module>
+    M.main(image_url, mex_url, auth_token)
+  File "motionmeerkat.py", line 21, in main
+    dataset = fetch_dataset (bq, image_url, 'images')
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 297, in fetch_dataset
+    x = fetch_image_pixels(session, uri, dest, uselocalpath=uselocalpath)
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 251, in fetch_image_pixels
+    ip = image.pixels().format('tiff')
+AttributeError: 'BQResource' object has no attribute 'pixels'

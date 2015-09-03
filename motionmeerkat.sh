@@ -6,7 +6,7 @@ echo "ENV"
 printenv
 
 echo "command"
-echo "./dist/motionmeerkat $@"
+#echo "./dist/motionmeerkat $@"
 
-exec ./dist/motionmeerkat $@
+python ./MotionMeerkat/main.py $@
 

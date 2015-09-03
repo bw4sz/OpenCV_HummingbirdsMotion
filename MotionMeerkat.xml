@@ -16,7 +16,7 @@
 	                <tag name="description" value="Minimum size of the contour for motion detected object" />
 	            </template>
 	        </tag>
-      <tag name="newcombo" value="MOG" type="combo">
+      <tag name="newcombo" value="ACC" type="combo">
             <template>
                 <tag name="label" value="Background method? (ACC)"/>
                 <tag name="select">
@@ -36,9 +36,9 @@
 	                <tag name="description" value="Background update rate for mixture model" />
 	            </template>
 	        </tag>
-      <tag name="mogvariance" value="500" type="number">
+      <tag name="mogvariance" value="16" type="number">
 	            <template>
-	                <tag name="label" value="MOG History" />
+	                <tag name="label" value="MOG Variance" />
 	                <tag name="reference" value="resource_url" />
 	                <tag name="allowNone" value="true" type="boolean" />
 	                <tag name="description" value="MOG Variance threshold between foreground and background distributions" />
