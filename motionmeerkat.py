@@ -53,7 +53,9 @@ class motionmeerkatModule(object):
 	print args
 	
 	#Structure arguments
-	inDest=dataset.values()[0]	
+	#add the file name to the list of arguments
+	inDest=dataset.values()[0]
+	#The third position is where we start - the 0th is the mex, 
 	args.insert(3,inDest)
 
 	#Format call string
