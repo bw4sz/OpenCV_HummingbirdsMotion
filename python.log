@@ -23,3 +23,134 @@ Traceback (most recent call last):
   File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 251, in fetch_image_pixels
     ip = image.pixels().format('tiff')
 AttributeError: 'BQResource' object has no attribute 'pixels'
+FETCHING http://bovary.iplantcollaborative.org/data_service/00-Wr8axXU86YEi67tR6E368f
+Traceback (most recent call last):
+  File "motionmeerkat.py", line 78, in <module>
+    M.main(image_url, mex_url, auth_token)
+  File "motionmeerkat.py", line 22, in main
+    dataset = fetch_dataset (bq, image_url, 'images')
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 297, in fetch_dataset
+    x = fetch_image_pixels(session, uri, dest, uselocalpath=uselocalpath)
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 251, in fetch_image_pixels
+    ip = image.pixels().format('tiff')
+AttributeError: 'BQResource' object has no attribute 'pixels'
+FETCHING http://bovary.iplantcollaborative.org/data_service/00-Wr8axXU86YEi67tR6E368f
+Traceback (most recent call last):
+  File "motionmeerkat.py", line 78, in <module>
+    M.main(image_url, mex_url, auth_token)
+  File "motionmeerkat.py", line 22, in main
+    dataset = fetch_dataset (bq, image_url, 'images')
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 297, in fetch_dataset
+    x = fetch_image_pixels(session, uri, dest, uselocalpath=uselocalpath)
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 251, in fetch_image_pixels
+    ip = image.pixels().format('tiff')
+AttributeError: 'BQResource' object has no attribute 'pixels'
+FETCHING http://bovary.iplantcollaborative.org/data_service/00-Wr8axXU86YEi67tR6E368f
+Traceback (most recent call last):
+  File "motionmeerkat.py", line 78, in <module>
+    M.main(image_url, mex_url, auth_token)
+  File "motionmeerkat.py", line 22, in main
+    dataset = fetch_dataset (bq, image_url, 'images')
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 297, in fetch_dataset
+    x = fetch_image_pixels(session, uri, dest, uselocalpath=uselocalpath)
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 251, in fetch_image_pixels
+    ip = image.pixels().format('tiff')
+AttributeError: 'BQResource' object has no attribute 'pixels'
+FETCHING http://bovary.iplantcollaborative.org/data_service/00-Wr8axXU86YEi67tR6E368f
+Traceback (most recent call last):
+  File "motionmeerkat.py", line 78, in <module>
+    M.main(image_url, mex_url, auth_token)
+  File "motionmeerkat.py", line 22, in main
+    dataset = fetch_dataset (bq, image_url, 'images')
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 297, in fetch_dataset
+    x = fetch_image_pixels(session, uri, dest, uselocalpath=uselocalpath)
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 251, in fetch_image_pixels
+    ip = image.pixels().format('tiff')
+AttributeError: 'BQResource' object has no attribute 'pixels'
+FETCHING http://bovary.iplantcollaborative.org/data_service/00-Wr8axXU86YEi67tR6E368f
+Traceback (most recent call last):
+  File "motionmeerkat.py", line 78, in <module>
+    M.main(image_url, mex_url, auth_token)
+  File "motionmeerkat.py", line 22, in main
+    dataset = fetch_dataset (bq, image_url, 'images')
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 297, in fetch_dataset
+    x = fetch_image_pixels(session, uri, dest, uselocalpath=uselocalpath)
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 251, in fetch_image_pixels
+    ip = image.pixels().format('tiff')
+AttributeError: 'BQResource' object has no attribute 'pixels'
+FETCHING http://bovary.iplantcollaborative.org/data_service/00-Wr8axXU86YEi67tR6E368f
+Traceback (most recent call last):
+  File "motionmeerkat.py", line 78, in <module>
+    M.main(image_url, mex_url, auth_token)
+  File "motionmeerkat.py", line 22, in main
+    dataset = fetch_dataset (bq, image_url, 'images')
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 297, in fetch_dataset
+    x = fetch_image_pixels(session, uri, dest, uselocalpath=uselocalpath)
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 251, in fetch_image_pixels
+    ip = image.pixels().format('tiff')
+AttributeError: 'BQResource' object has no attribute 'pixels'
+FETCHING http://bovary.iplantcollaborative.org/data_service/00-Wr8axXU86YEi67tR6E368f
+Traceback (most recent call last):
+  File "motionmeerkat.py", line 78, in <module>
+    M.main(image_url, mex_url, auth_token)
+  File "motionmeerkat.py", line 22, in main
+    dataset = fetch_dataset (bq, image_url, 'images')
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 297, in fetch_dataset
+    x = fetch_image_pixels(session, uri, dest, uselocalpath=uselocalpath)
+  File "/home/bw4sz/bisque/engine/bqenv/lib/python2.6/site-packages/bqapi/util.py", line 251, in fetch_image_pixels
+    ip = image.pixels().format('tiff')
+AttributeError: 'BQResource' object has no attribute 'pixels'
+libdc1394 error: Failed to initialize libdc1394
+Processing file MotionMeerkat/PlotwatcherTest.avi
+Unexpected element. Expected: LIST. Got: idx1.
+frame rate: 1
+Motion Detection Object Created
+
+
+
+
+AccAvg begin value is: 0.35
+Output path will be PlotwatcherTest
+Beginning Motion Detection
+10 % completed
+1 candidate motion frames
+20 % completed
+3 candidate motion frames
+30 % completed
+3 candidate motion frames
+40 % completed
+3 candidate motion frames
+50 % completed
+3 candidate motion frames
+60 % completed
+3 candidate motion frames
+70 % completed
+3 candidate motion frames
+80 % completed
+3 candidate motion frames
+90 % completed
+3 candidate motion frames
+
+
+Thank you for using MotionMeerkat! 
+
+Total run time (min): 0.03 
+ 
+Average frames processed per second: 29.18 
+ 
+Candidate motion events: 3 
+ 
+Frames skipped due to AccAvg: 0 
+ 
+Frames skipped due to Threshold: 31 
+ 
+Frames skipped due to minSIZE: 15 
+ 
+Total frames in files: 49 
+ 
+Hitrate: 6.12 % 
+
+DATASET {'http://bovary.iplantcollaborative.org/data_service/00-bR2Er55j84QcTSj4YxrUYD': 'videos/PlotwatcherTest-bR2E.tlv', 'http://bovary.iplantcollaborative.org/data_service/00-Wr8axXU86YEi67tR6E368f': 'videos/00011-Wr8a.MTS', 'http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm': 'videos/Bfladefend_Converted.wmv'}
+['http://bovary.iplantcollaborative.org/module_service/mex/00-ztpUqPmHr7rnStVbsNbJD7', 'bw4sz:00-ztpUqPmHr7rnStVbsNbJD7', 'http://bovary.iplantcollaborative.org/data_service/00-cHt7pKCphJftCURCUBNshN', '30', 'Acc', '500', '16', '0.35', '0']
+python MotionMeerkat/main.py --i MotionMeerkat/PlotwatcherTest.avi --threshT 30 --sub Acc --mogh 500 --mogv 16 --accA 0.35 --burn 0 --frameSET --frame_rate 1
+0

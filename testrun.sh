@@ -1,2 +1,7 @@
 cd  /home/bw4sz/bisque/engine/modules/MotionMeerkat
-python motionmeerkat.py http://bovary.iplantcollaborative.org/module_service/mex/00-TESMftryoNWjov6bQobewD kkvilekval:00-TESMftryoNWjov6bQobewD http://bovary.iplantcollaborative.org/data_service/00-dEFbGRF4bLjaZQ4uRgEar8 0.15 MOG 500 500 0.35 0.01
+
+#my plotwatcher dataset
+python motionmeerkat.py http://bovary.iplantcollaborative.org/module_service/mex/00-N2FzoQhtWJJ2DdSDU2x6KK bw4sz:00-N2FzoQhtWJJ2DdSDU2x6KK http://bovary.iplantcollaborative.org/data_service/00-cHt7pKCphJftCURCUBNshN 30 Acc 500 16 0.35 0
+
+#kris test image
+#python motionmeerkat.py http://bovary.iplantcollaborative.org/module_service/mex/00-TESMftryoNWjov6bQobewD kkvilekval:00-TESMftryoNWjov6bQobewD http://bovary.iplantcollaborative.org/data_service/00-dEFbGRF4bLjaZQ4uRgEar8 30 Acc 500 16 0.35 0

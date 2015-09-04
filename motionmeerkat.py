@@ -1,11 +1,38 @@
 import os
 import sys
-from bqapi import BQSession, BQTag
-from bqapi.util import fetch_dataset
+from bqapi import BQSession, BQTag, BQFactory
+from bqapi.util import fetch_dataset, fetch_blob, fetch_image_pixels
 import logging
 from subprocess import call
 
 logging.basicConfig(filename='motionmeerkat.log',level=logging.DEBUG)
+
+def fetch_dataset (bq, uri, destdir):
+    """ Fetch the binaries associated with a bisque dataset
+    @param bq: A BQSession object
+    @param uri: a dataset uri 
+    @param destdir: directory to put the binaries in
+    @return :  A dict mapping a blob uri -> binary filename 
+    """
+    # Get the elements of the dataset as xml entries
+    dataset = bq.fetchxml("%s/value" %uri)
+    results = {}
+    # loop through each element i.e each image/video to fetch the binary
+    for fxml  in dataset:
+        # get the unique uri of the blob
+        furi = fxml.get ('uri')  
+        logging.debug( "FETCHING %s", furi)
+        # sanity check that we are fetching something that has a binary component
+        if  fxml.tag == 'file' or fxml.tag == 'image':
+            x = fetch_blob(bq, furi, dest=destdir)
+        #elif fxml.tag == 'image':
+        #    x = fetch_image_pixels(bq, furi, dest=destdir)
+        else:
+            logging.warn ('skipping %s', BQFactory.to_string(fxml))
+            continue
+        results.update (x)
+    return results
+
 
 class motionmeerkatModule(object):
     """Example Python module
@@ -17,19 +44,23 @@ class motionmeerkatModule(object):
             bq = BQSession().init_mex(mex_url, bisque_token)
         # Fetch the datasets  links
 
-        if not os.path.exists ('images'):
-            os.makedirs ('images')
-        dataset = fetch_dataset (bq, image_url, 'images')
-        print dataset
+        if not os.path.exists ('videos'):
+            os.makedirs ('videos')
+        dataset = fetch_dataset (bq, image_url, 'videos')
+        print "DATASET", dataset
+	print 'File to run:', dataset.values()[0]
 	 #pass arguments to MotionMeerkat scripts, located in MotionMeerkat/main.py
 	print args
+	
 	#Structure arguments
-	inDest='MotionMeerkat/PlotwatcherTest.avi'	
+	inDest=dataset.values()[0]	
+	args.insert(3,inDest)
 
 	#Format call string
-	args.insert(3,inDest)
-	callargs=str("python MotionMeerkat/main.py --i %s --theshT %s --sub %s --mogh %s --mogv %s --accA %s --burn %s" %tuple(args[3:]))
+	callargs=str("python MotionMeerkat/main.py --i %s --threshT %s --sub %s --mogh %s --mogv %s --accA %s --burn %s --frameSET --frame_rate 1 --makeV none" %tuple(args[3:]))
 	print callargs
+
+	#run MotionMeerkat
 	print call([callargs],shell=True)
 
 	
