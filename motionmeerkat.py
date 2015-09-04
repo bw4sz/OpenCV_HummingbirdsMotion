@@ -59,7 +59,7 @@ class motionmeerkatModule(object):
 	args.insert(3,inDest)
 
 	#Format call string
-	callargs=str("python MotionMeerkat/main.py --i %s --threshT %s --sub %s --mogh %s --mogv %s --accA %s --burn %s --frameSET --frame_rate 1 --makeV none" %tuple(args[3:]))
+	callargs=str("python MotionMeerkat/main.py --i %s --threshT %s --sub %s --mogh %s --mogv %s --accA %s --burn %s --frameSET --frame_rate 1 --makeV none --fileD Output" %tuple(args[3:]))
 	print callargs
 
 	#run MotionMeerkat
