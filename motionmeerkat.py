@@ -73,7 +73,15 @@ class motionmeerkatModule(object):
         if r != 0:
 		bq.fail_mex ("Meerkat returned non-zero")
 		#Post Results
-	frames_blob = bq.postblob("Output/Bfladefend_Converted/Frames.csv")
+	
+	#get filename to get the destination of the csv to be posted
+	fn=video.values()[0]
+	fbs= os.path.basename(fn)
+	head, tail = os.path.splitext(fbs)
+	
+	#post file
+	frames_blob = bq.postblob(str("Output/" + head + "/Frames.csv"))
+	
 	#get file location from regex
 	uri=re.search("uri=\"(.*?)\"", frames_blob).group(1)
 	tags = [{ 'name': 'outputs','tag' : [{'name': 'frames_csv', 'type':'file', 'value':uri}]}]
