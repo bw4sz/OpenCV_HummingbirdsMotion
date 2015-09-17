@@ -1,0 +1,24 @@
+
+Run type: file
+Input file path: videos/Bfladefend_Converted.wmv
+Output dir: Output
+Adapt accAvg? False
+Threshold 30
+Minimum contour area: 0.1
+Burnin: 0
+Scan frames: 0
+Manual framerate: 1
+Set ROI: exclude
+Area counter?: False
+Output type?: none
+
+Total run time (min): 0.16 
+ Average frames per second: 258.83 
+ 
+ Thank you for using MotionMeerkat! 
+Candidate motion events: 384 
+ Frames skipped due to Threshold: 1906 
+ Frames skipped due to minSIZE: 212 
+ Total frames in files: 2502 
+ Hitrate: 15.35 % 
+Exiting

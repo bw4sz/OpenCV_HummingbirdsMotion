@@ -4,6 +4,8 @@ from bqapi import BQSession, BQTag, BQFactory
 from bqapi.util import fetch_dataset, fetch_blob, fetch_image_pixels
 import logging
 from subprocess import call
+import shlex
+
 
 logging.basicConfig(filename='motionmeerkat.log',level=logging.DEBUG)
 
@@ -38,35 +40,38 @@ class motionmeerkatModule(object):
     """Example Python module
     Read tags from image server and store tags on image directly
     """
-    def main(self, image_url,  mex_url = None, bisque_token=None, bq = None):
+    def main(self, image_url,  mex_url = None, bisque_token=None, bq = None, args = None):
         #  Allow for testing by passing an alreay initialized session
         if bq is None:
             bq = BQSession().init_mex(mex_url, bisque_token)
-        # Fetch the datasets  links
-
+        # Fetch the blob  links
         if not os.path.exists ('videos'):
             os.makedirs ('videos')
-        dataset = fetch_dataset (bq, image_url, 'videos')
-        print "DATASET", dataset
-	print 'File to run:', dataset.values()[0]
-	 #pass arguments to MotionMeerkat scripts, located in MotionMeerkat/main.py
-	print args
-	
+        video = fetch_blob(bq, image_url, 'videos')
+        print "VIDEO file ", video
+	 #pass arguments to MotionMeerkat scripts, located in MotionMeerkat/main.py	
 	#Structure arguments
-	#add the file name to the list of arguments
-	inDest=dataset.values()[0]
-	#The third position is where we start - the 0th is the mex, 
-	args.insert(3,inDest)
-
 	#Format call string
-	callargs=str("python MotionMeerkat/main.py --i %s --threshT %s --sub %s --mogh %s --mogv %s --accA %s --burn %s --frameSET --frame_rate 1 --makeV none --fileD Output" %tuple(args[3:]))
+
+        callargs = ["python MotionMeerkat/main.py", 
+                    "--i", video.values()[0], 
+                    "--threshT", args[0],
+                    "--sub", args[1],
+                    "--mogh", args[2],
+                    "--mogv", args[3],
+                    "--accA", args[4],
+                    "--burn", args[5],
+                    "--frameSET", 
+                    "--frame_rate", "1",
+                    "--makeV", "none",
+                    "--fileD", "Output"]
 	print callargs
+	print "Calling ", " ".join(callargs)
 
 	#run MotionMeerkat
-	print call([callargs],shell=True)
-
-	
-
+	r =  call(" ".join(callargs), shell=True)
+        if r != 0:
+            bq.fail_mex ("Meerkat returned non-zero")
 	
         # Fetch embedded tags from image service
         #meta = image.pixels().meta().fetch()
@@ -108,7 +113,8 @@ if __name__ == "__main__":
     M = motionmeerkatModule()
     if options.credentials is None:
         mex_url,  auth_token, image_url  = args[:3]
-        M.main(image_url, mex_url, auth_token)
+        args = args[3:]
+        M.main(image_url, mex_url, auth_token, args = args)
     else:
         image_url = args.pop(0)
 
@@ -117,7 +123,7 @@ if __name__ == "__main__":
         user,pwd = options.credentials.split(':')
 
         bq = BQSession().init_local(user, pwd)
-        M.main(image_url, bq=bq)
+        M.main(image_url, bq=bq, args=args)
 
 
 
