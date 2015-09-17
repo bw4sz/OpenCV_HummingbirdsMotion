@@ -71,6 +71,11 @@
     <tag name="outputs">
 		<tag name="mex_url" type="mex" />
 		<tag name="resource_url" type="dataset" />
+		<tag name="frames_csv" type="file">
+            <template>
+                <tag name="label" value="Frames CSV" />
+            </template>
+    </tag>
 	</tag>
 	<tag name="title" type="string" value="Motion Detection"/> 
     <tag name="authors" type="string" value="Ben Weinstein - Stony Brook University"/> 

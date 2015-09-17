@@ -4,7 +4,8 @@ from bqapi import BQSession, BQTag, BQFactory
 from bqapi.util import fetch_dataset, fetch_blob, fetch_image_pixels
 import logging
 from subprocess import call
-import shlex
+import re
+
 
 
 logging.basicConfig(filename='motionmeerkat.log',level=logging.DEBUG)
@@ -65,39 +66,19 @@ class motionmeerkatModule(object):
                     "--frame_rate", "1",
                     "--makeV", "none",
                     "--fileD", "Output"]
-	print callargs
 	print "Calling ", " ".join(callargs)
 
 	#run MotionMeerkat
 	r =  call(" ".join(callargs), shell=True)
         if r != 0:
-            bq.fail_mex ("Meerkat returned non-zero")
-	
-        # Fetch embedded tags from image service
-        #meta = image.pixels().meta().fetch()
-        #meta = ET.XML(meta)
-        #tags = []
-        # Create a new tag 'MetaData' to be placed on the image
-        #md = BQTag(name='MetaData')
-        # Filter the embedded metadata and place subtags in MetaData
-        #for t in meta.getiterator('tag'):
-        #    if t.get('name') in wanted_tags:
-        #        md.addTag (name=t.get('name'),
-        #                   value=t.get('value'))
-        ## Add the new tag to the image
-        #image.addTag(tag = md)
-        #metadata_tag = bq.save(md, image.uri + "/tag")
-        #if metadata_tag is None:
-        #    bq.fail_mex ("could not write tag: no write access")
-        #    return
-        #bq.finish_mex(tags = [{ 'name': 'outputs',
-        #                        'tag' : [{ 'name': 'metadata',
-        #                                   'value': metadata_tag.uri,
-        #                                   'type' : 'tag' }]}])
-        bq.finish_mex()
-        sys.exit(0)
-        #bq.close()
-
+		bq.fail_mex ("Meerkat returned non-zero")
+		#Post Results
+	frames_blob = bq.postblob("Output/Bfladefend_Converted/Frames.csv")
+	#get file location from regex
+	uri=re.search("uri=\"(.*?)\"", frames_blob).group(1)
+	tags = [{ 'name': 'outputs','tag' : [{'name': 'frames_csv', 'type':'file', 'value':uri}]}]
+	bq.finish_mex(tags = tags)
+	sys.exit(0)
 
 if __name__ == "__main__":
     import optparse

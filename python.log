@@ -223,3 +223,189 @@ bqapi.comm.BQCommError: BQCommError(status=500, headers={'date': 'Thu, 17 Sep 20
     
     </body>
     </html>
+libdc1394 error: Failed to initialize libdc1394
+Processing file videos/Bfladefend_Converted.wmv
+frame rate: 1
+Motion Detection Object Created
+
+
+
+
+AccAvg begin value is: 0.35
+Output path will be Output/Bfladefend_Converted
+Beginning Motion Detection
+0 % completed
+0 candidate motion frames
+0 % completed
+0 candidate motion frames
+
+
+Thank you for using MotionMeerkat! 
+
+Total run time (min): 0.15 
+ 
+Average frames processed per second: 286.19 
+ 
+Candidate motion events: 384 
+ 
+Frames skipped due to AccAvg: 0 
+ 
+Frames skipped due to Threshold: 1906 
+ 
+Frames skipped due to minSIZE: 212 
+ 
+Total frames in files: 2502 
+ 
+Hitrate: 15.35 % 
+
+VIDEO file  {'http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm': 'videos/Bfladefend_Converted.wmv'}
+['python MotionMeerkat/main.py', '--i', 'videos/Bfladefend_Converted.wmv', '--threshT', '30', '--sub', 'Acc', '--mogh', '500', '--mogv', '16', '--accA', '0.35', '--burn', '0', '--frameSET', '--frame_rate', '1', '--makeV', 'none', '--fileD', 'Output']
+Calling  python MotionMeerkat/main.py --i videos/Bfladefend_Converted.wmv --threshT 30 --sub Acc --mogh 500 --mogv 16 --accA 0.35 --burn 0 --frameSET --frame_rate 1 --makeV none --fileD Output
+libdc1394 error: Failed to initialize libdc1394
+Processing file videos/Bfladefend_Converted.wmv
+frame rate: 1
+Motion Detection Object Created
+
+
+
+
+AccAvg begin value is: 0.35
+Output path will be Output/Bfladefend_Converted
+Beginning Motion Detection
+0 % completed
+0 candidate motion frames
+0 % completed
+0 candidate motion frames
+
+
+Thank you for using MotionMeerkat! 
+
+Total run time (min): 0.18 
+ 
+Average frames processed per second: 236.71 
+ 
+Candidate motion events: 384 
+ 
+Frames skipped due to AccAvg: 0 
+ 
+Frames skipped due to Threshold: 1906 
+ 
+Frames skipped due to minSIZE: 212 
+ 
+Total frames in files: 2502 
+ 
+Hitrate: 15.35 % 
+
+VIDEO file  {'http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm': 'videos/Bfladefend_Converted.wmv'}
+Calling  python MotionMeerkat/main.py --i videos/Bfladefend_Converted.wmv --threshT 30 --sub Acc --mogh 500 --mogv 16 --accA 0.35 --burn 0 --frameSET --frame_rate 1 --makeV none --fileD Output
+libdc1394 error: Failed to initialize libdc1394
+Processing file videos/Bfladefend_Converted.wmv
+frame rate: 1
+Motion Detection Object Created
+
+
+
+
+AccAvg begin value is: 0.35
+Output path will be Output/Bfladefend_Converted
+Beginning Motion Detection
+0 % completed
+0 candidate motion frames
+0 % completed
+0 candidate motion frames
+
+
+Thank you for using MotionMeerkat! 
+
+Total run time (min): 0.17 
+ 
+Average frames processed per second: 252.05 
+ 
+Candidate motion events: 384 
+ 
+Frames skipped due to AccAvg: 0 
+ 
+Frames skipped due to Threshold: 1906 
+ 
+Frames skipped due to minSIZE: 212 
+ 
+Total frames in files: 2502 
+ 
+Hitrate: 15.35 % 
+
+VIDEO file  {'http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm': 'videos/Bfladefend_Converted.wmv'}
+Calling  python MotionMeerkat/main.py --i videos/Bfladefend_Converted.wmv --threshT 30 --sub Acc --mogh 500 --mogv 16 --accA 0.35 --burn 0 --frameSET --frame_rate 1 --makeV none --fileD Output
+libdc1394 error: Failed to initialize libdc1394
+Processing file videos/Bfladefend_Converted.wmv
+frame rate: 1
+Motion Detection Object Created
+
+
+
+
+AccAvg begin value is: 0.35
+Output path will be Output/Bfladefend_Converted
+Beginning Motion Detection
+0 % completed
+0 candidate motion frames
+0 % completed
+0 candidate motion frames
+
+
+Thank you for using MotionMeerkat! 
+
+Total run time (min): 0.14 
+ 
+Average frames processed per second: 304.90 
+ 
+Candidate motion events: 384 
+ 
+Frames skipped due to AccAvg: 0 
+ 
+Frames skipped due to Threshold: 1906 
+ 
+Frames skipped due to minSIZE: 212 
+ 
+Total frames in files: 2502 
+ 
+Hitrate: 15.35 % 
+
+VIDEO file  {'http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm': 'videos/Bfladefend_Converted.wmv'}
+Calling  python MotionMeerkat/main.py --i videos/Bfladefend_Converted.wmv --threshT 30 --sub Acc --mogh 500 --mogv 16 --accA 0.35 --burn 0 --frameSET --frame_rate 1 --makeV none --fileD Output
+libdc1394 error: Failed to initialize libdc1394
+Processing file videos/Bfladefend_Converted.wmv
+frame rate: 1
+Motion Detection Object Created
+
+
+
+
+AccAvg begin value is: 0.35
+Output path will be Output/Bfladefend_Converted
+Beginning Motion Detection
+0 % completed
+0 candidate motion frames
+0 % completed
+0 candidate motion frames
+
+
+Thank you for using MotionMeerkat! 
+
+Total run time (min): 0.16 
+ 
+Average frames processed per second: 253.87 
+ 
+Candidate motion events: 384 
+ 
+Frames skipped due to AccAvg: 0 
+ 
+Frames skipped due to Threshold: 1906 
+ 
+Frames skipped due to minSIZE: 212 
+ 
+Total frames in files: 2502 
+ 
+Hitrate: 15.35 % 
+
+VIDEO file  {'http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm': 'videos/Bfladefend_Converted.wmv'}
+Calling  python MotionMeerkat/main.py --i videos/Bfladefend_Converted.wmv --threshT 30 --sub Acc --mogh 500 --mogv 16 --accA 0.35 --burn 0 --frameSET --frame_rate 1 --makeV none --fileD Output
