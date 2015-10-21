@@ -116,7 +116,7 @@ def arguments(self):
                                                 self.mogvariance = 16
                                                 
                                                 if self.subMethod=="MOG":
-                                                                self.moghistory=raw_input("History of Frames for Gaussian (500):\n")
+                                                                self.moghistory=int(raw_input("History of Frames for Gaussian (500):\n"))
                                                                 if not self.moghistory: self.moghistory = 500                                                                
                                                                 self.mogvariance=raw_input("Variance in background threshold (16):\n")                                                
                                                                 if not self.mogvariance: self.mogvariance = 500
@@ -151,7 +151,7 @@ def arguments(self):
                                                 self.set_ROI= "y" == raw_input("Exclude a portion of the image? (n) :\n")
                                                     
                                                 if self.set_ROI:
-                                                                self.ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'?:\n")
+                                                                self.ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'? (exclude):\n")
                                                 else: self.ROI_include='exclude'
                             
                                                     #Create area counter by highlighting a section of frame
