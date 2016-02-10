@@ -171,10 +171,10 @@ class Motion:
 
                 ###If set area counter, draw another box.
                 if self.set_areacounter:
-                        area_box=sourceM.Urect(orig,"Set Area Counter")
+                        self.self.area_box=sourceM.Urect(orig,"Set Area Counter")
 
                         #Draw and show the area to count inside
-                        cv2.rectangle(orig, (area_box[1],area_box[3]), (area_box[0],area_box[2]), (255,0,0), 1)     
+                        cv2.rectangle(orig, (self.area_box[1],self.area_box[3]), (self.area_box[0],self.area_box[2]), (255,0,0), 1)     
                 
                 ###Background Constructor, create class
                 self.BC=BackgroundSubtractor.Background(self.subMethod,self.display_image,self.accAvg,self.threshT,self.moghistory,self.mogvariance)
@@ -428,10 +428,10 @@ class Motion:
                                 for box in bound_center:
                                         
                                         #is the x coordinate within
-                                        if area_box[2] > box[0] > area_box[0]:
-                                                if area_box[3] > box[1] > area_box[1]:
+                                        if self.area_box[2] > box[0] > self.area_box[0]:
+                                                if self.area_box[3] > box[1] > self.area_box[1]:
                                                                 inside_area= not inside_area
-                                                                cv2.rectangle(camera_image,(area_box[0],area_box[1]),(area_box[2],area_box[3]),(242,221,61),thickness=1,lineType=4)
+                                                                cv2.rectangle(camera_image,(self.area_box[0],self.area_box[1]),(self.area_box[2],self.area_box[3]),(242,221,61),thickness=1,lineType=4)
   
                         ##################################################
                         ###############Write image to file################

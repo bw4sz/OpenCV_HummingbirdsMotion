@@ -143,10 +143,7 @@ def arguments(self):
                                         #There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean       
                                                 self.plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera? (n) :\n")
                                                 if not self.plotwatcher: self.plotwatcher = False
-
-                                                self.segment='y'==raw_input("Segment image using grabcut? (n) :\n")
-                                                if not self.segment: self.segment = False
-                                                
+                                               
                                                 #set ROI
                                                 self.set_ROI= "y" == raw_input("Exclude a portion of the image? (n) :\n")
                                                     

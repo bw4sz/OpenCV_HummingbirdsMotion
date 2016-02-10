@@ -12,24 +12,24 @@ import numpy
 
 if __name__ == "__main__":
         while True:
-                try:
-                        motionVid=motionClass.Motion()
-                        arguments.arguments(motionVid)
-                        wrapper.wrap(motionVid)
-                        
-                except ValueError, e:
-                        if e.message!= 'Failed to load OpenCL runtime':
-                                raise ValueError, e
-        
-                #reboot or exit?
-                #if there were system arguments, immediately exit
-                if len(sys.argv)>=2:
-                        break
-                ch=raw_input("Press r to reboot, press x to exit \n")
-                if ch=='r':
-                        continue
-				if ch=='x':
-						break
-            
+            try:
+                    motionVid=motionClass.Motion()
+                    arguments.arguments(motionVid)
+                    wrapper.wrap(motionVid)
+                    
+            except ValueError, e:
+                    if e.message!= 'Failed to load OpenCL runtime':
+                            raise ValueError, e
+    
+            #reboot or exit?
+            #if there were system arguments, immediately exit
+            if len(sys.argv)>=2:
+                    break
+            ch=raw_input("Press r to reboot, press x to exit \n")
+            if ch=='r':
+                    continue
+            if ch=='x':
+                    break
 
+            
 
