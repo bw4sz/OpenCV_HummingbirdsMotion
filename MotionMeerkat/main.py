@@ -25,10 +25,11 @@ if __name__ == "__main__":
                 #if there were system arguments, immediately exit
                 if len(sys.argv)>=2:
                         break
-                ch=raw_input("Press r to reboot, press any key to exit \n")
+                ch=raw_input("Press r to reboot, press x to exit \n")
                 if ch=='r':
                         continue
-                break
+				if ch=='x':
+						break
             
 
 
