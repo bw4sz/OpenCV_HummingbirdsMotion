@@ -83,8 +83,8 @@ def arguments(self):
                                 else: self.threshT=float(self.threshT)
                 
                                 #minimum size of contour object
-                                self.minSIZE=raw_input("Minimum motion contour size (0.2):\n")
-                                if not self.minSIZE: self.minSIZE = 0.2
+                                self.minSIZE=raw_input("Minimum motion contour size (0.25):\n")
+                                if not self.minSIZE: self.minSIZE = 0.25
                                 else: self.minSIZE=float(self.minSIZE)
                 
                                 self.advanced= 'y'==raw_input("Set advanced options? (n) :\n")

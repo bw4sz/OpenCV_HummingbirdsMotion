@@ -344,7 +344,7 @@ class Motion:
                                 # Only keep the box if it's not a tiny noise box:
                                 if (box_width * box_height) > average_box_area*.3: 
                                         trimmed_box_list.append( box )
-
+                        
                         #shapely does a much faster job of polygon union
                         #format into shapely bounding feature
                         shape_list=[]
@@ -363,21 +363,23 @@ class Motion:
                         
                         if casc.type=="MultiPolygon":
                             #draw shapely bounds
-                            for p in range(1,len(casc.geoms)):
-                                b=casc.geoms[p].bounds
-                                if casc.geoms[p].area > ((self.width * self.height) * (float(self.minSIZE/100))):
-                                                cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
-                                                        
-                                                #Return the centroid to list, rounded two decimals
-                                                x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
-                                                y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
-                                                bound_center.append((x,y))
-                                                bound_casc_box.append(casc.geoms[p])
+                                for p in range(1,len(casc.geoms)):
+                                        b=casc.geoms[p].bounds
+                                        if casc.geoms[p].area > ((self.width * self.height) * (float(self.minSIZE/100))):
+                                                        cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                                                
+                                                        #Return the centroid to list, rounded two decimals
+                                                        x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
+                                                        y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
+                                                        bound_center.append((x,y))
+                                                        bound_casc_box.append(casc.geoms[p])
                         else:
                                 b=casc.bounds
                                 #If bounding polygon is larger than the minsize, draw a rectangle
+                                
                                 if casc.area > ((self.width * self.height) * (float(self.minSIZE/100))):
                                                 cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                                x=round(casc.centroid.coords.xy[0][0],2)
                                                 y=round(casc.centroid.coords.xy[1][0],2)
                                                 bound_center.append((x,y))
                                                 bound_casc_box.append(casc)
