@@ -10,6 +10,15 @@ import numpy
 # MAIN ENTRY POINT
 #==================
 
+#Define ending function
+def ending():
+    while True:
+        ch=raw_input("Enter r to reboot, Enter x to exit \n")
+        if ch=='r':
+            return(ch)
+        if ch=='x':
+            return(ch)
+
 if __name__ == "__main__":
         while True:
             try:
@@ -25,11 +34,9 @@ if __name__ == "__main__":
             #if there were system arguments, immediately exit
             if len(sys.argv)>=2:
                     break
-            ch=raw_input("Press r to reboot, press x to exit \n")
-            if ch=='r':
-                    continue
-            if ch=='x':
-                    break
+            ch=ending()
+            if ch == 'r': continue
+            if ch == 'x': break
 
             
 
