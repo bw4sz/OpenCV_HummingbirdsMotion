@@ -6,13 +6,6 @@ MotionMeerkat is a standalone python executable that identifies candidate motion
 
 Executable can be found here: http://benweinstein.weebly.com/motionmeerkat.html
 
-Current Version (1.6.4)
----------------------
-
-New features : [https://github.com/bw4sz/OpenCV_HummingbirdsMotion/issues/16]
-
-See issues in this repository for higher priority changes to be made. 
-
 Approach
 -------------
 
@@ -24,11 +17,6 @@ Contents
 -------------
 /dist: folder containing the executable dist build
 /build: data files for executable
-/testing: A collection small files (video, images) and test scripts to open up and image, test the codec reading. Also contains a PlotwatcherTest.tlv which contains a known motion event (hummingbird visiting flower)
-/Bisque_Dev: Module for Iplant's BISQUE Bio-image analysis center. This code cannot be run from source, and is only to connect to the BISQUE API
-/Ranalysis: R scripts to process and make figures for publication
-/Results: Folder to hold all the figures made in R
-Motion_dev.py: Core function. A Python script which takes in video file and parameters, and returns candidate motion frames.
 
 main.py
 -----------
