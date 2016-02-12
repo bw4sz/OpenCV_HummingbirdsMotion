@@ -37,14 +37,14 @@ def wrap(ob) :
                         ##Run Motion Function
                         #override to set the inDEST file to loop from batch videos
                         ob.inDEST=vid
-                        #try:
-                        ob.prep()
-                        ob.run()
-                        ob.videoM()
-                        report.report(ob)
-                        #except Exception, e:
-                                #print( "Error %s " % e + "\n" )
-                                #print 'Error in Video:',vid
+                        try:
+                                ob.prep()
+                                ob.run()
+                                ob.videoM()
+                                report.report(ob)
+                        except Exception, e:
+                                print( "Error %s " % e + "\n" )
+                                print 'Error in Video:',vid
 
         ###If runtype is a single file - run file destination        
         if (ob.runtype == "file"):

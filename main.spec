@@ -2,9 +2,10 @@
 
 block_cipher = None
 
+
 a = Analysis(['main.py'],
-             pathex=['C:\\Users\\Ben\\Documents\\OpenCV_HummingbirdsMotion\\MotionMeerkat'],
-             binaries=[],
+             pathex=['C:\\Users\\Ben\\Documents\\OpenCV_HummingbirdsMotion'],
+             binaries=None,
              datas=None,
              hiddenimports=[],
              hookspath=[],
