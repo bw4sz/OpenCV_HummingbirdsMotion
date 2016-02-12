@@ -9,8 +9,6 @@ import numpy.core.multiarray
 import ctypes
 import shapely
 
-
-
 #==================
 # MAIN ENTRY POINT
 #==================

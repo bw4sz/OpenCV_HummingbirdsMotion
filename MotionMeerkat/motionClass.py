@@ -26,6 +26,7 @@ class Motion:
         def prep(self):
                 
                 #Create initial conditions
+                
                 #Empty list for time stamps
                 self.stamp=[]
 
@@ -149,7 +150,8 @@ class Motion:
                         self.roi_selected=sourceM.Urect(iorig,"Region of Interest")
                         
                         print(self.roi_selected)
-                        
+                        if len(self.roi_selected)==0 :
+                                raise ValueError('Error: No box selected. Please select an area by right clicking and dragging with your cursor to create a box. Hit esc to exit the window.')
                         if self.ROI_include == "include": 
                                 self.display_image=orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]
                         else:
@@ -172,7 +174,9 @@ class Motion:
                 ###If set area counter, draw another box.
                 if self.set_areacounter:
                         self.area_box=sourceM.Urect(orig,"Set Area Counter")
-
+                        if len(self.area_box)==0:                                
+                                raise ValueError('Error: No box selected. Please select an area by right clicking and dragging with your cursor to create a box. Hit esc to exit the window.')
+                        
                         #Draw and show the area to count inside
                         cv2.rectangle(orig, (self.area_box[1],self.area_box[3]), (self.area_box[0],self.area_box[2]), (255,0,0), 1)     
                 

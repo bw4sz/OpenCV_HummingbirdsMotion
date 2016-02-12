@@ -75,7 +75,8 @@ def Urect(img,title):
 
     def onmouse(event,x,y,flags,param):
         global ix,iy,roi,drawing
-
+        
+        roi=[]
         # Draw Rectangle
         if event == cv2.EVENT_RBUTTONDOWN:
             drawing = True
