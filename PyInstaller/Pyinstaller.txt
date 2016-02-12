@@ -1,0 +1,17 @@
+#!/bin/bash
+cd C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion
+cd MotionMeerkat
+#execute, if already created, if not, pyinstaller main.py --onedir
+pyinstaller -y --onedir main.spec
+
+#copy shapely
+cp -r c:/Python27/Lib/site-packages/shapely/ dist/main/
+
+#Copy icon
+cp C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/Bisque_Dev/public/thumbnail.ico dist/main/
+
+#Copy plotwatcher test file
+cp C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/PlotwatcherTest.TLV dist/main/
+
+#Copy FFmpeg binary
+cp C:/Python27/opencv_ffmpeg310.dll dist/main/

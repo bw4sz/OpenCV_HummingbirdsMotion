@@ -388,40 +388,6 @@ class Motion:
                                 self.toosmall=self.toosmall+1
                                 self.noMotion=True                   
                                 continue
-                        
-                        ##############################
-                        ###Grabcut Image Segmentation#
-                        ##############################
-                        if self.segment:
-                                ####get bounding box of the current blob
-                                for blob in bound_casc_box:
-                                        b=blob.buffer(100).bounds
-                                        rect=[int(x) for x in b]
-                                        
-                                        ###Format into x,y,w,h shapely is different from opencv
-                                        rectf=tuple([rect[0],rect[1],rect[2]-rect[0],rect[3]-rect[1]])
-                                                                                         
-                                        mask = np.zeros(grabCUTimage.shape[:2],np.uint8)
-                                        mask[grey_image == 0] = 0
-                                        
-                                        #Set the rectangle as probable background                                
-                                        mask[rect[1]:rect[3],rect[0]:rect[2]] = 2
-                                        
-                                        #Add the background subtracted image
-                                        mask[grey_image == 255] = 1
-                                        bgdModel = np.zeros((1,65),np.float64)
-                                        fgdModel = np.zeros((1,65),np.float64)    
-                                        
-                                        if not mask.sum()==0:
-                                                cv2.grabCut(grabCUTimage,mask,rectf,bgdModel,fgdModel,4,cv2.GC_INIT_WITH_MASK)
-                                                mask2 = np.where((mask==2)|(mask==0),0,1).astype('uint8')
-                                
-                                                _,contours,hierarchy = cv2.findContours(mask2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE )
-                                                for cnt in contours:
-                                                        bounding_rect = cv2.boundingRect( cnt )
-                                                        point1 = ( bounding_rect[0], bounding_rect[1] )
-                                                        point2 = ( bounding_rect[0] + bounding_rect[2], bounding_rect[1] + bounding_rect[3] )                                
-                                                        cv2.rectangle(camera_image,point1,point2,(0,255,255),thickness=2)
                                         
                         #Set flag for inside area
                         inside_area=False
