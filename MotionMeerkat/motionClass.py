@@ -171,7 +171,7 @@ class Motion:
 
                 ###If set area counter, draw another box.
                 if self.set_areacounter:
-                        self.self.area_box=sourceM.Urect(orig,"Set Area Counter")
+                        self.area_box=sourceM.Urect(orig,"Set Area Counter")
 
                         #Draw and show the area to count inside
                         cv2.rectangle(orig, (self.area_box[1],self.area_box[3]), (self.area_box[0],self.area_box[2]), (255,0,0), 1)     

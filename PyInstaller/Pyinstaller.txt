@@ -8,7 +8,7 @@ pyinstaller -y --onedir main.spec
 cp -r c:/Python27/Lib/site-packages/shapely/ dist/main/
 
 #Copy icon
-cp C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/Bisque_Dev/public/thumbnail.ico dist/main/
+cp C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/thumbnail.ico dist/main/
 
 #Copy plotwatcher test file
 cp C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/PlotwatcherTest.TLV dist/main/
