@@ -72,11 +72,12 @@ def getint(name):
 ##User drawn rectangles
 
 def Urect(img,title):
-
     def onmouse(event,x,y,flags,param):
-        global ix,iy,roi,drawing
+        global ix,iy,roi,drawing        
         
+        #new roi space
         roi=[]
+        
         # Draw Rectangle
         if event == cv2.EVENT_RBUTTONDOWN:
             drawing = True
