@@ -29,8 +29,9 @@ if __name__ == "__main__":
                     arguments.arguments(motionVid)
                     wrapper.wrap(motionVid)
                     
-            except ValueError as e:
+            except ValueError as e:                
                 print(e)
+                print("To report an error, submit a new issue: https://github.com/bw4sz/OpenCV_HummingbirdsMotion/issues, please specify your input parameters and take a screenshot of your error message") 
                 ch=ending()
                 if ch == 'r': continue
                 if ch == 'x': break                

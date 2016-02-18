@@ -48,8 +48,8 @@ def report(ob):
         #log
         log_report.write("\n Thank you for using MotionMeerkat! \n")
         log_report.write("Candidate motion events: %.0f \n " % ob.total_count )
-        log_report.write("Frames skipped due to Threshold: %.0f \n " % ob.nocountr)
-        log_report.write("Frames skipped due to minSIZE: %.0f \n " % ob.toosmall)
+        log_report.write("Frames skipped due to insufficient movement based on the threshold parameter: %.0f \n" % ob.nocountr)
+        log_report.write("Frames skipped due to minimum size of the contours: %.0f \n " % ob.toosmall)
         log_report.write("Total frames in files: %.0f \n " % ob.frame_count)
         rate=float(ob.total_count)/ob.frame_count*100
         log_report.write("Hitrate: %.2f %% \n" % rate)
@@ -60,9 +60,9 @@ def report(ob):
         print("Total run time (min): %.2f \n " % total_min)
         print("Average frames processed per second: %.2f \n " % pfps)   
         print("Candidate motion events: %.0f \n " % ob.total_count )
-        print("Frames skipped due to AccAvg: %.0f \n " % ob.nodiff)
-        print("Frames skipped due to Threshold: %.0f \n " % ob.nocountr)
-        print("Frames skipped due to minSIZE: %.0f \n " % ob.toosmall)
+        print("Frames skipped due to insufficient difference to the background: %.0f \n " % ob.nodiff)
+        print("Frames skipped due to insufficient movement based on the threshold parameter: %.0f \n " % ob.nocountr)
+        print("rames skipped due to minimum size of the contours: %.0f \n " % ob.toosmall)
         print("Total frames in files: %.0f \n " % ob.frame_count)
 
         rate=float(ob.total_count)/ob.frame_count*100

@@ -33,7 +33,6 @@ def arguments(self):
                                 self.parser.add_argument("--adapt", help="Adaptive background averaging",action='store_true',default=False)
                                 self.parser.add_argument("--accAvg", help="Fixed background averaging rate",default=0.35,type=float)
                                 self.parser.add_argument("--frameHIT", help="expected percentage of motion frames",default=0.1,type=float)
-                                self.parser.add_argument("--floorvalue", help="minimum background averaging",default=0.01,type=float)
                                 self.parser.add_argument("--threshT", help="Threshold of movement",default=30,type=int)
                                 self.parser.add_argument("--minSIZE", help="Minimum size of contour",default=0.1,type=float)
                                 self.parser.add_argument("--burnin", help="Delay time",default=0,type=int)
@@ -41,7 +40,7 @@ def arguments(self):
                                 self.parser.add_argument("--frameSET", help="Set frame_rate?",action='store_true',default=False)
                                 self.parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true",default=False)
                                 self.parser.add_argument("--frame_rate", help="frames per second",default=0)
-                                self.parser.add_argument("--moghistory", help="Length of history for MOG background detector",default=1000,type=int)
+                                self.parser.add_argument("--moghistory", help="Length of history for MOG background detector",default=500,type=int)
                                 self.parser.add_argument("--subMethod", help="Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method",default='Acc',type=str)                                
                                 self.parser.add_argument("--mogvariance", help="Variance in MOG to select background",default=16,type=int)                                
                                 self.parser.add_argument("--set_ROI", help="Set region of interest?",action='store_true',default=False)
@@ -78,20 +77,20 @@ def arguments(self):
                                 if not self.accAvg: self.accAvg=0.35
                 
                                 #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
-                                self.threshT=raw_input("Threshold for movement tolerance\nranging from 0 [all] to 255 [no movement] (30):\n")
+                                self.threshT=raw_input("Threshold for movement tolerance\nranging from 0 [include any movement] to 255 [include no movement] (30):\n")
                                 if not self.threshT: self.threshT = 30
                                 else: self.threshT=float(self.threshT)
                 
                                 #minimum size of contour object
-                                self.minSIZE=raw_input("Minimum motion contour size (0.25):\n")
-                                if not self.minSIZE: self.minSIZE = 0.25
+                                self.minSIZE=raw_input("Minimum motion contour size\nincrease to exclude smaller objects (0.3):\n")
+                                if not self.minSIZE: self.minSIZE = 0.3
                                 else: self.minSIZE=float(self.minSIZE)
                 
                                 self.advanced= 'y'==raw_input("Set advanced options? (n) :\n")
                                 
                                 if self.advanced:
                                                 #Set background subtractor
-                                                self.subMethod=raw_input("Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (Acc) :\n")
+                                                self.subMethod=raw_input("Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (Acc) \n Acc is better for time-lapse video, MOG for higher frame rates:\n")
                                                 if not self.subMethod: self.subMethod="Acc"
                                                     
                                                 if self.subMethod=="Acc":
@@ -103,22 +102,23 @@ def arguments(self):
                                                                                 if not self.accAvg: self.accAvg = 0.35
                                                                     
                                                                                 #Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
-                                                                                self.frameHIT=raw_input("Expected percentage of frames with motion (decimal 0.01):\n")
-                                                                                if not self.frameHIT: self.frameHIT = 0.01
+                                                                                self.frameHIT=raw_input("Expected percentage of frames with motion (0.02, i.e 2% of frames returned):\n")
+                                                                                if not self.frameHIT: self.frameHIT = 0.02
                                                                                 else: self.frameHIT=float(self.frameHIT)
                                                                                     
                                                                                 #Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
-                                                                                self.floorvalue=raw_input("Minimum allowed sensitivity (0.05):\n")
-                                                                                if not self.floorvalue: self.floorvalue = 0.05
-                                                                                else: self.floorvalue=float(self.floorvalue)
+				
+                                                                                self.floorvalue = 0.05
                                                 #Still need to set moghistory to pass to argument, even if it isn't used.  
                                                 self.moghistory = 500
                                                 self.mogvariance = 16
                                                 
                                                 if self.subMethod=="MOG":
-                                                                self.moghistory=int(raw_input("History of Frames for Gaussian (500):\n"))
+                                                                self.moghistory=raw_input("History of Frames for Gaussian (500):\n")
                                                                 if not self.moghistory: self.moghistory = 500                                                                
-                                                                self.mogvariance=raw_input("Variance in background threshold (16):\n")                                                
+                                                                self.mogvariance=raw_input("Variance in background threshold (16):\n")
+								#turn to int
+								self.moghistory=int(self.moghistory)
                                                                 if not self.mogvariance: self.mogvariance = 500
                                                                 self.adapt=False
                                                                 

@@ -18,9 +18,7 @@ class Background:
         if self.subMethod in ["MOG","Both"]:
             #MOG method creator
             self.fgbg = cv2.createBackgroundSubtractorMOG2(history=moghistory, detectShadows=False)
-        if self.subMethod=="KNN":
-            #MOG method creator
-            self.fgbg = cv2.createBackgroundSubtractorKNN()
+
     
     #Frame Subtraction
     def BackGroundSub(self,camera_imageROI):

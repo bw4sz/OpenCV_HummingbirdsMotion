@@ -38,7 +38,7 @@ def myround(x, base=10):
     return int(base * round(float(x)/base))
 
 def ask_acc():
-        in_accAvg=raw_input("Fixed accumulated averaging (accAvg) sensitivity to motion (0.35):\n")
+        in_accAvg=raw_input("Accumulated averaging sensitivity to motion (0.35)\nincrease to make less sensitive to movement:\n")
         if in_accAvg:
                 try:
                         out=float(in_accAvg)
