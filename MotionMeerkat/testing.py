@@ -2,12 +2,11 @@
 
 import os
 
-os.chdir('C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/dist/main')
+os.chdir('C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/')
 
 #default
-os.system('main.exe --i PlotwatcherTest.TLV')
-print('defaults: ok')
+#os.system('main.py --i PlotwatcherTest.TLV')
+#print('defaults: ok')
 
-#Changing each of the main settings
-os.system('main.exe --i PlotwatcherTest.TLV --min 0.5')
+os.system('main.py --i PlotwatcherTest.TLV --thresh 0 --windy --windy_min 1')
 print('min size: ok')

@@ -1,6 +1,8 @@
 ####Background subtraction for Motion class
 import numpy as np
 import cv2
+import sourceM
+
 #takes in the constructor and the method chosen
 
 class Background:
@@ -36,12 +38,13 @@ class Background:
             # Use the Running Average as the static background
             cv2.accumulateWeighted(self.color_image,self.running_average_image,self.accAvg)                                  
             self.running_average_in_display_color_depth = cv2.convertScaleAbs(self.running_average_image)
-                                       
+            
+            #Needs to be manually commented if vis.
+            sourceM.displayV("Background image",10,self.running_average_in_display_color_depth)
+            
             # Subtract the current frame from the moving average.
             self.difference=cv2.absdiff( self.color_image, self.running_average_in_display_color_depth)
-            
-            #if vis: display("difference",5000,difference)
-            
+                        
             # Convert the image to greyscale.
             self.grey_image=cv2.cvtColor( self.difference,cv2.COLOR_BGR2GRAY)
             

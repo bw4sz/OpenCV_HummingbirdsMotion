@@ -61,7 +61,13 @@ def display(window,t,image):
         cv2.namedWindow(window, cv2.WINDOW_NORMAL)
         cv2.imshow(window,image)
         cv2.waitKey(t)
-        cv2.destroyWindow(window)            
+        cv2.destroyWindow(window)  
+
+#define a video diplay function
+def displayV(window,t,image):
+        cv2.namedWindow(window, cv2.WINDOW_NORMAL)
+        cv2.imshow(window,image)
+        cv2.waitKey(t)
         
 #define a sorting function
 def getint(name):

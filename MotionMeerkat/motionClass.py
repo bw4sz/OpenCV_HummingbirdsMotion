@@ -27,6 +27,10 @@ class Motion:
                 
                 #Create initial conditions
                 
+                #For debugging, visualize conditions?
+                self.vis=True
+                self.windy_min=3
+                
                 #Empty list for time stamps
                 self.stamp=[]
 
@@ -56,6 +60,9 @@ class Motion:
                 
                 #create hit counter to track number of outputs
                 self.hitcounter=0      
+                
+                #Frames removed due to wind
+                self.windy_count=0
                 
                 #Count the number of frames returned
                 self.frame_count=0
@@ -107,6 +114,8 @@ class Motion:
                         if not self.frameSET:
                                         
                                 self.frame_rate=round(self.cap.get(5))
+                                #This seems to misinterpret just .tlv files
+                                if extension in ['.tlv','.TLV']: self.frame_rate=1
                         
                         #get frame time relative to start
                         frame_time=self.cap.get(0)     
@@ -306,6 +315,7 @@ class Motion:
                         ###BACKGROUND SUBTRACTION
                         #############################
                         grey_image=self.BC.BackGroundSub(current_imageROI)
+                        if self.vis: sourceM.displayV("Thresholded image",10,grey_image)
                         
                         #######################################
                         ##Contour Analysis and Post-Proccessing
@@ -430,11 +440,24 @@ class Motion:
                                         #Record frame as motion
                                         self.frame_results.append(True)
                                         
-                                        #Is it wind?
-                                        windy_threshold=5
-                                        runs=sum(self.frame_results[self.frame_count-windy_threshold:self.frame_count])/float(windy_threshold)
-                                        if runs > 0.95: print("It is windy")
-
+                                        #Is it windy?
+                                        if self.windy:
+                                                
+                                                self.windy_threshold = int(self.windy_min * 60.0 / self.frame_rate)
+                                                runs=sum(self.frame_results[self.frame_count-self.windy_threshold:self.frame_count])/float(self.windy_threshold)
+                                                if runs > 0.95: 
+                                                        print("It is windy!\nDeleting the past %.0f returned frames" % self.windy_threshold)
+                                                        
+                                                        #reset the record to frames not returned
+                                                        self.frame_results[self.frame_count-self.windy_threshold:self.frame_count]=[False] *(self.windy_threshold)
+                                                        
+                                                        #Delete frames that encompassed that window
+                                                        todel=[self.file_destination + "/" + str(s) + ".jpg" for s in range(self.frame_count-self.windy_threshold,self.frame_count)]
+                                                        for x in todel: 
+                                                                if os.path.exists(x): 
+                                                                        self.windy_count=self.windy_count+1
+                                                                        os.remove(x)
+                                        
                         #save the frame count and the time in video, in case user wants to check in the original
                         #create a time object, this relies on the frame_rate being correct!
                         #set seconds

@@ -1,13 +1,16 @@
 import time
 import csv
-
+import cv2
 def report(ob):
+        
+        #Run is over, destroy display windows
+        cv2.destroyAllWindows()
+        
         #Create log file
         log_file_report = ob.file_destination + "/" + "Parameters_Results.log"
         log_report = file(log_file_report, 'a' )
 
         #Print parameters
-        print(ob.frame_results)
         #Batch or single file
         log_report.write("\nRun type: %s" % ob.runtype)
         if ob.runtype in ["file","pictures"]:
@@ -51,7 +54,10 @@ def report(ob):
         log_report.write("Candidate motion events: %.0f \n " % ob.total_count )
         log_report.write("Frames skipped due to insufficient movement based on the threshold parameter: %.0f \n" % ob.nocountr)
         log_report.write("Frames skipped due to minimum size of the contours: %.0f \n " % ob.toosmall)
+        if ob.windy:
+                log_report.write("Frames skipped due to windy conditions: %.0f \n " % ob.windy_count)                
         log_report.write("Total frames in files: %.0f \n " % ob.frame_count)
+        
         rate=float(ob.total_count)/ob.frame_count*100
         log_report.write("Hitrate: %.2f %% \n" % rate)
         log_report.write("Exiting")
@@ -63,7 +69,12 @@ def report(ob):
         print("Candidate motion events: %.0f \n " % ob.total_count )
         print("Frames skipped due to insufficient difference to the background: %.0f \n " % ob.nodiff)
         print("Frames skipped due to insufficient movement based on the threshold parameter: %.0f \n " % ob.nocountr)
-        print("rames skipped due to minimum size of the contours: %.0f \n " % ob.toosmall)
+        print("Frames skipped due to minimum size of the contours: %.0f \n " % ob.toosmall)
+        
+        #if windy
+        if ob.windy:
+                print("Frames skipped due to windy conditions: %.0f \n " % ob.windy_count)
+                
         print("Total frames in files: %.0f \n " % ob.frame_count)
 
         rate=float(ob.total_count)/ob.frame_count*100

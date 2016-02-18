@@ -39,11 +39,13 @@ def arguments(self):
                                 self.parser.add_argument("--scan", help="Scan one of every X frames for motion",default=0,type=int)
                                 self.parser.add_argument("--frameSET", help="Set frame_rate?",action='store_true',default=False)
                                 self.parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true",default=False)
-                                self.parser.add_argument("--frame_rate", help="frames per second",default=0)
+                                self.parser.add_argument("--frame_rate", help="frames per second",default=1)
                                 self.parser.add_argument("--moghistory", help="Length of history for MOG background detector",default=500,type=int)
                                 self.parser.add_argument("--subMethod", help="Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method",default='Acc',type=str)                                
                                 self.parser.add_argument("--mogvariance", help="Variance in MOG to select background",default=16,type=int)                                
                                 self.parser.add_argument("--set_ROI", help="Set region of interest?",action='store_true',default=False)
+				self.parser.add_argument("--windy", help="Enable wind correction",action='store_true',default=False)
+				self.parser.add_argument("--windy_min", help="How many minutes of continious movement should be ignored?",default='3',type=int)                                
                                 self.parser.add_argument("--ROI_include", help="include or exclude?",default="exclude")
                                 self.parser.add_argument("--set_areacounter", help="Set region to count area",action="store_true",default=False)
                                 self.parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?",default='frames',type=str)
@@ -89,8 +91,9 @@ def arguments(self):
                                 self.advanced= 'y'==raw_input("Set advanced options? (n) :\n")
                                 
                                 if self.advanced:
-                                                #Set background subtractor
-                                                self.subMethod=raw_input("Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (Acc) \n Acc is better for time-lapse video, MOG for higher frame rates:\n")
+                                                #Set background subtractor - this is currently disabled until opencv is fixed.
+                                                #self.subMethod=raw_input("Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (Acc) \n Acc is better for time-lapse video, MOG for higher frame rates:\n")
+                                                self.subMethod=''
                                                 if not self.subMethod: self.subMethod="Acc"
                                                     
                                                 if self.subMethod=="Acc":
@@ -107,8 +110,8 @@ def arguments(self):
                                                                                 else: self.frameHIT=float(self.frameHIT)
                                                                                     
                                                                                 #Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
-				
                                                                                 self.floorvalue = 0.05
+
                                                 #Still need to set moghistory to pass to argument, even if it isn't used.  
                                                 self.moghistory = 500
                                                 self.mogvariance = 16
@@ -127,7 +130,13 @@ def arguments(self):
                                                 self.burnin= raw_input("Burn in, skip initial minutes of video (0):\n")
                                                 if not self.burnin: self.burnin = 0
                                                 else: self.burnin=float(self.burnin)
-                    
+						
+						#Skip initial frames of video, in case of camera setup and shake.       
+						self.windy='y'== raw_input("Enable wind correction? (n):\n")
+						if not self.windy: self.windy = False
+						else: 
+								self.windy_min= raw_input("How many minutes of continious movement should be ignored? (3):\n")
+						
                                             #Decrease frame rate, downsample
                                                 self.scan= raw_input("Scan one of every X frames (0):\n")
                                                 if not self.scan: self.scan = 0
@@ -176,4 +185,5 @@ def arguments(self):
                                                 self.moghistory = 500
                                                 self.mogvariance = 16
                                                 self.pictures = False
-                                                self.segment = False
+                                                self.windy = False
+						
