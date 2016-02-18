@@ -41,8 +41,11 @@ class Motion:
                 self.left = 0
                 self.right = 1
                 
-                ###########Failure Classes, used to format output and illustrate number of frames
-                ##No motion, the frame was not different enough compared to the background due to accAvg 
+                #Capture output for wind detection
+                self.frame_results=[]
+                
+                #Failure Classes, used to format output and illustrate number of frames
+                #No motion, the frame was not different enough compared to the background due to accAvg 
                 self.nodiff=0
                 
                 ##No contours, there was not enough motion compared to background, did not meet threshold
@@ -317,6 +320,10 @@ class Motion:
                         if len(contours) == 0 :
                                 #No movement, add to counter
                                 self.nocountr=self.nocountr+1
+                                
+                                #Result was no motion
+                                self.frame_results.append(False)
+                                
                                 #self.noMotion flag
                                 self.noMotion=True
                                 continue                    
@@ -389,8 +396,16 @@ class Motion:
                                                 bound_casc_box.append(casc)
                                                 
                         if len(bound_center) == 0:
+                                
+                                #mark as too small
                                 self.toosmall=self.toosmall+1
+                                
+                                #record output
+                                
+                                self.frame_results.append(False)
+                                
                                 self.noMotion=True                   
+                                #Go to next image
                                 continue
                                         
                         #Set flag for inside area
@@ -412,6 +427,13 @@ class Motion:
                         if not self.makeVID == "none":
                                 if self.makeVID in ("frames","both"):
                                         cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",camera_image)
+                                        #Record frame as motion
+                                        self.frame_results.append(True)
+                                        
+                                        #Is it wind?
+                                        windy_threshold=5
+                                        runs=sum(self.frame_results[self.frame_count-windy_threshold:self.frame_count])/float(windy_threshold)
+                                        if runs > 0.95: print("It is windy")
 
                         #save the frame count and the time in video, in case user wants to check in the original
                         #create a time object, this relies on the frame_rate being correct!

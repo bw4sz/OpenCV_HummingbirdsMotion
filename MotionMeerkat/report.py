@@ -7,6 +7,7 @@ def report(ob):
         log_report = file(log_file_report, 'a' )
 
         #Print parameters
+        print(ob.frame_results)
         #Batch or single file
         log_report.write("\nRun type: %s" % ob.runtype)
         if ob.runtype in ["file","pictures"]:
