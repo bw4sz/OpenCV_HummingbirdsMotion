@@ -2,13 +2,16 @@
 
 import numpy as np
 import cv2
+import sourceM
+
 def run_main():
     cap = cv2.VideoCapture('C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/PlotwatcherTest.TLV')
     # Read the first frame of the video
     ret, frame = cap.read()
-    # Set the ROI (Region of Interest). Actually, this is a
+    # Set the ROI (Region of Interest).
+    c,r,w,h=sourceM.Urect(frame,"Set ROI")
+    
     # rectangle of the building that we're tracking
-    c,r,w,h = 900,650,70,70
     track_window = (c,r,w,h)
     
     # Create mask and normalized histogram
