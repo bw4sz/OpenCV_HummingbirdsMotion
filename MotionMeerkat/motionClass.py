@@ -29,7 +29,6 @@ class Motion:
                 
                 #For debugging, visualize conditions?
                 self.vis=True
-                self.windy_min=3
                 
                 #Empty list for time stamps
                 self.stamp=[]
@@ -445,7 +444,7 @@ class Motion:
                                                 
                                                 self.windy_threshold = int(self.windy_min * 60.0 / self.frame_rate)
                                                 runs=sum(self.frame_results[self.frame_count-self.windy_threshold:self.frame_count])/float(self.windy_threshold)
-                                                if runs > 0.95: 
+                                                if runs > 0.9: 
                                                         print("It is windy!\nDeleting the past %.0f returned frames" % self.windy_threshold)
                                                         
                                                         #reset the record to frames not returned

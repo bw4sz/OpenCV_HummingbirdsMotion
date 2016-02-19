@@ -79,12 +79,12 @@ def arguments(self):
                                 if not self.accAvg: self.accAvg=0.35
                 
                                 #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
-                                self.threshT=raw_input("Threshold for movement tolerance\nranging from 0 [include any movement] to 255 [include no movement] (30):\n")
-                                if not self.threshT: self.threshT = 30
+                                self.threshT=raw_input("Threshold for movement tolerance\nRanging from 0 [include any movement] to 255 [include no movement] (40):\n")
+                                if not self.threshT: self.threshT = 40
                                 else: self.threshT=float(self.threshT)
                 
                                 #minimum size of contour object
-                                self.minSIZE=raw_input("Minimum motion contour size\nincrease to exclude smaller objects (0.3):\n")
+                                self.minSIZE=raw_input("Minimum motion contour size\nExpressed as the proportion of the screen.\nFor example, the default (0.3) would ignore objects less than 0.3% of the screen size (0.3):\n")
                                 if not self.minSIZE: self.minSIZE = 0.3
                                 else: self.minSIZE=float(self.minSIZE)
                 
@@ -98,7 +98,7 @@ def arguments(self):
                                                     
                                                 if self.subMethod=="Acc":
                                                                 #Should accAVG be adapted every 10minutes based on an estimated hitrate
-                                                                self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on hitrate? (n) :\n")      
+                                                                self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on expected frequency of visits? (n) :\n")      
                                                                 
                                                                 if self.adapt:
                                                                                 self.accAvg=sourceM.ask_acc()
@@ -135,7 +135,7 @@ def arguments(self):
 						self.windy='y'== raw_input("Enable wind correction? (n):\n")
 						if not self.windy: self.windy = False
 						else: 
-								self.windy_min= raw_input("How many minutes of continious movement should be ignored? (3):\n")
+								self.windy_min= raw_input("If more than 90% of consecutive frames in X minutes are returned, delete frames. (3):\n")
 						
                                             #Decrease frame rate, downsample
                                                 self.scan= raw_input("Scan one of every X frames (0):\n")
@@ -143,7 +143,7 @@ def arguments(self):
                                                 else: self.scan=int(self.scan)
                     
                                         #Manually set framerate?
-                                                self.frameSET= "y" == raw_input("Set frame rate in fps? (n):\n")
+                                                self.frameSET= "y" == raw_input("Set frame rate in frames per second? (n):\n")
                                                 #Set frame rate.
                                                 if self.frameSET:
                                                                 self.frame_rate = raw_input("frames per second:\n")

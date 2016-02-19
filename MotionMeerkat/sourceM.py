@@ -38,7 +38,7 @@ def myround(x, base=10):
     return int(base * round(float(x)/base))
 
 def ask_acc():
-        in_accAvg=raw_input("Accumulated averaging sensitivity to motion (0.35)\nincrease to make less sensitive to movement:\n")
+        in_accAvg=raw_input("Accumulated averaging sensitivity to motion (0.35)\n0.1 would be very sensitive to movement,\n0.5 would be fairly insensitive to movement:\n")
         if in_accAvg:
                 try:
                         out=float(in_accAvg)
@@ -80,9 +80,6 @@ def getint(name):
 def Urect(img,title):
     def onmouse(event,x,y,flags,param):
         global ix,iy,roi,drawing        
-        
-        #new roi space
-        roi=[]
         
         # Draw Rectangle
         if event == cv2.EVENT_RBUTTONDOWN:

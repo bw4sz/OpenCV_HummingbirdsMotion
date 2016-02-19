@@ -67,7 +67,6 @@ def report(ob):
         print("Total run time (min): %.2f \n " % total_min)
         print("Average frames processed per second: %.2f \n " % pfps)   
         print("Candidate motion events: %.0f \n " % ob.total_count )
-        print("Frames skipped due to insufficient difference to the background: %.0f \n " % ob.nodiff)
         print("Frames skipped due to insufficient movement based on the threshold parameter: %.0f \n " % ob.nocountr)
         print("Frames skipped due to minimum size of the contours: %.0f \n " % ob.toosmall)
         

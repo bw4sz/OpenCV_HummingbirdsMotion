@@ -9,4 +9,7 @@ os.chdir('C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/')
 #print('defaults: ok')
 
 os.system('main.py --i PlotwatcherTest.TLV --thresh 0 --windy --windy_min 1')
-print('min size: ok')
+print('windy: ok')
+
+
+os.system('main.py --i flies.avi --minSIZE 0.001 --thresh 20 --accAvg=.35 --frameSET --frame_rate 1')

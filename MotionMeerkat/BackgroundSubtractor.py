@@ -39,7 +39,7 @@ class Background:
             cv2.accumulateWeighted(self.color_image,self.running_average_image,self.accAvg)                                  
             self.running_average_in_display_color_depth = cv2.convertScaleAbs(self.running_average_image)
             
-            #Needs to be manually commented if vis.
+            #Needs to be manually commented if vis
             sourceM.displayV("Background image",10,self.running_average_in_display_color_depth)
             
             # Subtract the current frame from the moving average.
