@@ -32,8 +32,8 @@ def run_main():
     term_crit = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 100, 1)
     
     #Create background subtractor
-    #full=BackgroundSubtractor.Background("Acc",frame,0.35,10,100,16)
-    #crop=BackgroundSubtractor.Background("Acc",roi,0.35,10,100,16)
+    full=BackgroundSubtractor.Background("Acc",frame,0.35,10,100,16)
+    crop=BackgroundSubtractor.Background("Acc",roi,0.35,10,100,16)
     
     while True:
         ret, frame = cap.read()
@@ -52,16 +52,23 @@ def run_main():
         
         #plot original
         cv2.imshow('Tracking', toshow)
-        if cv2.waitKey(10) & 0xFF == ord('q'):
+        if cv2.waitKey(5) & 0xFF == ord('q'):
             break
         
         #get subframe
-        #subframe = frame[x:x+h, y:y+w]
+        subframe = frame[y:y+h, x:x+w]
 
         #Apply background subtraction
-        #grey_full=full.BackGroundSub(frame)
-        #grey_crop=crop.BackGroundSub(subframe)
-
+        grey_full=full.BackGroundSub(frame)
+        grey_crop=crop.BackGroundSub(subframe)
+        
+        cv2.imshow('Full', grey_full)
+        if cv2.waitKey(5) & 0xFF == ord('q'):
+            break
+        
+        cv2.imshow('Crop', grey_crop)
+        if cv2.waitKey(5) & 0xFF == ord('q'):
+            break        
         
     cap.release()
     
