@@ -79,7 +79,7 @@ def arguments(self):
                                 if not self.accAvg: self.accAvg=0.35
                 
                                 #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
-                                self.threshT=raw_input("Threshold for movement tolerance\nRanging from 0 [include any movement] to 255 [include no movement]\nSlow moving animals, like fish, need low threshold [10] and fast moving animals, like birds, can have higher thresholds [70] (30):\n")
+                                self.threshT=raw_input("Threshold for movement tolerance\nRanging from 0 [include any movement] to 255 [include no movement]\nSlow moving animals, like fish, need low thresholds [10].\nFast moving animals, like birds, can have higher thresholds [70] (30):\n")
                                 if not self.threshT: self.threshT = 30
                                 else: self.threshT=float(self.threshT)
                 
@@ -92,7 +92,7 @@ def arguments(self):
                                 
                                 if self.advanced:
                                                 #background method
-                                                self.subMethod=raw_input("Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (Acc) \n Acc is better for time-lapse video, MOG for higher frame rates:\n")
+                                                self.subMethod=raw_input("Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (Acc)\nAcc is better for time-lapse video, MOG for higher frame rates:\n")
                                                 if not self.subMethod: self.subMethod="Acc"
                                                     
                                                 if self.subMethod=="Acc":
@@ -135,7 +135,10 @@ def arguments(self):
 						if not self.windy: self.windy = False
 						else: 
 								self.windy_min= raw_input("If more than 90% of consecutive frames in X minutes are returned, delete frames. (3):\n")
-						
+								if not self.windy_min:
+										self.windy_min=3
+								else:
+										self.windy_min=int(self.windy_min)
                                             #Decrease frame rate, downsample
                                                 self.scan= raw_input("Scan one of every X frames (0):\n")
                                                 if not self.scan: self.scan = 0
