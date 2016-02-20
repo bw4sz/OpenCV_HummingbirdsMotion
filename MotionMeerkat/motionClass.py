@@ -28,7 +28,7 @@ class Motion:
                 #Create initial conditions
                 
                 #For debugging, visualize conditions?
-                self.vis=True
+                self.vis=False
                 
                 #Empty list for time stamps
                 self.stamp=[]
