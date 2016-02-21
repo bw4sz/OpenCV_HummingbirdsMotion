@@ -136,9 +136,9 @@ def arguments(self):
 						else: 
 								self.windy_min= raw_input("If more than 90% of consecutive frames in X minutes are returned, delete frames. (3):\n")
 								if not self.windy_min:
-										self.windy_min=int(3)
+										self.windy_min=float(3.0)
 								else:
-										self.windy_min=int(self.windy_min)
+										self.windy_min=float(self.windy_min)
                                             #Decrease frame rate, downsample
                                                 self.scan= raw_input("Scan one of every X frames (0):\n")
                                                 if not self.scan: self.scan = 0
