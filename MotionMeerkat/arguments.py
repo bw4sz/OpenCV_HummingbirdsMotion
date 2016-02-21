@@ -92,7 +92,7 @@ def arguments(self):
                                 
                                 if self.advanced:
                                                 #background method
-                                                self.subMethod=raw_input("Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (Acc)\nAcc is better for time-lapse video, MOG for higher frame rates:\n")
+                                                self.subMethod=raw_input("\nAccumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (Acc)\nAcc is better for time-lapse video, MOG for higher frame rates:\n")
                                                 if not self.subMethod: self.subMethod="Acc"
                                                     
                                                 if self.subMethod=="Acc":
@@ -136,7 +136,7 @@ def arguments(self):
 						else: 
 								self.windy_min= raw_input("If more than 90% of consecutive frames in X minutes are returned, delete frames. (3):\n")
 								if not self.windy_min:
-										self.windy_min=3
+										self.windy_min=int(3)
 								else:
 										self.windy_min=int(self.windy_min)
                                             #Decrease frame rate, downsample

@@ -442,7 +442,7 @@ class Motion:
                                         #Is it windy?
                                         if self.windy:
                                                 
-                                                self.windy_threshold = self.windy_min * 60 / self.frame_rate
+                                                self.windy_threshold = int(self.windy_min * 60 * self.frame_rate)
                                                 runs=sum(self.frame_results[self.frame_count-self.windy_threshold:self.frame_count])/float(self.windy_threshold)
                                                 if runs > 0.9: 
                                                         print("It is windy!\nDeleting the past %.0f returned frames" % self.windy_threshold)

@@ -6,7 +6,7 @@ import sourceM
 import BackgroundSubtractor
 
 def run_main():
-    cap = cv2.VideoCapture('C:/Users/Ben/Downloads/test.avi')
+    cap = cv2.VideoCapture('C:/Users/Ben/Desktop/test.avi')
     #cap= cv2.VideoCapture("C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/PlotwatcherTest.tlv")
     # Read the first frame of the video
     ret, frame = cap.read()
@@ -32,8 +32,8 @@ def run_main():
     term_crit = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 100, 1)
     
     #Create background subtractor
-    full=BackgroundSubtractor.Background("Acc",frame,0.35,10,100,16)
-    crop=BackgroundSubtractor.Background("Acc",roi,0.35,10,100,16)
+    full=BackgroundSubtractor.Background("MOG",frame,0.35,10,100,16)
+    crop=BackgroundSubtractor.Background("MOG",roi,0.35,10,100,16)
     
     while True:
         ret, frame = cap.read()

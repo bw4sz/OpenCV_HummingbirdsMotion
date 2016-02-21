@@ -53,7 +53,7 @@ class Background:
                 
         ##Mixture of Gaussians
         if self.subMethod in ["MOG","KNN","Both"]:
-            self.grey_image = self.fgbg.apply(camera_imageROI)
+            self.grey_image = self.fgbg.apply(camera_imageROI,learningRate=0)
         
         #Dilate the areas to merge bounded objects
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(7,7))
