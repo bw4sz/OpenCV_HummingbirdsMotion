@@ -27,8 +27,8 @@ class Motion:
                 
                 #Create initial conditions
                 
-                #For debugging, visualize conditions?
-                self.vis=True
+                #For debugging, visualize conditions.
+                self.vis=False
                 
                 #Capture average minimum box size for plotting
                 self.avg_area = []

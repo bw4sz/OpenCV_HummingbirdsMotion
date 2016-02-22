@@ -12,6 +12,7 @@ def report(ob):
 
         #Print parameters
         #Batch or single file
+        log_report.write("Input Parameters")        
         log_report.write("\nRun type: %s" % ob.runtype)
         if ob.runtype in ["file","pictures"]:
                 log_report.write("\nInput file path: %s" % ob.inDEST)
@@ -19,20 +20,30 @@ def report(ob):
         else:
                 log_report.write("\nInput file path: %s" % ob.batchpool)
         log_report.write("\nOutput dir: %s" % ob.fileD)
-        log_report.write("\nAdapt accAvg? %s" % ob.adapt)
-        
+        log_report.write("\nBackground Subtraction Method? %s" % ob.subMethod)
+        if ob.subMethod == "MOG":
+                log_report.write("\nLearning Rate: %s" % ob.moglearning)
+                log_report.write("\nVariance Rate: %s" % ob.mogvariance)
+        if ob.subMethod == "Acc":
+                log_report.write("\nAccumulated Averaging: %s" % ob.accAvg)  
+                log_report.write("\nAdapt Parameters: %s" % ob.adapt)                
+
         if ob.adapt:
                 log_report.write("\nExpected hitrate: %s" % ob.frameHIT)
                 log_report.write("\nMinimum accAvg: %s" % ob.floorvalue)
-        log_report.write("\nThreshold %s" % ob.threshT)
+        log_report.write("\nThreshold: %s" % ob.threshT)
         log_report.write("\nMinimum contour area: %s" % ob.minSIZE)
-        log_report.write("\nBurnin: %s" % ob.burnin)
-        log_report.write("\nScan frames: %s" % ob.scan)
+        if ob.burnin > 0:
+                log_report.write("\nBurnin: %s" % ob.burnin)
+        if ob.scan > 0:
+                log_report.write("\nScan frames: %s" % ob.scan)
         
         if ob.frameSET:
                 log_report.write("\nManual framerate: %s" % ob.frame_rate)
-        log_report.write("\nSet ROI: %s" % ob.ROI_include)
-        log_report.write("\nArea counter?: %s" % ob.set_areacounter)
+        if ob.set_ROI:        
+                log_report.write("\nSet ROI: %s" % ob.ROI_include)
+        if ob.set_areacounter:
+                log_report.write("\nArea counter?: %s" % ob.set_areacounter)
         log_report.write("\nOutput type?: %s\n\n" % ob.makeVID)
 
         #Ending time
@@ -45,22 +56,23 @@ def report(ob):
         pfps=float(ob.frame_count)/(total_min*60)
 
         ##Write to log file
+        log_report.write("\Processing\n")        
         log_report.write("Total run time (min): %.2f \n " % total_min)
         log_report.write("Average frames per second: %.2f \n " % pfps)
 
         #End of program, report some statistic to screen and log
         #log
-        log_report.write("\n Thank you for using MotionMeerkat! \n")
-        log_report.write("Candidate motion events: %.0f \n " % ob.total_count )
+        log_report.write("\nResults\n")
+        log_report.write("Candidate motion events: %.0f \n" % ob.total_count )
         log_report.write("Frames skipped due to insufficient movement based on the threshold parameter: %.0f \n" % ob.nocountr)
-        log_report.write("Frames skipped due to minimum size of the contours: %.0f \n " % ob.toosmall)
+        log_report.write("Frames skipped due to minimum size of the contours: %.0f \n" % ob.toosmall)
         if ob.windy:
-                log_report.write("Frames skipped due to windy conditions: %.0f \n " % ob.windy_count)                
-        log_report.write("Total frames in files: %.0f \n " % ob.frame_count)
+                log_report.write("Frames skipped due to windy conditions: %.0f \n" % ob.windy_count)                
+        log_report.write("Total frames in files: %.0f \n" % ob.frame_count)
         
         rate=float(ob.total_count)/ob.frame_count*100
         log_report.write("Hitrate: %.2f %% \n" % rate)
-        log_report.write("Exiting")
+        log_report.write("Exiting\n")
 
         #print to screen
         print("\n\nThank you for using MotionMeerkat! \n")

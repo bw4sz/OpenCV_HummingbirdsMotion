@@ -58,9 +58,9 @@ class Background:
             self.grey_image = self.fgbg.apply(camera_imageROI,learningRate=learningRate)
             
             #if vis
-            bgimage=self.fgbg.getBackgroundImage()
-            cv2.imshow("Background",bgimage)
-            cv2.waitKey(1)
+            #bgimage=self.fgbg.getBackgroundImage()
+            #cv2.imshow("Background",bgimage)
+            #cv2.waitKey(1)
             
         #Erode to remove noise, dilate the areas to merge bounded objects
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(9,9))
