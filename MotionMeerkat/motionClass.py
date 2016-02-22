@@ -29,7 +29,7 @@ class Motion:
                 
                 #For debugging, visualize conditions.
                 self.vis=False
-                
+                if self.vis: self.todraw = True
                 #Capture average minimum box size for plotting
                 self.avg_area = []
                 
@@ -393,7 +393,7 @@ class Motion:
                                 for p in range(1,len(casc.geoms)):
                                         b=casc.geoms[p].bounds
                                         if casc.geoms[p].area > ((self.width * self.height) * (float(self.minSIZE/100))):
-                                                        if self.vis: cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                                        if self.todraw: cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
                                                                 
                                                         #Return the centroid to list, rounded two decimals
                                                         x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
@@ -405,7 +405,7 @@ class Motion:
                                 #If bounding polygon is larger than the minsize, draw a rectangle
                                 
                                 if casc.area > ((self.width * self.height) * (float(self.minSIZE/100))):
-                                                if self.vis: cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                                if self.todraw: cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
                                                 x=round(casc.centroid.coords.xy[0][0],2)
                                                 y=round(casc.centroid.coords.xy[1][0],2)
                                                 bound_center.append((x,y))
@@ -417,7 +417,6 @@ class Motion:
                                 self.toosmall=self.toosmall+1
                                 
                                 #record output
-                                
                                 self.frame_results.append(False)
                                 
                                 self.noMotion=True                   

@@ -49,6 +49,7 @@ def arguments(self):
 				self.parser.add_argument("--windy_min", help="How many minutes of continious movement should be ignored?",default='3',type=int)                                
                                 self.parser.add_argument("--ROI_include", help="include or exclude?",default="exclude")
                                 self.parser.add_argument("--set_areacounter", help="Set region to count area",action="store_true",default=False)
+                                self.parser.add_argument("--todraw", help="Draw red boxes to highlight motion' ?",action="store_true",default=False)				
                                 self.parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?",default='frames',type=str)
                                 self.args = self.parser.parse_args(namespace=self)
 				if not self.runtype=="pictures":
@@ -124,13 +125,7 @@ def arguments(self):
 								self.moghistory=int(self.moghistory)
                                                                 if not self.mogvariance: self.mogvariance = 500
                                                                 self.adapt=False
-                                                                
-                                               
-                                               #Skip initial frames of video, in case of camera setup and shake.       
-                                                self.burnin= raw_input("Burn in, skip initial minutes of video (0):\n")
-                                                if not self.burnin: self.burnin = 0
-                                                else: self.burnin=float(self.burnin)
-						
+                                                                                                             					
 						#Skip initial frames of video, in case of camera setup and shake.       
 						self.windy='y'== raw_input("Enable wind correction? (n):\n")
 						if not self.windy: self.windy = False
@@ -140,28 +135,40 @@ def arguments(self):
 										self.windy_min=float(3.0)
 								else:
 										self.windy_min=float(self.windy_min)
-                                            #Decrease frame rate, downsample
+								
+						#set ROI
+						self.set_ROI= "y" == raw_input("Exclude a portion of the image? (n) :\n")
+				
+						if self.set_ROI:
+								self.ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'? (exclude):\n")
+						else: self.ROI_include='exclude'                                            
+						#Decrease frame rate, downsample
                                                 self.scan= raw_input("Scan one of every X frames (0):\n")
                                                 if not self.scan: self.scan = 0
                                                 else: self.scan=int(self.scan)
-                    
-                                        #Manually set framerate?
+						
+						#Skip initial frames of video, in case of camera setup and shake.       
+						self.burnin= raw_input("Burn in, skip initial minutes of video (0):\n")
+						if not self.burnin: self.burnin = 0
+						else: self.burnin=float(self.burnin)
+
+						#There are specific conditions for the plotwatcher pro, because the frame_rate is off, turn this to a boolean       
+						self.plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera? (n) :\n")
+						if not self.plotwatcher: self.plotwatcher = False  
+						
+						#Draw boxes to highlight motion
+						self.todraw='y'==raw_input("Draw red boxes to highlight motion? (n) :\n")
+						if not self.todraw: self.todraw = False 
+						
+						#Manually set framerate?
                                                 self.frameSET= "y" == raw_input("Set frame rate in frames per second? (n):\n")
+                                        
                                                 #Set frame rate.
                                                 if self.frameSET:
                                                                 self.frame_rate = raw_input("frames per second:\n")
                                                 else: self.frame_rate=0
-                                            
-                                        #There are specific conditions for the plotwatcher, because the frame_rate is off, turn this to a boolean       
-                                                self.plotwatcher='y'==raw_input("Does this video come from a plotwatcher camera? (n) :\n")
-                                                if not self.plotwatcher: self.plotwatcher = False
-                                               
-                                                #set ROI
-                                                self.set_ROI= "y" == raw_input("Exclude a portion of the image? (n) :\n")
-                                                    
-                                                if self.set_ROI:
-                                                                self.ROI_include=raw_input("Subregion of interest to 'include' or 'exclude'? (exclude):\n")
-                                                else: self.ROI_include='exclude'
+						
+						
                             
                                                     #Create area counter by highlighting a section of frame
                                                 self.set_areacounter='y'==raw_input("Highlight region for area count? (n) \n")

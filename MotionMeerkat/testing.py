@@ -2,13 +2,15 @@
 
 import os
 
+#cd into direction holding main.py - for users this would be the directory holding main.exe
 os.chdir('C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/')
 
-#default
-os.system('main.py --batchpool C:/Users/Ben/Desktop/MeerkatTest --subMethod MOG --moglearning 0.5 --makeVID frames --runtype batch')
-#os.system('main.py --batchpool C:/Users/Ben/Desktop/MeerkatTest --subMethod MOG --moglearning 0.1 --makeVID none --runtype batch')
-#os.system('main.py --batchpool C:/Users/Ben/Desktop/MeerkatTest --subMethod MOG --moglearning 0.01 --makeVID none --runtype batch')
-#os.system('main.py --batchpool C:/Users/Ben/Desktop/MeerkatTest --subMethod MOG --moglearning 0.5 --makeVID none --runtype batch')
+# Run from command line
+# Note: for users without source code, replace main.py with main.exe.
+#os.system('main.py --batchpool C:/Users/Ben/Desktop/MeerkatTest --fileD C:/MotionMeerkat/MOG --subMethod MOG --moglearning 0.1 --makeVID frames --runtype batch --windy --windy_min 1')
+#os.system('main.py --batchpool C:/Users/Ben/Desktop/MeerkatTest --fileD C:/MotionMeerkat/Acc --subMethod Acc --moglearning 0.1 --makeVID frames --runtype batch --windy --windy_min 1')
+
+os.system('main.py --i C:/Users/Ben/Desktop/MeerkatTest/MoyTest.mpg --subMethod MOG --moglearning 0.1')
 
 #print('defaults: ok')
 

@@ -56,8 +56,8 @@ def report(ob):
         pfps=float(ob.frame_count)/(total_min*60)
 
         ##Write to log file
-        log_report.write("\Processing\n")        
-        log_report.write("Total run time (min): %.2f \n " % total_min)
+        log_report.write("Processing\n")        
+        log_report.write("Total run time (min): %.2f \n" % total_min)
         log_report.write("Average frames per second: %.2f \n " % pfps)
 
         #End of program, report some statistic to screen and log
@@ -72,7 +72,6 @@ def report(ob):
         
         rate=float(ob.total_count)/ob.frame_count*100
         log_report.write("Hitrate: %.2f %% \n" % rate)
-        log_report.write("Exiting\n")
 
         #print to screen
         print("\n\nThank you for using MotionMeerkat! \n")
