@@ -19,11 +19,13 @@ class Background:
     
         if self.subMethod in ["MOG","Both"]:
             #MOG method creator
-            self.fgbg = cv2.createBackgroundSubtractorMOG2(history=moghistory, detectShadows=False)
+            self.fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=False)
+            self.fgbg.setBackgroundRatio(0.95)
+            #self.fgbg = cv2.bgsegm.createBackgroundSubtractorMOG(history=moghistory)
 
     
     #Frame Subtraction
-    def BackGroundSub(self,camera_imageROI):
+    def BackGroundSub(self,camera_imageROI,learningRate):
         ## accumulated averaging
         if self.subMethod in ["Acc","Both"]:
             # Create an image with interactive feedback:
@@ -53,10 +55,15 @@ class Background:
                 
         ##Mixture of Gaussians
         if self.subMethod in ["MOG","KNN","Both"]:
-            self.grey_image = self.fgbg.apply(camera_imageROI)
-        
-        #Dilate the areas to merge bounded objects
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(7,7))
+            self.grey_image = self.fgbg.apply(camera_imageROI,learningRate=learningRate)
+            
+            #if vis
+            bgimage=self.fgbg.getBackgroundImage()
+            cv2.imshow("Background",bgimage)
+            cv2.waitKey(1)
+            
+        #Erode to remove noise, dilate the areas to merge bounded objects
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(9,9))
         self.grey_image= cv2.morphologyEx(self.grey_image, cv2.MORPH_OPEN, kernel)
         return(self.grey_image)
     

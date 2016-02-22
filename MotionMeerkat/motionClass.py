@@ -28,7 +28,14 @@ class Motion:
                 #Create initial conditions
                 
                 #For debugging, visualize conditions?
-                self.vis=False
+                self.vis=True
+                
+                #Capture average minimum box size for plotting
+                self.avg_area = []
+                
+                #Capture average threshold for plotting
+                self.avg_threshold = []
+                
                 
                 #Empty list for time stamps
                 self.stamp=[]
@@ -313,7 +320,7 @@ class Motion:
                         #############################
                         ###BACKGROUND SUBTRACTION
                         #############################
-                        grey_image=self.BC.BackGroundSub(current_imageROI)
+                        grey_image=self.BC.BackGroundSub(current_imageROI,self.moglearning)
                         if self.vis: sourceM.displayV("Thresholded image",10,grey_image)
                         
                         #######################################
@@ -386,7 +393,7 @@ class Motion:
                                 for p in range(1,len(casc.geoms)):
                                         b=casc.geoms[p].bounds
                                         if casc.geoms[p].area > ((self.width * self.height) * (float(self.minSIZE/100))):
-                                                        cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                                        if self.vis: cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
                                                                 
                                                         #Return the centroid to list, rounded two decimals
                                                         x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
@@ -398,7 +405,7 @@ class Motion:
                                 #If bounding polygon is larger than the minsize, draw a rectangle
                                 
                                 if casc.area > ((self.width * self.height) * (float(self.minSIZE/100))):
-                                                cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                                if self.vis: cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
                                                 x=round(casc.centroid.coords.xy[0][0],2)
                                                 y=round(casc.centroid.coords.xy[1][0],2)
                                                 bound_center.append((x,y))
