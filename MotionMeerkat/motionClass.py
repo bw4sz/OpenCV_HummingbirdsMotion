@@ -425,7 +425,7 @@ class Motion:
                                                 bound_casc_box.append(casc)
                         
                         #Get the average size of box
-                        self.avg_area.append(np.array(sumbox).mean())                                                                                        
+                        self.avg_area.append(np.array(sumbox).max())                                                                                        
                         
                         if len(bound_center) == 0:
                                 

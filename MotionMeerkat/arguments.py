@@ -81,7 +81,7 @@ def arguments(self):
 				self.moglearning=float(self.moglearning)				
                 
                                 #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
-                                self.threshT=raw_input("Threshold for movement tolerance\nRanging from 0 [include any movement] to 255 [include no movement]\nSlow moving animals, like fish, need low thresholds [10].\nFast moving animals, like birds, can have higher thresholds [70] (30):\n")
+                                self.threshT=raw_input("Threshold for movement tolerance\nRanging from 0 [include any movement] to 255 [include no movement]\nSlow moving animals, like fish, need low thresholds [10].\nFast moving animals, like birds, can have higher thresholds [60] (30):\n")
                                 if not self.threshT: self.threshT = 30
                                 else: self.threshT=float(self.threshT)
                 

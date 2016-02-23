@@ -103,9 +103,9 @@ def report(ob):
         #Show if file, don't let it hang command line
         if ob.runtype == 'file':
 
-                Plotting.combineplots(scale_size,ob.frame_results,ob.minSIZE,ob.file_destination + "/" + "Diagnostics.png",show=True)
+                Plotting.combineplots(scale_size,ob.frame_results,ob.minSIZE/100,ob.file_destination + "/" + "Diagnostics.png",show=True)
         else:
-                Plotting.combineplots(scale_size,ob.frame_results,ob.minSIZE,ob.file_destination + "/" + "Diagnostics.png",show=False)
+                Plotting.combineplots(scale_size,ob.frame_results,ob.minSIZE/100,ob.file_destination + "/" + "Diagnostics.png",show=False)
                 
         #reset frame count if in batch loop
         ob.frame_count=0
