@@ -1,6 +1,8 @@
 import time
 import csv
 import cv2
+import Plotting
+
 def report(ob):
         
         #Run is over, destroy display windows
@@ -20,10 +22,12 @@ def report(ob):
         else:
                 log_report.write("\nInput file path: %s" % ob.batchpool)
         log_report.write("\nOutput dir: %s" % ob.fileD)
-        log_report.write("\nBackground Subtraction Method? %s" % ob.subMethod)
+        log_report.write("\nBackground Subtraction Method?: %s" % ob.subMethod)
+        
         if ob.subMethod == "MOG":
                 log_report.write("\nLearning Rate: %s" % ob.moglearning)
                 log_report.write("\nVariance Rate: %s" % ob.mogvariance)
+        
         if ob.subMethod == "Acc":
                 log_report.write("\nAccumulated Averaging: %s" % ob.accAvg)  
                 log_report.write("\nAdapt Parameters: %s" % ob.adapt)                
@@ -31,20 +35,20 @@ def report(ob):
         if ob.adapt:
                 log_report.write("\nExpected hitrate: %s" % ob.frameHIT)
                 log_report.write("\nMinimum accAvg: %s" % ob.floorvalue)
+        
         log_report.write("\nThreshold: %s" % ob.threshT)
         log_report.write("\nMinimum contour area: %s" % ob.minSIZE)
         if ob.burnin > 0:
                 log_report.write("\nBurnin: %s" % ob.burnin)
         if ob.scan > 0:
                 log_report.write("\nScan frames: %s" % ob.scan)
-        
         if ob.frameSET:
                 log_report.write("\nManual framerate: %s" % ob.frame_rate)
         if ob.set_ROI:        
                 log_report.write("\nSet ROI: %s" % ob.ROI_include)
         if ob.set_areacounter:
-                log_report.write("\nArea counter?: %s" % ob.set_areacounter)
-        log_report.write("\nOutput type?: %s\n\n" % ob.makeVID)
+                log_report.write("\nArea counter: %s" % ob.set_areacounter)
+        log_report.write("\nOutput type: %s\n\n" % ob.makeVID)
 
         #Ending time
         end=time.time()
@@ -89,7 +93,13 @@ def report(ob):
 
         rate=float(ob.total_count)/ob.frame_count*100
         print("Hitrate: %.2f %% \n" % rate)
-
+        
+        
+        #Generate plots
+        #Show box size by area
+        tarea=(ob.width * ob.height)
+        Plotting.combineplots([x/tarea for x in ob.avg_area],ob.frame_results)
+        
         #reset frame count if in batch loop
         ob.frame_count=0
         ob.total_count=0

@@ -36,6 +36,9 @@ class Motion:
                 #Capture average threshold for plotting
                 self.avg_threshold = []
                 
+                #Ignore the first X minutes?
+                self.allowlearning = True
+                self.learning_wait = 3
                 
                 #Empty list for time stamps
                 self.stamp=[]
@@ -94,8 +97,8 @@ class Motion:
                 #we want to name the output a folder from the output destination with the named extension        
                 if self.subMethod=="Acc":
                         print("AccAvg begin value is: %s" % (self.accAvg))
-                #set an original to reset at the end
-                self.accAvgBegin=self.accAvg
+                        #set an original to reset at the end
+                        self.accAvgBegin=self.accAvg
 
                 #If its batch, give an extra folder
                 if self.runtype == 'batch':
@@ -199,7 +202,7 @@ class Motion:
                         cv2.rectangle(orig, (self.area_box[1],self.area_box[3]), (self.area_box[0],self.area_box[2]), (255,0,0), 1)     
                 
                 ###Background Constructor, create class
-                self.BC=BackgroundSubtractor.Background(self.subMethod,self.display_image,self.accAvg,self.threshT,self.moghistory,self.mogvariance)
+                self.BC=BackgroundSubtractor.Background(self.subMethod,self.display_image,self.accAvg,self.threshT,self.mogvariance)
            
 ######################################################             
 ##Function to compute background during the video loop
@@ -226,8 +229,9 @@ class Motion:
                         if not self.pictures:
                                 ret,current_image = self.cap.read()
                                 if not ret:
-                                        #If there are no more frames, break, need to reset
-                                        self.accAvg=self.accAvgBegin
+                                        #If there are no more frames, break, need to reset AccAVG
+                                        if self.subMethod=="Acc": 
+                                                self.accAvg=self.accAvgBegin
                                         break
                         else:
                                 if len(self.jpgs)==0:
@@ -388,10 +392,14 @@ class Motion:
                         #shape_pol=sg.MultiPolygon(shape_list)
                         casc=cascaded_union(shape_list).buffer(1)
                         
+                        #Make an object to get the average box size
+                        sumbox = []
+                        
                         if casc.type=="MultiPolygon":
                             #draw shapely bounds
                                 for p in range(1,len(casc.geoms)):
                                         b=casc.geoms[p].bounds
+                                        sumbox.append(casc.geoms[p].area)
                                         if casc.geoms[p].area > ((self.width * self.height) * (float(self.minSIZE/100))):
                                                         if self.todraw: cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
                                                                 
@@ -400,17 +408,24 @@ class Motion:
                                                         y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
                                                         bound_center.append((x,y))
                                                         bound_casc_box.append(casc.geoms[p])
+                                                        
                         else:
                                 b=casc.bounds
-                                #If bounding polygon is larger than the minsize, draw a rectangle
                                 
+                                #get size 
+                                sumbox.append(casc.area)
+                                
+                                #If bounding polygon is larger than the minsize, draw a rectangle
                                 if casc.area > ((self.width * self.height) * (float(self.minSIZE/100))):
                                                 if self.todraw: cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
                                                 x=round(casc.centroid.coords.xy[0][0],2)
                                                 y=round(casc.centroid.coords.xy[1][0],2)
                                                 bound_center.append((x,y))
                                                 bound_casc_box.append(casc)
-                                                
+                        
+                        #Get the average size of box
+                        self.avg_area.append(np.array(sumbox).mean())                                                                                        
+                        
                         if len(bound_center) == 0:
                                 
                                 #mark as too small
@@ -441,7 +456,12 @@ class Motion:
                         
                         if not self.makeVID == "none":
                                 if self.makeVID in ("frames","both"):
-                                        cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",camera_image)
+                                        if not self.allowlearning:
+                                                cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",camera_image)
+                                        else:
+                                                if self.frame_count > self.frame_rate * self.learning_wait:
+                                                        cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",camera_image)
+                                        
                                         #Record frame as motion
                                         self.frame_results.append(True)
                                         

@@ -40,9 +40,8 @@ def arguments(self):
                                 self.parser.add_argument("--frameSET", help="Set frame_rate?",action='store_true',default=False)
                                 self.parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true",default=False)
                                 self.parser.add_argument("--frame_rate", help="frames per second",default=1)
-                                self.parser.add_argument("--moghistory", help="Length of history for MOG background detector",default=500,type=int)
-				self.parser.add_argument("--moglearning", help="Length of history for MOG background detector",default=0,type=float)                                
-                                self.parser.add_argument("--subMethod", help="Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method",default='Acc',type=str)                                
+				self.parser.add_argument("--moglearning", help="Speed of MOG background detector, lowering values are more sensitive to movement",default=0.1,type=float)                                
+                                self.parser.add_argument("--subMethod", help="Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method",default='MOG',type=str)                                
                                 self.parser.add_argument("--mogvariance", help="Variance in MOG to select background",default=16,type=int)                                
                                 self.parser.add_argument("--set_ROI", help="Set region of interest?",action='store_true',default=False)
 				self.parser.add_argument("--windy", help="Enable wind correction",action='store_true',default=False)
@@ -76,10 +75,6 @@ def arguments(self):
                                 self.fileD=raw_input("File Destination Folder (C:\MotionMeerkat):\n")   
                                 if not self.fileD: self.fileD = str("C:\MotionMeerkat")
                 
-                                #Sensitivity to movement
-                                self.accAvg=sourceM.ask_acc()
-                                if not self.accAvg: self.accAvg=0.35
-                
                                 #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
                                 self.threshT=raw_input("Threshold for movement tolerance\nRanging from 0 [include any movement] to 255 [include no movement]\nSlow moving animals, like fish, need low thresholds [10].\nFast moving animals, like birds, can have higher thresholds [70] (30):\n")
                                 if not self.threshT: self.threshT = 30
@@ -94,10 +89,15 @@ def arguments(self):
                                 
                                 if self.advanced:
                                                 #background method
-                                                self.subMethod=raw_input("\nAccumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (Acc)\nAcc is better for time-lapse video, MOG for higher frame rates:\n")
-                                                if not self.subMethod: self.subMethod="Acc"
+                                                self.subMethod=raw_input("\nAccumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (Acc)\nAcc is faster, MOG is more accurate:\n")
+                                                if not self.subMethod: self.subMethod="MOG"
                                                     
                                                 if self.subMethod=="Acc":
+								
+								#Sensitivity to movement
+								self.accAvg=sourceM.ask_acc()
+								if not self.accAvg: self.accAvg=0.35
+								
                                                                 #Should accAVG be adapted every 10minutes based on an estimated hitrate
                                                                 self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on expected frequency of visits? (n) :\n")      
                                                                 
@@ -113,17 +113,19 @@ def arguments(self):
                                                                                 #Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
                                                                                 self.floorvalue = 0.05
 
-                                                #Still need to set moghistory to pass to argument, even if it isn't used.  
-                                                self.moghistory = 500
+                                                #Still need to set moglearning to pass to argument, even if it isn't used.  
+                                                self.moglearning = 0.1
                                                 self.mogvariance = 16
                                                 
                                                 if self.subMethod=="MOG":
-                                                                self.moghistory=raw_input("History of Frames for Gaussian (500):\n")
-                                                                if not self.moghistory: self.moghistory = 500                                                                
+                                                                self.moglearning=raw_input("Senitivity to background movement, ranging from 0 [very sensitive] to 1. (0.1):\n")
+                                                                if not self.moglearning: self.learning = 0.1
+								self.moglearning=float(self.moglearning)
+								
                                                                 self.mogvariance=raw_input("Variance in background threshold (16):\n")
-								#turn to int
-								self.moghistory=int(self.moghistory)
-                                                                if not self.mogvariance: self.mogvariance = 500
+                                                                if not self.mogvariance: self.mogvariance = 16
+                                                                
+                                                                #Turn off adaptation, not ready V1.8.5
                                                                 self.adapt=False
                                                                                                              					
 						#Skip initial frames of video, in case of camera setup and shake.       
@@ -168,9 +170,7 @@ def arguments(self):
                                                                 self.frame_rate = raw_input("frames per second:\n")
                                                 else: self.frame_rate=0
 						
-						
-                            
-                                                    #Create area counter by highlighting a section of frame
+                            			#Create area counter by highlighting a section of frame
                                                 self.set_areacounter='y'==raw_input("Highlight region for area count? (n) \n")
                                                 if not self.set_areacounter: self.set_areacounter=False
                             
@@ -179,6 +179,7 @@ def arguments(self):
                                                 if not self.makeVID:self.makeVID="frames"
                             
                                 else:
+                                                #Set defaults that weren't specified.
                                                 self.floorvalue=0
                                                 self.frameHIT=0
                                                 self.adapt=False
@@ -191,9 +192,11 @@ def arguments(self):
                                                 self.frame_rate=0
                                                 self.set_ROI=False
                                                 self.set_areacounter=False
-                                                self.subMethod="Acc"
-                                                self.moghistory = 500
+						self.accAvg = 0.35
+                                                self.subMethod="MOG"
+                                                self.moglearning = 0.1
                                                 self.mogvariance = 16
                                                 self.pictures = False
                                                 self.windy = False
+						self.todraw=False
 						
