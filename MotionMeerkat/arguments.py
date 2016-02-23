@@ -40,7 +40,7 @@ def arguments(self):
                                 self.parser.add_argument("--frameSET", help="Set frame_rate?",action='store_true',default=False)
                                 self.parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true",default=False)
                                 self.parser.add_argument("--frame_rate", help="frames per second",default=1)
-				self.parser.add_argument("--moglearning", help="Speed of MOG background detector, lowering values are more sensitive to movement",default=0.1,type=float)                                
+				self.parser.add_argument("--moglearning", help="Speed of MOG background detector, lowering values are more sensitive to movement",default=0.15,type=float)                                
                                 self.parser.add_argument("--subMethod", help="Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method",default='MOG',type=str)                                
                                 self.parser.add_argument("--mogvariance", help="Variance in MOG to select background",default=16,type=int)                                
                                 self.parser.add_argument("--set_ROI", help="Set region of interest?",action='store_true',default=False)
@@ -76,8 +76,8 @@ def arguments(self):
                                 if not self.fileD: self.fileD = str("C:\MotionMeerkat")
 				
 				#Sensitivity to background 
-				self.moglearning=raw_input("Sensitivity to background movement, ranging from 0 [very sensitive] to 1.\nRecommended between 0.05 for still videos and 0.4 for windy videos\nAs learning rate increases, fewer frames will be returned (0.1):\n")
-				if not self.moglearning: self.moglearning = 0.1
+				self.moglearning=raw_input("Sensitivity to background movement, ranging from 0 [very sensitive] to 1.\nRecommended between 0.05 for still videos and 0.4 for windy videos\nAs learning rate increases, fewer frames will be returned (0.15):\n")
+				if not self.moglearning: self.moglearning = 0.15
 				self.moglearning=float(self.moglearning)				
                 
                                 #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
@@ -114,7 +114,7 @@ def arguments(self):
                                                                                 else: self.frameHIT=float(self.frameHIT)
 		
 								#Still need to set moglearning to pass to argument, even if it isn't used.  
-								self.moglearning = 0.1
+								self.moglearning = 0.15
 								self.mogvariance = 16
                                                 
                                                 if self.subMethod=="MOG":
