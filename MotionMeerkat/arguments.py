@@ -119,11 +119,13 @@ def arguments(self):
                                                 
                                                 if self.subMethod=="MOG":
 								
+								print("Default background subtractor MOG selected.")
                                                                 self.mogvariance=raw_input("Variance in background threshold (16):\n")
                                                                 if not self.mogvariance: self.mogvariance = 16
                                                                 
                                                                 #Turn off adaptation, not ready V1.8.5
                                                                 self.adapt=False
+								self.accAvg = 0.35
                                                                                                              					
 						#Skip initial frames of video, in case of camera setup and shake.       
 						self.windy='y'== raw_input("Enable wind correction? (n):\n")
