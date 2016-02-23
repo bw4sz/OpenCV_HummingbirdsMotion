@@ -6,7 +6,7 @@ import os
 os.chdir('C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/')
 
 # Run from command line, using default video to test state
-testing = False
+testing = True
 if testing:
     #Minsize
     os.system('main.py --minSIZE 0.3')
@@ -30,7 +30,7 @@ if testing:
     os.system('main.py --scan 1')
     
     #Change background subtractor
-os.system('main.py --subMethod Acc --accAvg 0.4 --adapt')
+    os.system('main.py --subMethod Acc --accAvg 0.4 --adapt')
 
 
 # Note: for users without source code, replace main.py with main.exe.

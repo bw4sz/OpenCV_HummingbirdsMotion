@@ -74,6 +74,11 @@ def arguments(self):
                                 #Destination of file
                                 self.fileD=raw_input("File Destination Folder (C:\MotionMeerkat):\n")   
                                 if not self.fileD: self.fileD = str("C:\MotionMeerkat")
+				
+				#Sensitivity to background 
+				self.moglearning=raw_input("Sensitivity to background movement, ranging from 0 [very sensitive] to 1.\nRecommended between 0.05 for still videos and 0.4 for windy videos\nAs learning rate increases, fewer frames will be returned (0.1):\n")
+				if not self.moglearning: self.moglearning = 0.1
+				self.moglearning=float(self.moglearning)				
                 
                                 #thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
                                 self.threshT=raw_input("Threshold for movement tolerance\nRanging from 0 [include any movement] to 255 [include no movement]\nSlow moving animals, like fish, need low thresholds [10].\nFast moving animals, like birds, can have higher thresholds [70] (30):\n")
@@ -107,15 +112,12 @@ def arguments(self):
                                                                                 self.frameHIT=raw_input("Expected percentage of frames with motion (0.02, i.e 2% of frames returned):\n")
                                                                                 if not self.frameHIT: self.frameHIT = 0.02
                                                                                 else: self.frameHIT=float(self.frameHIT)
-
-                                                #Still need to set moglearning to pass to argument, even if it isn't used.  
-                                                self.moglearning = 0.1
-                                                self.mogvariance = 16
+		
+								#Still need to set moglearning to pass to argument, even if it isn't used.  
+								self.moglearning = 0.1
+								self.mogvariance = 16
                                                 
                                                 if self.subMethod=="MOG":
-                                                                self.moglearning=raw_input("Senitivity to background movement, ranging from 0 [very sensitive] to 1. (0.1):\n")
-                                                                if not self.moglearning: self.learning = 0.1
-								self.moglearning=float(self.moglearning)
 								
                                                                 self.mogvariance=raw_input("Variance in background threshold (16):\n")
                                                                 if not self.mogvariance: self.mogvariance = 16
