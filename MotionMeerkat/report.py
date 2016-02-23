@@ -95,10 +95,14 @@ def report(ob):
         print("Hitrate: %.2f %% \n" % rate)
         
         
-        #Generate plots
+        ####Generate plots
         #Show box size by area
-        tarea=(ob.width * ob.height)
-        Plotting.combineplots([x/tarea for x in ob.avg_area],ob.frame_results)
+        if ob.runtype == 'file':
+                tarea=(ob.width * ob.height)
+                scale_size=[x/tarea for x in ob.avg_area]
+                #First frame is artifact of intilization
+                scale_size[0]=None
+                Plotting.combineplots(scale_size,ob.frame_results,ob.minSIZE,ob.file_destination + "/" + "Diagnostics.png")
         
         #reset frame count if in batch loop
         ob.frame_count=0

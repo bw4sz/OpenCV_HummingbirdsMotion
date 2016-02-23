@@ -7,9 +7,9 @@ os.chdir('C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/')
 
 # Run from command line
 # Note: for users without source code, replace main.py with main.exe.
+#os.system('main.py --windy --i C:/Users/Ben/Desktop/MeerkatTest/MoyTest.mpg')
 os.system('main.py --windy')
-
-#os.system('main.py --batchpool C:/Users/Ben/Desktop/MeerkatTest --fileD C:/MotionMeerkat/MOG --subMethod MOG --moglearning 0.1 --makeVID frames --runtype batch --windy --windy_min 1')
+#os.system('main.py --batchpool C:/Users/Ben/Desktop/MeerkatTest --fileD C:/MotionMeerkat/MOG --runtype batch --makeVID none')
 #os.system('main.py --batchpool C:/Users/Ben/Desktop/MeerkatTest --fileD C:/MotionMeerkat/Acc --subMethod Acc --moglearning 0.1 --makeVID frames --runtype batch --windy --windy_min 1')
 
 #os.system('main.py --i C:/Users/Ben/Desktop/MeerkatTest/MoyTest.mpg --subMethod MOG --moglearning 0.1')

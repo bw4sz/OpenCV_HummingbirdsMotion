@@ -346,6 +346,7 @@ class Motion:
                                 
                                 #self.noMotion flag
                                 self.noMotion=True
+                                self.avg_area.append(0)                                                                                                                        
                                 continue                    
                         
                         for cnt in contours:
