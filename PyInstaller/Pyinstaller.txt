@@ -7,6 +7,10 @@ pyinstaller -y --onedir main.spec
 #copy shapely
 cp -r c:/Python27/Lib/site-packages/shapely/ dist/main/
 
+#Copy dialog boxes for matplotlib
+cp c:/Python27/lib/lib-tk/FileDialog.py dist/main/
+cp c:/Python27/lib/lib-tk/Dialog.py dist/main/
+
 #Copy icon
 cp C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/thumbnail.ico dist/main/
 

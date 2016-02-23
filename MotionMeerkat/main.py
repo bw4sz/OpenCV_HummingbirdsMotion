@@ -9,6 +9,7 @@ import numpy.core.multiarray
 import ctypes
 import shapely
 import cv2
+import FileDialog
 
 #==================
 # MAIN ENTRY POINT
