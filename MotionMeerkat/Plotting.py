@@ -4,16 +4,10 @@ import numpy as np
 
 
 def minsizeplot(array,mincontour) :
-    #ax = plt.subplot(111)
     plt.plot(array)
     plt.ylabel("Avg Size of Motion Objects\n(% of Frame)")
     plt.axhline(y=mincontour,color='r',ls='dashed')
     plt.ylim(0,mincontour+0.05)
-    
-    #Format percentages
-    #fmt = '%.0f%%' # Format you want the ticks, e.g. '40%'
-    #yticks = mtick.FormatStrFormatter(fmt)
-    #ax.yaxis.set_major_formatter(yticks) 
     
 def returnplots(array):
     x=range(0,len(array))
@@ -25,9 +19,14 @@ def returnplots(array):
 def combineplots(minsize,returnframes,mincontour,fname):
     plt.ion()
     plt.figure(1)
-    plt.subplot(2,1,1)    
+    ax=plt.subplot(2,1,1)    
     plt.title("Diagnostics")    
     minsizeplot(minsize,mincontour)
+    #Format percentages
+    fmt = '%.2f%%' # Format you want the ticks, e.g. '40%'
+    yticks = mtick.FormatStrFormatter(fmt)
+    ax.yaxis.set_major_formatter(yticks)     
+    
     
     plt.subplot(2,1,2)
     returnplots(returnframes)
