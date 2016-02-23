@@ -311,12 +311,12 @@ class Motion:
                                         self.hitcounter=0
                                                                                         
                                         #Build in a floor, the value can't be negative.
-                                        if self.accAvg < self.floorvalue:
+                                        if self.accAvg < 0.05:
                                                 self.floor=self.floor + 1
                                         
                                 #Reset if needed.
                                         if self.floor == 1 :
-                                                self.accAvg=self.floorvalue
+                                                self.accAvg=0.05
                                 
                                                 print(self.file_destination + str(self.frame_count) + " accAvg is reset to: " + str(self.accAvg))
                                                 #Write change to log file    

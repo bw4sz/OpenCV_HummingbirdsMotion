@@ -34,7 +34,6 @@ def report(ob):
 
         if ob.adapt:
                 log_report.write("\nExpected hitrate: %s" % ob.frameHIT)
-                log_report.write("\nMinimum accAvg: %s" % ob.floorvalue)
         
         log_report.write("\nThreshold: %s" % ob.threshT)
         log_report.write("\nMinimum contour area: %s" % ob.minSIZE)
@@ -94,16 +93,20 @@ def report(ob):
         rate=float(ob.total_count)/ob.frame_count*100
         print("Hitrate: %.2f %% \n" % rate)
         
-        
-        ####Generate plots
+        ####Generate plots        
         #Show box size by area
-        if ob.runtype == 'file':
-                tarea=(ob.width * ob.height)
-                scale_size=[x/tarea for x in ob.avg_area]
-                #First frame is artifact of intilization
-                scale_size[0]=None
-                Plotting.combineplots(scale_size,ob.frame_results,ob.minSIZE,ob.file_destination + "/" + "Diagnostics.png")
+        tarea=(ob.width * ob.height)
+        scale_size=[x/tarea for x in ob.avg_area]
+        #First frame is artifact of intilization
+        scale_size[0]=None
         
+        #Show if file, don't let it hang command line
+        if ob.runtype == 'file':
+
+                Plotting.combineplots(scale_size,ob.frame_results,ob.minSIZE,ob.file_destination + "/" + "Diagnostics.png",show=True)
+        else:
+                Plotting.combineplots(scale_size,ob.frame_results,ob.minSIZE,ob.file_destination + "/" + "Diagnostics.png",show=False)
+                
         #reset frame count if in batch loop
         ob.frame_count=0
         ob.total_count=0

@@ -32,7 +32,7 @@ def arguments(self):
                                 self.parser.add_argument("--fileD", help="output directory",default="C:/MotionMeerkat")
                                 self.parser.add_argument("--adapt", help="Adaptive background averaging",action='store_true',default=False)
                                 self.parser.add_argument("--accAvg", help="Fixed background averaging rate",default=0.35,type=float)
-                                self.parser.add_argument("--frameHIT", help="expected percentage of motion frames",default=0.1,type=float)
+                                self.parser.add_argument("--frameHIT", help="expected percentage of motion frames",default=0.05,type=float)
                                 self.parser.add_argument("--threshT", help="Threshold of movement",default=30,type=int)
                                 self.parser.add_argument("--minSIZE", help="Minimum size of contour",default=0.1,type=float)
                                 self.parser.add_argument("--burnin", help="Delay time",default=0,type=int)
@@ -89,7 +89,7 @@ def arguments(self):
                                 
                                 if self.advanced:
                                                 #background method
-                                                self.subMethod=raw_input("\nAccumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? (Acc)\nAcc is faster, MOG is more accurate:\n")
+                                                self.subMethod=raw_input("\nAccumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? \nAcc is faster, MOG is more accurate. (MOG):\n")
                                                 if not self.subMethod: self.subMethod="MOG"
                                                     
                                                 if self.subMethod=="Acc":
@@ -102,16 +102,11 @@ def arguments(self):
                                                                 self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on expected frequency of visits? (n) :\n")      
                                                                 
                                                                 if self.adapt:
-                                                                                self.accAvg=sourceM.ask_acc()
-                                                                                if not self.accAvg: self.accAvg = 0.35
                                                                     
                                                                                 #Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
                                                                                 self.frameHIT=raw_input("Expected percentage of frames with motion (0.02, i.e 2% of frames returned):\n")
                                                                                 if not self.frameHIT: self.frameHIT = 0.02
                                                                                 else: self.frameHIT=float(self.frameHIT)
-                                                                                    
-                                                                                #Floor value, if adapt = TRUE, what is the minimum AccAVG allowed. If this is unset, and it is a particularly still video, the algorithm paradoically spits out alot of frames, because its trying to find the accAVG that matches the frameHit rate below. We can avoid this by simply placing a floor value for accAVG 
-                                                                                self.floorvalue = 0.05
 
                                                 #Still need to set moglearning to pass to argument, even if it isn't used.  
                                                 self.moglearning = 0.1
@@ -180,7 +175,6 @@ def arguments(self):
                             
                                 else:
                                                 #Set defaults that weren't specified.
-                                                self.floorvalue=0
                                                 self.frameHIT=0
                                                 self.adapt=False
                                                 self.makeVID="frames"
