@@ -131,9 +131,9 @@ def arguments(self):
 								self.accAvg = 0.35
 								
 								# Learning wait for mog init
-								self.learning_wait= raw_input("Ignore frames in the first X minutes to allow MOG to smoothly initialize. (0.5)\n")
+								self.learning_wait= raw_input("Ignore frames in the first X minutes to allow MOG to smoothly initialize. (0)\n")
 								if not self.learning_wait: 
-										self.learning_wait = 0.5
+										self.learning_wait = 0
                                                                                                              					
 						#Skip initial frames of video, in case of camera setup and shake.       
 						self.windy='y'== raw_input("Cap the number of consecutive frames to reduce wind? (n):\n")
