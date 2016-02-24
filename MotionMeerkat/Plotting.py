@@ -18,7 +18,6 @@ def returnplots(array):
     plt.xlabel("Frame")
 
 def combineplots(minsize,returnframes,mincontour,fname,show):
-
     plt.ion()    
     if show:
         plt.figure()

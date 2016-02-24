@@ -41,14 +41,14 @@ def arguments(self):
                                 self.parser.add_argument("--plotwatcher", help="Camera was a plotwatcher?",action="store_true",default=False)
                                 self.parser.add_argument("--frame_rate", help="frames per second",default=1)
 				self.parser.add_argument("--moglearning", help="Speed of MOG background detector, lowering values are more sensitive to movement",default=0.15,type=float)                                
-				self.parser.add_argument("--learning_wait", help="Wait X minutes to allow MOG to initialize?",default='1',type=int)                                		                                
+				self.parser.add_argument("--learning_wait", help="Wait X minutes to allow MOG to initialize?",default='0.5',type=int)                                		                                
                                 self.parser.add_argument("--subMethod", help="Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method",default='MOG',type=str)                                
                                 self.parser.add_argument("--mogvariance", help="Variance in MOG to select background",default=16,type=int)                                
                                 self.parser.add_argument("--set_ROI", help="Set region of interest?",action='store_true',default=False)
 				self.parser.add_argument("--windy", help="Enable wind correction",action='store_true',default=False)
 				self.parser.add_argument("--windy_min", help="How many minutes of continious movement should be ignored?",default='3',type=int)                                		
 				self.parser.add_argument("--remove_singles", help="Remove single frames with no neighbors of a given distance",action='store_true',default=False)
-				self.parser.add_argument("--single_distance", help="Eliminate frames witin no neighbors within X seconds",default='5',type=int)                                
+				self.parser.add_argument("--single_distance", help="Eliminate frames witin no neighbors within X seconds",default='10',type=int)                                
                                 self.parser.add_argument("--ROI_include", help="include or exclude?",default="exclude")
                                 self.parser.add_argument("--set_areacounter", help="Set region to count area",action="store_true",default=False)
                                 self.parser.add_argument("--todraw", help="Draw red boxes to highlight motion' ?",action="store_true",default=False)				
@@ -131,9 +131,9 @@ def arguments(self):
 								self.accAvg = 0.35
 								
 								# Learning wait for mog init
-								self.learning_wait= raw_input("Ignore frames in the first X minutes to allow MOG to smoothly initialize. (1)\n")
+								self.learning_wait= raw_input("Ignore frames in the first X minutes to allow MOG to smoothly initialize. (0.5)\n")
 								if not self.learning_wait: 
-										self.learning_wait = 1
+										self.learning_wait = 0.5
                                                                                                              					
 						#Skip initial frames of video, in case of camera setup and shake.       
 						self.windy='y'== raw_input("Cap the number of consecutive frames to reduce wind? (n):\n")
@@ -148,8 +148,8 @@ def arguments(self):
 						#Remove singletons
 						self.remove_singles= "y" == raw_input("Remove single frames without neighbors to reduce wind? (n) :\n")
 						if self.remove_singles:
-								self.single_distance=raw_input("Eliminate frames witin no neighbors within X seconds'? (5):\n")
-						else: self.single_distance = 5                                           						
+								self.single_distance=raw_input("Eliminate frames witin no neighbors within X seconds'? (10):\n")
+						else: self.single_distance = 10                                           						
 						
 						#set ROI
 						self.set_ROI= "y" == raw_input("Exclude a portion of the image? (n) :\n")
@@ -198,7 +198,7 @@ def arguments(self):
                                                 self.makeVID="frames"
                                                 self.scan = 0
                                                 self.burnin = 0
-                                                self.ROI_include='exclude'
+                                                self.ROI_include='include'
                                                 self.frameSET=False
                                                 self.plotwatcher=False
                                                 self.frame_rate=0
@@ -212,7 +212,7 @@ def arguments(self):
                                                 self.windy = False
 						self.todraw=False
 						self.remove_singles=False
-						self.single_distance = 5
-						self.learning_wait = 1
+						self.single_distance = 10
+						self.learning_wait = 0
 						
 						

@@ -34,9 +34,6 @@ def remove_singletons(frame_results,distance,destination):
     #However, the array are 0 indexed. The frames are 1 indexed. The first frame is frame #1, "1.jpg"
     todelframes=[x+1 for x in todel]
     
-    print(both)
-    print(todelframes)
-    
     #Counter
     counter=0
     for x in todelframes: 
