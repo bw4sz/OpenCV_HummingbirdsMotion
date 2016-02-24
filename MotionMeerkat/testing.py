@@ -63,5 +63,5 @@ if testing_mainexe:
 
 #Single test
 os.chdir('C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/')
-os.system('main.py --remove_singles --single_distance 5')
+os.system('main.py --i 151023AA_analysed.TLV')
 #os.system('main.py --remove_sin 0.1')

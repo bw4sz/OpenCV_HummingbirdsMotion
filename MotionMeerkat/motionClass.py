@@ -123,6 +123,7 @@ class Motion:
                                 self.frame_rate=round(self.cap.get(5))
                                 #This seems to misinterpret just .tlv files
                                 if extension in ['.tlv','.TLV']: self.frame_rate=1
+                                print("File type is .tlv, setting frame rate to 1 fps")
                         
                         #get frame time relative to start
                         frame_time=self.cap.get(0)     
