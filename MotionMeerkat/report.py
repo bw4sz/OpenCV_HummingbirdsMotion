@@ -2,11 +2,18 @@ import time
 import csv
 import cv2
 import Plotting
+import PostProcessing
 
 def report(ob):
         
         #Run is over, destroy display windows
+        #Postprocessing
         cv2.destroyAllWindows()
+        if ob.remove_singles:
+                singles_removed=PostProcessing.remove_singletons(ob.frame_results,ob.single_distance*ob.frame_rate,ob.file_destination)
+        if ob.learning_wait > 0:
+                PostProcessing.remove_init(ob.learning_wait,ob.frame_rate,len(ob.frame_results))
+                
         
         #Create log file
         log_file_report = ob.file_destination + "/" + "Parameters_Results.log"
@@ -70,7 +77,10 @@ def report(ob):
         log_report.write("Frames skipped due to insufficient movement based on the threshold parameter: %.0f \n" % ob.nocountr)
         log_report.write("Frames skipped due to minimum size of the contours: %.0f \n" % ob.toosmall)
         if ob.windy:
-                log_report.write("Frames skipped due to windy conditions: %.0f \n" % ob.windy_count)                
+                log_report.write("Frames deleted due to windy conditions: %.0f \n" % ob.windy_count)
+        if ob.remove_singles:
+                log_report.write("Frames deleted due to singletons: %.0f \n" % singles_removed)
+       
         log_report.write("Total frames in files: %.0f \n" % ob.frame_count)
         
         rate=float(ob.total_count)/ob.frame_count*100
@@ -87,6 +97,8 @@ def report(ob):
         #if windy
         if ob.windy:
                 print("Frames skipped due to windy conditions: %.0f \n " % ob.windy_count)
+        if ob.remove_singles:
+                print("Frames deleted due to singletons: %.0f \n" % singles_removed)
                 
         print("Total frames in files: %.0f \n " % ob.frame_count)
 

@@ -21,7 +21,7 @@ import BackgroundSubtractor
 class Motion:
 
         def __init__(self):                  
-                print("Motion Detection Object Created")
+                print("Motion Detection Object Created\n")
                 
         def prep(self):
                 
@@ -30,15 +30,13 @@ class Motion:
                 #For debugging, visualize conditions.
                 self.vis=False
                 if self.vis: self.todraw = True
+                
                 #Capture average minimum box size for plotting
                 self.avg_area = []
                 
                 #Capture average threshold for plotting
                 self.avg_threshold = []
-                
-                #Ignore the first X minutes?
-                self.allowlearning = True
-                self.learning_wait = 3
+                             
                 
                 #Empty list for time stamps
                 self.stamp=[]
@@ -139,7 +137,7 @@ class Motion:
                                 self.cap.grab()
                                 self.frame_count=self.frame_count+1
                                 
-                        print("Beginning Motion Detection")
+                        print("Beginning Motion Detection\n")
                         
                         #Set frame skip counter if downsampling 
                         frameSKIP=0
@@ -191,6 +189,7 @@ class Motion:
                 self.width = np.size(self.display_image, 1)
                 self.height = np.size(self.display_image, 0)
                 frame_size=(self.width, self.height)
+                
 
                 ###If set area counter, draw another box.
                 if self.set_areacounter:
@@ -277,8 +276,7 @@ class Motion:
                                         #Give it a pause feature so it doesn't announce twice on the scan, i a bit ugly, but it doesn't run very often.
                                         #if the last time the percent complete was printed was within the scan range, don't print again. 
                                         if abs(self.frameC_announce - self.frame_count) >= self.scan:
-                                                print("%.0f %% completed" % fc)
-                                                print( "%.0f candidate motion frames" % self.total_count)
+                                                print("%.0f %% completed: %.0f candidate motion frames" % (fc, self.total_count))
                                                 self.frameC_announce=self.frame_count                                                
                                                 
                                         #Reset the last time it was printed. 
@@ -457,12 +455,8 @@ class Motion:
                         
                         if not self.makeVID == "none":
                                 if self.makeVID in ("frames","both"):
-                                        if not self.allowlearning:
-                                                cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",camera_image)
-                                        else:
-                                                if self.frame_count > self.frame_rate * self.learning_wait:
-                                                        cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",camera_image)
-                                        
+                                        cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",camera_image)
+ 
                                         #Record frame as motion
                                         self.frame_results.append(True)
                                         

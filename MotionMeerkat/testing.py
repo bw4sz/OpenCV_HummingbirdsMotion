@@ -33,7 +33,7 @@ if testing_mainpy:
     #Change background subtractor
     os.system('main.py --subMethod Acc --accAvg 0.4 --adapt')
 
-testing_mainexe = True
+testing_mainexe = False
 if testing_mainexe:
     os.chdir('C:/Program Files (x86)/MotionMeerkat/')
     
@@ -60,3 +60,8 @@ if testing_mainexe:
     
     #Change background subtractor
     os.system('main.exe --subMethod Acc --accAvg 0.4 --adapt')
+
+#Single test
+os.chdir('C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/')
+os.system('main.py --remove_singles --single_distance 5')
+#os.system('main.py --remove_sin 0.1')
