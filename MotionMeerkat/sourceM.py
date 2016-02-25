@@ -100,7 +100,7 @@ def Urect(img,title):
     cv2.namedWindow(title,cv2.WINDOW_NORMAL)
     cv2.setMouseCallback(title,onmouse)
 
-    print ("Right click and hold to draw a single rectangle ROI, beginning at the top left corner of the desired area. A blue box should appear. Hit esc to exit screen.")
+    print ("Right click and hold to draw a single rectangle ROI, beginning at the top left corner of the desired area. A blue box should appear. Hit esc to exit screen. Window can be resized by selecting borders.")
     while(1):
             cv2.namedWindow(title,cv2.WINDOW_NORMAL)                 
             cv2.imshow(title,img)

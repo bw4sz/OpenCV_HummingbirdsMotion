@@ -27,10 +27,7 @@ class Background:
         ## accumulated averaging
         if self.subMethod in ["Acc","Both"]:
             # Create an image with interactive feedback:
-            self.display_image = camera_imageROI.copy()
-            
-            # Create a working "color image" to modify / blur
-            self.color_image =  self.display_image.copy()
+            self.color_image = camera_imageROI.copy()
                     
             # Smooth to get rid of false positives
             self.color_image = cv2.GaussianBlur(self.color_image,(3,3),0)

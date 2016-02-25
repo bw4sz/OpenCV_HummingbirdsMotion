@@ -144,15 +144,16 @@ class Motion:
                         frameSKIP=0
                         
                         # Capture the first frame from file for image properties
-                        orig_image = self.cap.read()[1]  
+                        orig_image = self.cap.read()[1] 
                 else:
                         self.jpgs=glob.glob(os.path.join(self.inDEST,"*.jpg"))
                         orig_image=cv2.imread(self.jpgs[0])
                         self.total_frameC=len(self.jpgs)
                         self.frame_rate=1
+                
                 #Have to set global for the callback, feedback welcome. 
                 global orig
-                
+                                
                 if self.plotwatcher:
                         #cut off the self.bottom 5% if the timing mechanism is on the self.bottom. 
                         orig = orig_image[1:700,1:1280]
@@ -169,10 +170,10 @@ class Motion:
                 if self.set_ROI:
                         self.roi_selected=sourceM.Urect(iorig,"Region of Interest")
                         
-                        print(self.roi_selected)
                         if len(self.roi_selected)==0 :
                                 raise ValueError('Error: No box selected. Please select an area by right clicking and dragging with your cursor to create a box. Hit esc to exit the window.')
                         if self.ROI_include == "include": 
+                                print("Cropping Frame...")
                                 self.display_image=orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]
                         else:
                                 orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]=255
@@ -182,16 +183,15 @@ class Motion:
                  
                 #show the display image
                 if self.set_ROI:
-                        cv2.namedWindow("Result",cv2.WINDOW_NORMAL)
+                        cv2.namedWindow("Result")
                         cv2.imshow("Result", self.display_image)
                         cv2.waitKey(1200) 
                         cv2.destroyAllWindows()
                         
                 self.width = np.size(self.display_image, 1)
                 self.height = np.size(self.display_image, 0)
-                frame_size=(self.width, self.height)
-                
-
+                frame_size=(self.height, self.width)
+                                
                 ###If set area counter, draw another box.
                 if self.set_areacounter:
                         self.area_box=sourceM.Urect(orig,"Set Area Counter")
@@ -199,7 +199,7 @@ class Motion:
                                 raise ValueError('Error: No box selected. Please select an area by right clicking and dragging with your cursor to create a box. Hit esc to exit the window.')
                         
                         #Draw and show the area to count inside
-                        cv2.rectangle(orig, (self.area_box[1],self.area_box[3]), (self.area_box[0],self.area_box[2]), (255,0,0), 1)     
+                        cv2.rectangle(orig, (self.area_box[3],self.area_box[0]), (self.area_box[2],self.area_box[1]), (255,0,0), 1)     
                 
                 ###Background Constructor, create class
                 self.BC=BackgroundSubtractor.Background(self.subMethod,self.display_image,self.accAvg,self.threshT,self.mogvariance)
@@ -238,22 +238,6 @@ class Motion:
                                         break
                                 else:
                                         current_image=cv2.imread(self.jpgs.pop())
-                                
-                        #Cut off the self.bottom 5% if the plotwatcher option is called. 
-                        if not self.plotwatcher:
-                                camera_image = current_image   
-                        else:
-                                camera_image = current_image[1:700,1:1280]
-                        
-                        #If set roi, subset the image
-                        if not self.set_ROI:
-                                current_imageROI=camera_image
-                        else:
-                                if self.ROI_include == "include":current_imageROI=camera_image[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]
-                                else: 
-                                        #Exclude area by making it a white square
-                                        current_imageROI=camera_image.copy()
-                                        current_imageROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]=255
                                         
                         self.frame_count += 1
                         frame_t0 = time.time()
@@ -316,25 +300,44 @@ class Motion:
                                 #Reset if needed.
                                         if self.floor == 1 :
                                                 self.accAvg=0.05
-                                
                                                 print(self.file_destination + str(self.frame_count) + " accAvg is reset to: " + str(self.accAvg))
-                                                #Write change to log file    
                                         
                         #############################
                         ###BACKGROUND SUBTRACTION
                         #############################
-                        grey_image=self.BC.BackGroundSub(current_imageROI,self.moglearning)
+                        
+                        grey_image=self.BC.BackGroundSub(current_image,self.moglearning)
                         if self.vis: sourceM.displayV("Thresholded image",10,grey_image)
                         
+                        #Cut off the self.bottom 5% if the plotwatcher option is called. 
+                        if self.plotwatcher:
+                                mask = np.ones(grey_image.shape, np.bool)
+                                mask[1:700,1:1280] = False
+                                grey_image[~mask]=0
+                        
+                        #If set roi, subset the image
+                        if self.set_ROI:
+                                
+                                if self.ROI_include == "include":
+                                        #Crop
+                                        mask = np.ones(grey_image.shape, np.bool)
+                                        mask[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]] = False
+                                        grey_image[mask]=0
+                                        
+                                else: 
+                                        mask = np.ones(grey_image.shape, np.bool)
+                                        mask[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]] = False
+                                        grey_image[~mask]=0
+                                        
                         #######################################
                         ##Contour Analysis and Post-Proccessing
                         #######################################
+                        
                         points = []   # Was using this to hold camera_imageROIeither pixel coords or polygon coords.
                         bounding_box_list = []
                         
-                        contourImage=grey_image.copy()
                         # Now calculate movements using the white pixels as "motion" data
-                        _,contours,hierarchy = cv2.findContours(contourImage, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
+                        _,contours,hierarchy = cv2.findContours(grey_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
                         
                         if len(contours) == 0 :
                                 #No movement, add to counter
@@ -383,13 +386,21 @@ class Motion:
                         ## Centroids of each target and hold on to target blobs
                         bound_center=[]
                         bound_casc_box=[]
-                        grabCUTimage=camera_image.copy()
+                        
                         
                         for out in trimmed_box_list:
-                                sh_out=sg.box(out[0][0],out[0][1],out[1][0],out[1][1])
+                                #shapely needs to boxes as minx, miny, max x maxy
+                                
+                                minx=out[0][0]
+                                miny=out[1][1]
+                                maxx=out[1][0]
+                                maxy=out[0][1]
+                                
+                                #make into a tuple
+                                sh_out=sg.box(minx,miny,maxx,maxy)
                                 shape_list.append(sh_out)
-
-                        #shape_pol=sg.MultiPolygon(shape_list)
+                        
+                        #Merge boxes that touch
                         casc=cascaded_union(shape_list).buffer(1)
                         
                         #Make an object to get the average box size
@@ -399,10 +410,20 @@ class Motion:
                             #draw shapely bounds
                                 for p in range(1,len(casc.geoms)):
                                         b=casc.geoms[p].bounds
+                                        
+                                        #Numpy origin is top left
+                                        #Shapely origin is bottom left 
+                                        minx,miny,maxx,maxy=b
+                                        
+                                        topleft=(int(minx),int(maxy))
+                                        bottomright=(int(maxx),int(miny))
+                                        
+                                        #Append to summary
                                         sumbox.append(casc.geoms[p].area)
                                         if casc.geoms[p].area > ((self.width * self.height) * (float(self.minSIZE/100))):
-                                                        if self.todraw: cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
-                                                                
+                                                        if self.todraw: 
+                                                                cv2.rectangle(current_image,topleft,bottomright,(0,0,255),thickness=3)
+
                                                         #Return the centroid to list, rounded two decimals
                                                         x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
                                                         y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
@@ -411,13 +432,20 @@ class Motion:
                                                         
                         else:
                                 b=casc.bounds
-                                
                                 #get size 
                                 sumbox.append(casc.area)
                                 
+                                #to draw polygon
+                                minx,miny,maxx,maxy=b
+                                
+                                topleft=(int(minx),int(maxy))
+                                bottomright=(int(maxx),int(miny))                                
+
                                 #If bounding polygon is larger than the minsize, draw a rectangle
                                 if casc.area > ((self.width * self.height) * (float(self.minSIZE/100))):
-                                                if self.todraw: cv2.rectangle(camera_image,(int(b[0]),int(b[1])),(int(b[2]),int(b[3])),(0,0,255),thickness=2)
+                                                if self.todraw: 
+                                                        cv2.rectangle(current_image,topleft,bottomright,(0,0,255),thickness=3)                                                        
+                                                        
                                                 x=round(casc.centroid.coords.xy[0][0],2)
                                                 y=round(casc.centroid.coords.xy[1][0],2)
                                                 bound_center.append((x,y))
@@ -448,7 +476,7 @@ class Motion:
                                         if self.area_box[2] > box[0] > self.area_box[0]:
                                                 if self.area_box[3] > box[1] > self.area_box[1]:
                                                                 inside_area= not inside_area
-                                                                cv2.rectangle(camera_image,(self.area_box[0],self.area_box[1]),(self.area_box[2],self.area_box[3]),(242,221,61),thickness=1,lineType=4)
+                                                                cv2.rectangle(current_image,(self.area_box[3],self.area_box[0]),(self.area_box[2],self.area_box[1]),(242,221,61),thickness=1,lineType=4)
   
                         ##################################################
                         ###############Write image to file################
@@ -456,7 +484,7 @@ class Motion:
                         
                         if not self.makeVID == "none":
                                 if self.makeVID in ("frames","both"):
-                                        cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",camera_image)
+                                        cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",current_image)
  
                                         #Record frame as motion
                                         self.frame_results.append(True)

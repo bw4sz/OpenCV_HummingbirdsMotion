@@ -7,9 +7,7 @@ def remove_singletons(frame_results,distance,destination):
     #index list
     index_frame=range(0,len(frame_results))
     only_true_frames=np.array(index_frame)[np.array(frame_results)]
-    
-    print(frame_results)
-    
+        
     sf=np.sort(only_true_frames)
     
     #Forwards
