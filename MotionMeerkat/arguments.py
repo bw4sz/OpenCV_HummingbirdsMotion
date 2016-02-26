@@ -72,7 +72,7 @@ def arguments(self):
                                                 self.batchpool=raw_input("Enter folder containing videos:\n")
                                                 self.pictures=False
                                 if(self.runtype=="pictures"):
-                                                self.inDEST=raw_input("Enter folder containing pictures\n Please note that filenames need to be chronological order \n")                             
+                                                self.inDEST=raw_input("Filenames need to be chronological order. Enter folder containing pictures:\n")                             
                                                 self.pictures=True
                                 #Destination of file
                                 self.fileD=raw_input("File Destination Folder (C:\MotionMeerkat):\n")   
@@ -208,7 +208,6 @@ def arguments(self):
                                                 self.subMethod="MOG"
                                                 self.moglearning = 0.1
                                                 self.mogvariance = 16
-                                                self.pictures = False
                                                 self.windy = False
 						self.todraw=False
 						self.remove_singles=False

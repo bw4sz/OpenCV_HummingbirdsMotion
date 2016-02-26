@@ -146,7 +146,13 @@ class Motion:
                         # Capture the first frame from file for image properties
                         orig_image = self.cap.read()[1] 
                 else:
-                        self.jpgs=glob.glob(os.path.join(self.inDEST,"*.jpg"))
+                        #File formats
+                        imagef=["*.jpg","*.JPG","*.jpeg","*.tif","*.tiff","*.JPEG","*.png"]
+                        pathimage=[os.path.join(self.inDEST,x) for x in imagef]
+                        self.jpgs=[]
+                        for ext in pathimage:
+                                self.jpgs.extend(glob.glob(ext))
+                        print('Finding images...')
                         orig_image=cv2.imread(self.jpgs[0])
                         self.total_frameC=len(self.jpgs)
                         self.frame_rate=1
