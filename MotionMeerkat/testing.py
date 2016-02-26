@@ -32,6 +32,10 @@ if testing_mainpy:
     
     #Change background subtractor
     os.system('main.py --subMethod Acc --accAvg 0.4 --adapt')
+    
+    #Pictures
+    os.system('main.py --runtype pictures --i C:/MotionMeerkat/PlotwatcherTest')
+    
 
 testing_mainexe = True
 if testing_mainexe:
