@@ -18,10 +18,8 @@ def returnplots(array):
     plt.xlabel("Frame")
 
 def combineplots(minsize,returnframes,mincontour,fname,show):
-    plt.ion()    
-    if show:
-        plt.figure()
     
+    plt.figure()
     #Top Plot
     ax=plt.subplot(2,1,1)    
     plt.title("Diagnostics")    
@@ -42,8 +40,5 @@ def combineplots(minsize,returnframes,mincontour,fname,show):
     returnplots(returnframes)
     plt.tight_layout()    
     
-    #Show and save
-    if show:
-        plt.show()
     plt.savefig(fname)
     

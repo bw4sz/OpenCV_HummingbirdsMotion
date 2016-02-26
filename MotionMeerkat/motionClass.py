@@ -179,7 +179,7 @@ class Motion:
                         if len(self.roi_selected)==0 :
                                 raise ValueError('Error: No box selected. Please select an area by right clicking and dragging with your cursor to create a box. Hit esc to exit the window.')
                         if self.ROI_include == "include": 
-                                print("Cropping Frame...")
+                                print("Cropping Frame...complete")
                                 self.display_image=orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]
                         else:
                                 orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]=255
