@@ -40,9 +40,9 @@ def combineplots(minsize,returnframes,mincontour,fname,show):
         plt.subplot(2,1,2)
         returnplots(returnframes)
         plt.tight_layout()    
+        plt.savefig(fname)        
         if show:
             plt.show()        
-        plt.savefig(fname)
     except:
-        print("Windows version < 10 may have trouble showing diagnostic plots. Plots were saved to the output folder.")
+        print("Windows version < 10 may have trouble showing diagnostic plots. Plots were skipped.")
     
