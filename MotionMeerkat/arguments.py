@@ -30,7 +30,7 @@ def arguments(self):
                                 self.parser.add_argument("--batchpool", help="run directory of videos",type=str)
                                 self.parser.add_argument("--inDEST", help="path of single video",type=str,default='C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv')
                                 self.parser.add_argument("--fileD", help="output directory",default="C:/MotionMeerkat")
-                                self.parser.add_argument("--adapt", help="Adaptive background averaging",action='store_true',default=False)
+                                self.parser.add_argument("--adapt", help="Adaptive background averaging",action='store_true',default=True)
                                 self.parser.add_argument("--accAvg", help="Fixed background averaging rate",default=0.35,type=float)
                                 self.parser.add_argument("--frameHIT", help="expected percentage of motion frames",default=0.05,type=float)
                                 self.parser.add_argument("--threshT", help="Threshold of movement",default=30,type=int)
@@ -107,7 +107,7 @@ def arguments(self):
 								if not self.accAvg: self.accAvg=0.35
 								
                                                                 #Should accAVG be adapted every 10minutes based on an estimated hitrate
-                                                                self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on expected frequency of visits? (n) :\n")      
+                                                                self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on expected frequency of visits? (y) :\n")      
                                                                 
                                                                 if self.adapt:
                                                                     
@@ -194,7 +194,7 @@ def arguments(self):
                                 else:
                                                 #Set defaults that weren't specified.
                                                 self.frameHIT=0
-                                                self.adapt=False
+                                                self.adapt=True
                                                 self.makeVID="frames"
                                                 self.scan = 0
                                                 self.burnin = 0
