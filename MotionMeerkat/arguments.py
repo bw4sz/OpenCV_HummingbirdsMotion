@@ -112,8 +112,8 @@ def arguments(self):
                                                                 if self.adapt:
                                                                     
                                                                                 #Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
-                                                                                self.frameHIT=raw_input("Expected percentage of frames with motion (0.02, i.e 2% of frames returned):\n")
-                                                                                if not self.frameHIT: self.frameHIT = 0.02
+                                                                                self.frameHIT=raw_input("Expected percentage of frames with motion (0.04, i.e 4% of frames returned):\n")
+                                                                                if not self.frameHIT: self.frameHIT = 0.04
                                                                                 else: self.frameHIT=float(self.frameHIT)
 		
 								#Still need to set moglearning to pass to argument, even if it isn't used.  

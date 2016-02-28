@@ -65,9 +65,6 @@ class Motion:
                 ###Not large enough, the movement contour was too small to be included 
                 self.toosmall=0 
                 
-                #create hit counter to track number of outputs
-                self.hitcounter=0      
-                
                 #Frames removed due to wind
                 self.windy_count=0
                 
@@ -93,10 +90,12 @@ class Motion:
                 (_,IDFL) = os.path.split(filepath)
                 
                 #we want to name the output a folder from the output destination with the named extension        
+                #set original parameters if needed
                 if self.subMethod=="Acc":
-                        print("AccAvg begin value is: %s" % (self.accAvg))
                         #set an original to reset at the end
                         self.accAvgBegin=self.accAvg
+                else:
+                        self.moglearningBegin=self.moglearning
 
                 #If its batch, give an extra folder
                 if self.runtype == 'batch':
@@ -238,6 +237,8 @@ class Motion:
                                         #If there are no more frames, break, need to reset AccAVG
                                         if self.subMethod=="Acc": 
                                                 self.accAvg=self.accAvgBegin
+                                        else:
+                                                self.moglearning=self.moglearningBegin
                                         break
                         else:
                                 if len(self.jpgs)==0:
@@ -269,45 +270,7 @@ class Motion:
                                         if abs(self.frameC_announce - self.frame_count) >= self.scan:
                                                 print("%.0f %% completed: %.0f candidate motion frames" % (fc, self.total_count))
                                                 self.frameC_announce=self.frame_count                                                
-                                                
-                                        #Reset the last time it was printed. 
-                                        
-                        ###Adaptively set the aggregate threshold 
-                        #set floor flag, we can't have negative accAVG
-                        self.floor=0
-                        if self.adapt:
-                                #Every 10min, reset the accAvg threshold, depending on expected level of movement
-                                #Should be a integer, round it
-                                fift=round(10*60*float(self.frame_rate))
-                                
-                                if self.frame_count % fift == 0:  
-                                        
-                                       #If the total base is fift (10min window), then assuming 99% of images are junk the threshold should be
-                                        #We've been counting frames output to file in the hitcounter
-                                        
-                                        print(str(self.hitcounter) + " files written in last 10minutes" + "\n" )             
-                                        if self.hitcounter > (fift*self.frameHIT) :
-                                                self.accAvg = self.accAvg + .05
-                                        if self.hitcounter < (fift*self.frameHIT) :
-                                                self.accAvg = self.accAvg - .025
-                                                
-                                        #In my experience its much more important to drop the sensitivity, than to increase it, so i've make the adapt filter move downwards slower than upwards. 
-                                        print(self.file_destination + str(self.frame_count) + " accAvg is changed to: " + str(self.accAvg) + "\n")
-                                        
-                                        #Write change to log file
-                                        
-                                        #reset hitcoutner for another fifteen minutes
-                                        self.hitcounter=0
-                                                                                        
-                                        #Build in a floor, the value can't be negative.
-                                        if self.accAvg < 0.05:
-                                                self.floor=self.floor + 1
-                                        
-                                #Reset if needed.
-                                        if self.floor == 1 :
-                                                self.accAvg=0.05
-                                                print(self.file_destination + str(self.frame_count) + " accAvg is reset to: " + str(self.accAvg))
-                                        
+
                         #############################
                         ###BACKGROUND SUBTRACTION
                         #############################
@@ -530,11 +493,38 @@ class Motion:
                                         self.areaC.append(stampadd)
                                 
                         #Have a returned counter to balance hitRate
-                        self.hitcounter=self.hitcounter+1
                         self.total_count=self.total_count+1
                         
                         #set flag to motion
                         self.noMotion=False
+                        
+                        ###Adaptation based on current conditions
+                        
+                        if self.adapt:
+                                #get the last 10 minutes
+                                cutoff=self.frame_rate * 60 * 10
+                                lastten=self.frame_results[-cutoff:]   
+                                
+                                if (sumlastten)/float(len(lastten)) > 0.5:  
+                                        if self.subMethod == "Acc":
+                                                        
+                                                #Increase accumulated averaging
+                                                self.accAvg=self.accAvg+0.05
+                                                                                                
+                                                #Build bounds. in a floor, the value can't be negative.
+                                                if self.accAvg < 0.1: self.accAvg=0.1
+                                                if self.accAvg > 0.55: self.accAvg=0.55
+                                                print(" accAvg is changed to: " + str(self.accAvg) + "\n")
+
+                                        else:                       
+        
+                                                #increase learning rate
+                                                self.moghistory=self.moghistory+0.1
+                                                print("More than expected frames were returned, increasing moghistory to %d" % self.moghistory)
+                                                        
+                                                #Increase minimum size?
+                                                #mean(self.avg_area)
+                                        
                                 
         def videoM(self):
                 
