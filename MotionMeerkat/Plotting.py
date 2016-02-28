@@ -3,7 +3,6 @@ import matplotlib.ticker as mtick
 import matplotlib.lines as mlines
 import numpy as np
 
-
 def minsizeplot(array,mincontour) :
     plt.plot(array)
     plt.ylabel("Max Size of Motion Objects\n(% of Frame)")
