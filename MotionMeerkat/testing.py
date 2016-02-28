@@ -37,7 +37,7 @@ if testing_mainpy:
     os.system('main.py --runtype pictures --i C:/MotionMeerkat/PlotwatcherTest')
     
 
-testing_mainexe = True
+testing_mainexe = False
 if testing_mainexe:
     os.chdir('C:/Program Files (x86)/MotionMeerkat/')
     
@@ -66,6 +66,6 @@ if testing_mainexe:
     os.system('main.exe --subMethod Acc --accAvg 0.4 --adapt')
 
 #Single test
-#os.chdir('C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/')
-#os.system('main.py --i C:/Users/Ben/Desktop/M/test.avi --todraw --set_ROI --ROI_include include')
+os.chdir('C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/')
+os.system('main.py --i C:/Users/Ben/Desktop/M/test.avi --todraw --adapt')
 #os.system('main.py --todraw')

@@ -500,30 +500,39 @@ class Motion:
                         
                         ###Adaptation based on current conditions
                         
+                        cutoff=int(self.frame_rate * 60 * 10)
+                        
                         if self.adapt:
-                                #get the last 10 minutes
-                                cutoff=self.frame_rate * 60 * 10
-                                lastten=self.frame_results[-cutoff:]   
                                 
-                                if (sumlastten)/float(len(lastten)) > 0.5:  
-                                        if self.subMethod == "Acc":
-                                                        
-                                                #Increase accumulated averaging
-                                                self.accAvg=self.accAvg+0.05
-                                                                                                
-                                                #Build bounds. in a floor, the value can't be negative.
-                                                if self.accAvg < 0.1: self.accAvg=0.1
-                                                if self.accAvg > 0.55: self.accAvg=0.55
-                                                print(" accAvg is changed to: " + str(self.accAvg) + "\n")
-
-                                        else:                       
+                                #If current frame is a multiple of the 10 minute mark
+                                if self.frame_count % cutoff == 0:                                  
+                                
+                                        #get the last 10 minutes
+                                        lastten=self.frame_results[-cutoff:]
+                                        
+                                        #If more than 50% of frames have been printed.
+                                        
+                                        if sum(lastten)/float(len(lastten)) > 0.5:  
+                                                if self.subMethod == "Acc":
+                                                                
+                                                        #Increase accumulated averaging
+                                                        self.accAvg=self.accAvg+0.05
+                                                                                                        
+                                                        #Build bounds. in a floor, the value can't be negative.
+                                                        if self.accAvg < 0.1: self.accAvg=0.1
+                                                        if self.accAvg > 0.55: self.accAvg=0.55
+                                                        print(" accAvg is changed to: " + str(self.accAvg) + "\n")
         
-                                                #increase learning rate
-                                                self.moghistory=self.moghistory+0.1
-                                                print("More than expected frames were returned, increasing moghistory to %d" % self.moghistory)
+                                                else:                       
+                
+                                                        #increase learning rate
+                                                        self.moglearning=self.moglearning+0.1
+                                                        print("More than expected frames were returned, increasing moghistory to %d" % self.moghistory)
                                                         
-                                                #Increase minimum size?
-                                                #mean(self.avg_area)
+                                                        #add a ceiling
+                                                        if self.moglearning > 0.8: self.moglearning = 0.8
+                                                        #Increase minimum size?
+                                                        #mean(self.avg_area)
                                         
                                 
         def videoM(self):
