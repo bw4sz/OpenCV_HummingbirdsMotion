@@ -25,7 +25,7 @@ class Background:
     #Frame Subtraction
     def BackGroundSub(self,camera_imageROI,learningRate):
         ## accumulated averaging
-        if self.subMethod in ["Acc","Both"]:
+        if self.subMethod == "Acc":
             # Create an image with interactive feedback:
             self.color_image = camera_imageROI.copy()
                     
@@ -45,21 +45,20 @@ class Background:
             # Convert the image to greyscale.
             self.grey_image=cv2.cvtColor( self.difference,cv2.COLOR_BGR2GRAY)
 
-            #Capture the average threshold of the image
-            #self.avg_threshold.append(self.grey_image.mean())
-            
             # Threshold the image to a black and white motion mask:
             ret,self.grey_image = cv2.threshold(self.grey_image, self.threshT, 255, cv2.THRESH_BINARY )
+        
+            return(self.grey_image)
                 
         ##Mixture of Gaussians
-        if self.subMethod in ["MOG","KNN","Both"]:
+        if self.subMethod =="MOG":
             self.grey_image = self.fgbg.apply(camera_imageROI,learningRate=learningRate)
             
             #if vis
             #bgimage=self.fgbg.getBackgroundImage()
             #cv2.imshow("Background",bgimage)
             #cv2.waitKey(1)
-            
+        
         #Erode to remove noise, dilate the areas to merge bounded objects
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(9,9))
         self.grey_image= cv2.morphologyEx(self.grey_image, cv2.MORPH_OPEN, kernel)

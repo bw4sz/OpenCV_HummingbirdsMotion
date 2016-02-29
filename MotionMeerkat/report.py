@@ -13,7 +13,6 @@ def report(ob):
                 singles_removed=PostProcessing.remove_singletons(ob.frame_results,ob.single_distance*ob.frame_rate,ob.file_destination)
         if ob.learning_wait > 0:
                 PostProcessing.remove_init(ob.learning_wait,ob.frame_rate,len(ob.frame_results))
-                
         
         #Create log file
         log_file_report = ob.file_destination + "/" + "Parameters_Results.log"
@@ -30,6 +29,8 @@ def report(ob):
                 log_report.write("\nInput file path: %s" % ob.batchpool)
         log_report.write("\nOutput dir: %s" % ob.fileD)
         log_report.write("\nBackground Subtraction Method?: %s" % ob.subMethod)
+        log_report.write("\nAdapt settings: %s" % ob.adapt)
+        log_report.write("\nFrame Rate: %s" % ob.frame_rate)
         
         if ob.subMethod == "MOG":
                 log_report.write("\nLearning Rate: %s" % ob.moglearning)
@@ -37,7 +38,6 @@ def report(ob):
         
         if ob.subMethod == "Acc":
                 log_report.write("\nAccumulated Averaging: %s" % ob.accAvg)  
-                log_report.write("\nAdapt Parameters: %s" % ob.adapt)                
 
         if ob.adapt:
                 log_report.write("\nExpected hitrate: %s" % ob.frameHIT)

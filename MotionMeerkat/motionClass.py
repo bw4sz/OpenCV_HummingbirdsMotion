@@ -34,10 +34,6 @@ class Motion:
                 #Capture average minimum box size for plotting
                 self.avg_area = []
                 
-                #Capture average threshold for plotting
-                self.avg_threshold = []
-                             
-                
                 #Empty list for time stamps
                 self.stamp=[]
 
@@ -155,21 +151,9 @@ class Motion:
                         orig_image=cv2.imread(self.jpgs[0])
                         self.total_frameC=len(self.jpgs)
                         self.frame_rate=1
-                
-                #Have to set global for the callback, feedback welcome. 
-                global orig
-                                
-                if self.plotwatcher:
-                        #cut off the self.bottom 5% if the timing mechanism is on the self.bottom. 
-                        orig = orig_image[1:700,1:1280]
-                else:
-                        orig = orig_image.copy()
-                                
-                #make a copy of the image
-                orig_ROI=orig.copy()
-
+                                                
                 #make a copy for the markup
-                iorig=orig.copy()    
+                iorig=orig_image.copy()
 
                 #Set region of interest 
                 if self.set_ROI:
@@ -179,12 +163,12 @@ class Motion:
                                 raise ValueError('Error: No box selected. Please select an area by right clicking and dragging with your cursor to create a box. Hit esc to exit the window.')
                         if self.ROI_include == "include": 
                                 print("Cropping Frame...complete")
-                                self.display_image=orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]
+                                self.display_image=orig_image[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]
                         else:
-                                orig_ROI[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]=255
-                                self.display_image=orig_ROI                             
+                                orig_image[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]]=255
+                                self.display_image=orig_image                             
                 else:
-                        self.display_image=orig              
+                        self.display_image=orig_image              
                  
                 #show the display image
                 if self.set_ROI:
@@ -199,12 +183,12 @@ class Motion:
                                 
                 ###If set area counter, draw another box.
                 if self.set_areacounter:
-                        self.area_box=sourceM.Urect(orig,"Set Area Counter")
+                        self.area_box=sourceM.Urect(orig_image,"Set Area Counter")
                         if len(self.area_box)==0:                                
                                 raise ValueError('Error: No box selected. Please select an area by right clicking and dragging with your cursor to create a box. Hit esc to exit the window.')
                         
                         #Draw and show the area to count inside
-                        cv2.rectangle(orig, (self.area_box[3],self.area_box[0]), (self.area_box[2],self.area_box[1]), (255,0,0), 1)     
+                        cv2.rectangle(orig_image, (self.area_box[3],self.area_box[0]), (self.area_box[2],self.area_box[1]), (255,0,0), 1)     
                 
                 ###Background Constructor, create class
                 self.BC=BackgroundSubtractor.Background(self.subMethod,self.display_image,self.accAvg,self.threshT,self.mogvariance)
@@ -277,12 +261,6 @@ class Motion:
                         
                         grey_image=self.BC.BackGroundSub(current_image,self.moglearning)
                         if self.vis: sourceM.displayV("Thresholded image",10,grey_image)
-                        
-                        #Cut off the self.bottom 5% if the plotwatcher option is called. 
-                        if self.plotwatcher:
-                                mask = np.ones(grey_image.shape, np.bool)
-                                mask[1:700,1:1280] = False
-                                grey_image[~mask]=0
                         
                         #If set roi, subset the image
                         if self.set_ROI:
@@ -512,7 +490,7 @@ class Motion:
                                         
                                         #If more than 50% of frames have been printed.
                                         
-                                        if sum(lastten)/float(len(lastten)) > 0.5:  
+                                        if sum(lastten)/float(len(lastten)) > 0.3:  
                                                 if self.subMethod == "Acc":
                                                                 
                                                         #Increase accumulated averaging
@@ -521,13 +499,13 @@ class Motion:
                                                         #Build bounds. in a floor, the value can't be negative.
                                                         if self.accAvg < 0.1: self.accAvg=0.1
                                                         if self.accAvg > 0.55: self.accAvg=0.55
-                                                        print(" accAvg is changed to: " + str(self.accAvg) + "\n")
+                                                        print("Adapting to video conditions: accAvg is changed to: " + str(self.accAvg) + "\n")
         
                                                 else:                       
                 
                                                         #increase learning rate
                                                         self.moglearning=self.moglearning+0.1
-                                                        print("More than expected frames were returned, increasing moghistory to %d" % self.moghistory)
+                                                        print("Adapting to video conditions: increasing MOG learning rate to %d" % self.moglearning)
                                                         
                                                         #add a ceiling
                                                         if self.moglearning > 0.8: self.moglearning = 0.8

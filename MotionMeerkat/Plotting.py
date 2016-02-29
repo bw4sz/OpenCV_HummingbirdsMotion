@@ -9,6 +9,7 @@ def minsizeplot(array,mincontour) :
     plt.axhline(y=mincontour,color='r',ls='dashed')
     plt.ylim(0,max([max(array),mincontour+0.001]))
     
+    
 def returnplots(array):
     x=range(0,len(array))
     plt.step(x=x,y=array)
@@ -34,7 +35,7 @@ def combineplots(minsize,returnframes,mincontour,fname,show):
         fmt = '%.2f%%' # Format you want the ticks, e.g. '40%'
         yticks = mtick.FormatStrFormatter(fmt)
         ax.yaxis.set_major_formatter(yticks)     
-        
+
         #Bottom Plot
         plt.subplot(2,1,2)
         returnplots(returnframes)

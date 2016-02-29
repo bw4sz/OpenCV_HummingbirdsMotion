@@ -67,5 +67,5 @@ if testing_mainexe:
 
 #Single test
 os.chdir('C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/')
-os.system('main.py --i C:/Users/Ben/Desktop/M/test.avi --todraw --adapt')
+os.system('main.exe --i C:/Users/Ben/Desktop/M/jan.mp4 --fileD C:/MotionMeerkat/mogvar100 --mogvariance 100 --moglearning 0.9  --minSIZE 0.3 --todraw')
 #os.system('main.py --todraw')
