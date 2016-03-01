@@ -27,6 +27,11 @@ class Motion:
                 
                 #Create initial conditions
                 
+                #report auto settings
+                print('Auto settings...')
+                print('Background MOG sensitivity set to %d' % self.moglearning)  
+                print('MOG Variance tolerance set to %d' % self.mogvariance)  
+                
                 #For debugging, visualize conditions.
                 self.vis=False
                 if self.vis: self.todraw = True
@@ -39,6 +44,7 @@ class Motion:
 
                 #Write header row
                 self.stamp.append(("Time","Frame","X","Y"))
+                
                 #Empty list for area counter
                 self.areaC=[]
                 self.areaC.append(("Time","Frame","X","Y"))
@@ -72,7 +78,8 @@ class Motion:
                 self.frameC_announce=0
     
                 #Start with motion flag on
-                self.noMotion=False                 
+                self.noMotion=False
+                
                 #Report name of file
                 sys.stderr.write("Processing file %s\n" % (self.inDEST))
                 
@@ -122,11 +129,12 @@ class Motion:
                         
                         #get frame time relative to start
                         frame_time=self.cap.get(0)     
+                        
                         #get total number of frames
                         self.total_frameC=self.cap.get(7)     
                         sys.stderr.write("frame rate: %s\n" % self.frame_rate)
                         
-                        ####Burnin and first image
+                        #Burnin and first image
                         
                         #apply burn in, skip the the first X frames according to user input
                         for x in range(1,int(float(self.burnin) * int(self.frame_rate) * 60)): 
@@ -151,14 +159,34 @@ class Motion:
                         orig_image=cv2.imread(self.jpgs[0])
                         self.total_frameC=len(self.jpgs)
                         self.frame_rate=1
-                                                
+                
+                #Let the user define area
+                if self.drawSmall == 'draw':
+                        print('Draw the expected size of the smallest organism of interest\nObjects smaller than this size will be ignored. Be conservative.')
+                        
+                        #make a copy for the markup
+                        ismalldraw=orig_image.copy()
+                        minarea=sourceM.Urect(ismalldraw,"Minimize size setting")
+                        minarea=minarea[-4:]                        
+                        
+                        #get area
+                        minh,minw =ismalldraw[minarea[1]:minarea[3], minarea[0]:minarea[2]].shape[0:2]
+                        ih,iw=orig_image.shape[0:2]
+                        
+                        #report area
+                        objectsize=float(minh*minw)/float(ih*iw)
+                        self.minSIZE=objectsize/(3 * self.frame_rate)
+                        
+                        print('\nExpected object size set to %.2f percent of frame.\n' % (objectsize*100))
+                        print('Minimum motion object size set to %.2f percent of frame based on input and frame rate.\n' % (self.minSIZE*100)) 
+
                 #make a copy for the markup
                 iorig=orig_image.copy()
 
                 #Set region of interest 
                 if self.set_ROI:
                         self.roi_selected=sourceM.Urect(iorig,"Region of Interest")
-                        
+                        self.roi_selected=self.roi_selected[-4:]
                         if len(self.roi_selected)==0 :
                                 raise ValueError('Error: No box selected. Please select an area by right clicking and dragging with your cursor to create a box. Hit esc to exit the window.')
                         if self.ROI_include == "include": 
@@ -334,10 +362,9 @@ class Motion:
                         bound_center=[]
                         bound_casc_box=[]
                         
-                        
                         for out in trimmed_box_list:
-                                #shapely needs to boxes as minx, miny, max x maxy
                                 
+                                #shapely needs to boxes as minx, miny, max x maxy
                                 minx=out[0][0]
                                 miny=out[1][1]
                                 maxx=out[1][0]
@@ -367,7 +394,7 @@ class Motion:
                                         
                                         #Append to summary
                                         sumbox.append(casc.geoms[p].area)
-                                        if casc.geoms[p].area > ((self.width * self.height) * (float(self.minSIZE/100))):
+                                        if casc.geoms[p].area > ((self.width * self.height) * self.minSIZE):
                                                         if self.todraw: 
                                                                 cv2.rectangle(current_image,topleft,bottomright,(0,0,255),thickness=3)
 
@@ -376,7 +403,6 @@ class Motion:
                                                         y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
                                                         bound_center.append((x,y))
                                                         bound_casc_box.append(casc.geoms[p])
-                                                        
                         else:
                                 b=casc.bounds
                                 #get size 
@@ -389,7 +415,7 @@ class Motion:
                                 bottomright=(int(maxx),int(miny))                                
 
                                 #If bounding polygon is larger than the minsize, draw a rectangle
-                                if casc.area > ((self.width * self.height) * (float(self.minSIZE/100))):
+                                if casc.area > ((self.width * self.height) * self.minSIZE):
                                                 if self.todraw: 
                                                         cv2.rectangle(current_image,topleft,bottomright,(0,0,255),thickness=3)                                                        
                                                         
@@ -502,17 +528,13 @@ class Motion:
                                                         print("Adapting to video conditions: accAvg is changed to: " + str(self.accAvg) + "\n")
         
                                                 else:                       
-                
-                                                        #increase learning rate
-                                                        self.moglearning=self.moglearning+0.1
-                                                        print("Adapting to video conditions: increasing MOG learning rate to %d" % self.moglearning)
+                                                        #increase tolerance rate
+                                                        self.mogvariance=self.mogvariance+5
+                                                        print("Adapting to video conditions: increasing MOG variance tolerance to %d" % self.mogvariance)
                                                         
                                                         #add a ceiling
-                                                        if self.moglearning > 0.8: self.moglearning = 0.8
-                                                        #Increase minimum size?
-                                                        #mean(self.avg_area)
+                                                        if self.mogvariance > 60: self.mogvariance = 60
                                         
-                                
         def videoM(self):
                 
                 ## Methods for video writing in the class Motion

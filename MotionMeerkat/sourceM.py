@@ -74,6 +74,13 @@ def getint(name):
         f=os.path.split(name)
         (shortname, extension) = os.path.splitext(f[-1]) 
         return int(shortname)
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
     
 ##User drawn rectangles
 

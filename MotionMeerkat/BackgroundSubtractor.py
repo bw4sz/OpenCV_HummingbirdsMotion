@@ -12,14 +12,14 @@ class Background:
         self.subMethod=subMethod
         
         ####Create Background Constructor
-        if self.subMethod in ["Acc","Both"]:
+        if self.subMethod == "Acc":
                 self.running_average_image = np.float32(display_image)
                 self.accAvg=acc
                 self.threshT=thresh
     
-        if self.subMethod in ["MOG","Both"]:
+        if self.subMethod == "MOG":
             #MOG method creator
-            self.fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=False)
+            self.fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=False,varThreshold=float(mogvariance))
             self.fgbg.setBackgroundRatio(0.95)
     
     #Frame Subtraction
