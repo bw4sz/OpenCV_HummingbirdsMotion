@@ -11,8 +11,6 @@ def report(ob):
         cv2.destroyAllWindows()
         if ob.remove_singles:
                 singles_removed=PostProcessing.remove_singletons(ob.frame_results,ob.single_distance*ob.frame_rate,ob.file_destination)
-        if ob.learning_wait > 0:
-                PostProcessing.remove_init(ob.learning_wait,ob.frame_rate,len(ob.frame_results))
         
         #Create log file
         log_file_report = ob.file_destination + "/" + "Parameters_Results.log"

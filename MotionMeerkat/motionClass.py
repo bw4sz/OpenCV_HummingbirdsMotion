@@ -21,7 +21,7 @@ import BackgroundSubtractor
 class Motion:
 
         def __init__(self):                  
-                print("Motion Detection Object Created\n")
+                print("Welcome to MotionMeerkat!\n")
                 
         def prep(self):
                 
@@ -29,7 +29,7 @@ class Motion:
                 
                 #report auto settings
                 print('Auto settings...')
-                print('Background MOG sensitivity set to %d' % self.moglearning)  
+                print('Background MOG sensitivity set to %.2f' % self.moglearning)  
                 print('MOG Variance tolerance set to %d' % self.mogvariance)  
                 
                 #For debugging, visualize conditions.
@@ -200,8 +200,8 @@ class Motion:
                  
                 #show the display image
                 if self.set_ROI:
-                        cv2.namedWindow("Result")
-                        cv2.imshow("Result", self.display_image)
+                        cv2.namedWindow("Crop result")
+                        cv2.imshow("Crop result", self.display_image)
                         cv2.waitKey(1200) 
                         cv2.destroyAllWindows()
                         
@@ -514,26 +514,29 @@ class Motion:
                                         #get the last 10 minutes
                                         lastten=self.frame_results[-cutoff:]
                                         
-                                        #If more than 50% of frames have been printed.
+                                        #If more than 20% of frames have been printed.
                                         
-                                        if sum(lastten)/float(len(lastten)) > 0.3:  
-                                                if self.subMethod == "Acc":
+                                        if sum(lastten)/float(len(lastten)) > self.frameHIT:  
+                                                if self.subMethod == "MOG":
                                                                 
+                                                        #increase tolerance rate
+                                                        self.mogvariance=self.mogvariance+5
+                                        
+                                                        #add a ceiling
+                                                        if self.mogvariance > 50: self.mogvariance = 50
+                                                        
+                                                        print("Adapting to video conditions: increasing MOG variance tolerance to %d" % self.mogvariance)
+                                                        
+        
+                                                else:                       
+
                                                         #Increase accumulated averaging
                                                         self.accAvg=self.accAvg+0.05
-                                                                                                        
+                                                
                                                         #Build bounds. in a floor, the value can't be negative.
                                                         if self.accAvg < 0.1: self.accAvg=0.1
                                                         if self.accAvg > 0.55: self.accAvg=0.55
-                                                        print("Adapting to video conditions: accAvg is changed to: " + str(self.accAvg) + "\n")
-        
-                                                else:                       
-                                                        #increase tolerance rate
-                                                        self.mogvariance=self.mogvariance+5
-                                                        print("Adapting to video conditions: increasing MOG variance tolerance to %d" % self.mogvariance)
-                                                        
-                                                        #add a ceiling
-                                                        if self.mogvariance > 60: self.mogvariance = 60
+                                                        print("Adapting to video conditions: accAvg is changed to: " + str(self.accAvg) + "\n")                                                        
                                         
         def videoM(self):
                 

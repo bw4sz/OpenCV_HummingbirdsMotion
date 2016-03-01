@@ -1,10 +1,9 @@
 import sys
 import sourceM
 import argparse
+import numpy as np
 
 Usage = """
-
-Welcome to MotionMeerkat!
 
 Automated capture of motion frames from a video file.
 
@@ -12,7 +11,7 @@ For help, see the wiki: https://github.com/bw4sz/OpenCV_HummingbirdsMotion/wiki
 
 Default values for parameters are in parenthesis. To select default hit enter.
 
-Affirmative answers to questions are y, negative answers n
+Affirmative answers are y, negative answers are n.
 
 Please do not use quotes for any responses. 
 
@@ -34,14 +33,13 @@ def arguments(self):
                                 self.parser.add_argument("--accAvg", help="Fixed background averaging rate",default=0.35,type=float)
                                 self.parser.add_argument("--frameHIT", help="expected percentage of motion frames",default=0.05,type=float)
                                 self.parser.add_argument("--threshT", help="Threshold of movement",default=30,type=int)
-                                self.parser.add_argument("--drawSmall", help="'Draw' or 'enter' object size",type=str,default='draw')
-                                self.parser.add_argument("--minSIZE", help="Minimum size of contour",default=0.3,type=float)
+                                self.parser.add_argument("--drawSmall", help="'Draw' or 'enter' object size",type=str,default='enter')
+                                self.parser.add_argument("--minSIZE", help="Minimum size of contour",default=0.003,type=float)
                                 self.parser.add_argument("--burnin", help="Delay time",default=0,type=int)
                                 self.parser.add_argument("--scan", help="Scan one of every X frames for motion",default=0,type=int)
                                 self.parser.add_argument("--frameSET", help="Set frame_rate?",action='store_true',default=False)
                                 self.parser.add_argument("--frame_rate", help="frames per second",default=1)
 				self.parser.add_argument("--moglearning", help="Speed of MOG background detector, lowering values are more sensitive to movement",default=0.15,type=float)                                
-				self.parser.add_argument("--learning_wait", help="Wait X minutes to allow MOG to initialize?",default='0.5',type=float)                                		                                
                                 self.parser.add_argument("--subMethod", help="Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method",default='MOG',type=str)                                
                                 self.parser.add_argument("--mogvariance", help="Variance in MOG to select background",default=16,type=int)                                
                                 self.parser.add_argument("--set_ROI", help="Set region of interest?",action='store_true',default=False)
@@ -79,41 +77,41 @@ def arguments(self):
                                 if not self.fileD: self.fileD = str("C:\MotionMeerkat")
 				
 				##Automatic mode or manual
-                                self.mode=raw_input("'auto' mode or 'manual'. Manual mode allows greater flexibility. (auto)\n")   
+                                self.mode=raw_input("'Auto' mode or 'manual'. Auto mode will define settings based on video properties. Manual mode allows greater flexibility. (auto)\n")   
                                 if not self.mode: self.mode = 'auto'
+				if self.mode: self.mode=self.mode.lower()
 				
 				if self.mode=='auto':
-						print('''Automatic mode will try to set the settings based on questions and video characteristics. The settings will be printed in case the user wants to refine using manual mode.''')
-						q1=raw_input("How much background variation [eg. wind, waves, debris] do you expect in your video?\n0[no movement] to 10 [extreme movement]: (3)")
+						print('''Automatic mode will try to set the settings based on questions and video characteristics. The settings will be printed in case the user wants to refine using manual mode. It usually better to be conservative and review more frames rather than risk missing an object of interest.\n''')
+						q1=raw_input("How much background variation [eg. wind, waves, debris] do you expect in your video?\nFrom 0[no movement, eg. underwater] to 5 [extreme movement, eg. windy trees]: (2)\n")
 						if not q1: q1 = 3
 						
 						#Array of movement options
-						q1select=np.arange(0.01,.52,.05)
+						q1select=np.arange(0,.16,.03)
 						self.moglearning=q1select[int(q1)]
 						
-						q2=raw_input("How quickly does your organism move? 0[slowly, eg. fish] to 5[quickly, eg. flying insects] (3)")
+						q2=raw_input("How quickly does your organism move?\nFrom 0 [slowly, eg. fish] to 5 [quickly, eg. flying insects] (2)\n")
 						if not q2: q2=3
 						q2select=np.arange(10,40,5)
 						self.mogvariance=q2select[int(q2)]
 						
-						self.drawSmall=raw_input("'Draw' or 'enter' the expected size of your smallest object of interest? (Draw)")	
+						self.drawSmall=raw_input("'Enter' or 'draw' the expected size of your smallest object of interest? (enter)\n")	
 						if not self.drawSmall: 
-								self.drawSmall='draw'
+								self.drawSmall='enter'
 						else: 
 								self.drawSmall=self.drawSmall.lower()
 						
 						if self.drawSmall=='enter':
 								self.minSIZE=raw_input("Minimum motion object size\nExpressed as the proportion of the screen.\nFor example, the default (0.3) would ignore objects less than 0.3% of the screen size (0.3):\n")
 								if not self.minSIZE: self.minSIZE = float(0.3/100)
-								else: self.minSIZE=float(self.minSIZE/100)						
+								else: self.minSIZE=float(self.minSIZE)/100						
 
-						self.set_ROI ='y'==raw_input("Would you like to set a region of interest to crop based on expected location [ie. flower, nest, bait] (y)")
-						if not self.set_ROI: self.set_ROI=True
+						self.set_ROI ='y'==raw_input("Would you like to set a region of interest to crop based on expected location [ie. flower, nest, bait] (y)\n")
 						if self.set_ROI==True: 
 								self.ROI_include = 'include'
 						
 						#Set defaults that weren't specified.
-						self.frameHIT=0
+						self.frameHIT=0.10
 						self.adapt=True
 						self.makeVID="frames"
 						self.scan = 0
@@ -128,25 +126,39 @@ def arguments(self):
 						self.todraw=False
 						self.remove_singles=False
 						self.single_distance = 10
-						self.learning_wait = 0
 						
 				else:
 						#Sensitivity to background 
-						self.moglearning=raw_input("Sensitivity to background movement, ranging from 0 [very sensitive] to 1.\nRecommended between 0.05 for still videos and 0.4 for windy videos\nAs learning rate increases, fewer frames will be returned (0.15):\n")
+						self.moglearning=raw_input("\nSensitivity to background movement, ranging from 0 [very sensitive] to 1.\nRecommended between 0.05 for still videos and 0.2 for windy videos\nAs learning rate increases, fewer frames will be returned (0.15):\n")
 						if not self.moglearning: self.moglearning = 0.15
 						self.moglearning=float(self.moglearning)
 						
 						self.mogvariance=raw_input("Background threshold.\nMotion objects more similar in color to background (such as night or underwater) need a lower threshold. Increase to reduce wind error. (16):\n")
-						if not self.mogvariance: self.mogvariance = 16				
+						if not self.mogvariance: 
+								self.mogvariance = 16
+						else:
+								self.mogvariance = int(self.mogvariance)
 				
 						#minimum size of contour object
+						self.drawSmall='enter'
 						self.minSIZE=raw_input("Minimum motion object size\nExpressed as the proportion of the screen.\nFor example, the default (0.3) would ignore objects less than 0.3% of the screen size (0.3):\n")
 						if not self.minSIZE: self.minSIZE = float(0.3/100)
-						else: self.minSIZE=float(self.minSIZE/100)
+						else: self.minSIZE=float(self.minSIZE)/100
 				
 						self.advanced= 'y'==raw_input("Set advanced options? (n) :\n")
 						
 						if self.advanced:
+								
+								self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on expected frequency of visits? (y) :\n")
+								if self.adapt:
+						
+										#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
+										self.frameHIT=raw_input("Expected percentage of frames with motion (0.15, i.e 15% of frames returned):\n")
+										if not self.frameHIT: self.frameHIT = 0.15
+										else: self.frameHIT=float(self.frameHIT)
+								else:
+										self.frameHIT=1
+								
 								#background method
 								self.subMethod=raw_input("\nAccumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method? \nAcc is faster, MOG is more accurate. (MOG):\n")
 								if not self.subMethod: self.subMethod="MOG"
@@ -157,21 +169,12 @@ def arguments(self):
 										self.accAvg=sourceM.ask_acc()
 										if not self.accAvg: self.accAvg=0.35
 										
-										#Should accAVG be adapted every 10minutes based on an estimated hitrate
-										self.adapt= 'y'==raw_input("Adapt the motion sensitivity based on expected frequency of visits? (y) :\n")      
 										
 										#thresholding, a way of differentiating the background from movement, higher values (0-255) disregard more motion, lower values make the model more sensitive to motion
 										self.threshT=raw_input("Threshold for movement tolerance\nRanging from 0 [include any movement] to 255 [include no movement]\nSlow moving animals, like fish, need low thresholds [10].\nFast moving animals, like birds, can have higher thresholds [60] (30):\n")
 										if not self.threshT: self.threshT = 30
 										else: self.threshT=float(self.threshT)                                                                
-		
-										if self.adapt:
-										    
-												#Hitrate, the expected % of frames per 10 minutes - this is a helpful adaptive setting that helps tune the model, this will be multiplied the frame_rate
-												self.frameHIT=raw_input("Expected percentage of frames with motion (0.04, i.e 4% of frames returned):\n")
-												if not self.frameHIT: self.frameHIT = 0.04
-												else: self.frameHIT=float(self.frameHIT)
-				
+						
 										#Still need to set moglearning to pass to argument, even if it isn't used.  
 										self.moglearning = 0.15
 										self.mogvariance = 16
@@ -182,10 +185,6 @@ def arguments(self):
 										self.accAvg = 0.35
 										self.threshT = 30
 										
-										# Learning wait for mog init
-										self.learning_wait= raw_input("Ignore frames in the first X minutes to allow MOG to smoothly initialize. (0)\n")
-										if not self.learning_wait: 
-												self.learning_wait = 0
 																				
 								#Skip initial frames of video, in case of camera setup and shake.       
 								self.windy='y'== raw_input("Cap the number of consecutive frames to reduce wind? (n):\n")
@@ -241,7 +240,7 @@ def arguments(self):
 					    
 						else:
 								#Set defaults that weren't specified.
-								self.frameHIT=0
+								self.frameHIT=0.10
 								self.adapt=True
 								self.makeVID="frames"
 								self.scan = 0
@@ -258,6 +257,7 @@ def arguments(self):
 								self.todraw=False
 								self.remove_singles=False
 								self.single_distance = 10
-								self.learning_wait = 0
+								self.drawSmall = 'enter'
+								
 						
 						

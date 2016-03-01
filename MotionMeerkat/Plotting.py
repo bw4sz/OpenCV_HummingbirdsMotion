@@ -20,6 +20,10 @@ def returnplots(array):
 def combineplots(minsize,returnframes,mincontour,fname,show):
     
     try:
+        #clear any previous plots
+        plt.clf()
+        plt.cla()
+        
         plt.figure(1)
         #Top Plot
         ax=plt.subplot(2,1,1)    

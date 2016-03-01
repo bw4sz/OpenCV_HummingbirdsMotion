@@ -40,20 +40,4 @@ def remove_singletons(frame_results,distance,destination):
             os.remove(f)
             counter=counter + 1
     return(counter)
-
-def remove_init(learning_wait,frame_rate,length_results):
-#If time lapse delay the beginning of motion detection
-    #If its time lapse, 
-    if frame_rate ==1:
-        #If the video is twice as long as the init period
-        if length_results > frame_rate * learning_wait * 60 * 2: 
-            print("Frame rate is 1 fps, MOG detector needs a couple moments to initialize.\n Removing frames outputting during initilization. This can be changed by setting the learning_wait parameter in advanced settings\n")
-            todel = range(1,frame_rate * learning_wait * 60)
-            counter=0
-            for x in todel: 
-                f=destination + "/" + str(x) + ".jpg"        
-                if os.path.exists(f): 
-                    os.remove(f)
-                    counter=counter + 1
-            print("%d motion frames removed due initilization period of %d minutes" % (counter, learning_wait))  
-            return(counter)                
+          

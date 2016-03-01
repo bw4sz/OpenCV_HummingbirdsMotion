@@ -4,7 +4,7 @@ import wrapper
 import arguments
 import traceback
 import sys
-import numpy
+import numpy as np
 import numpy.core.multiarray
 import ctypes
 import shapely

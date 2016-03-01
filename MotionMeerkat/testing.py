@@ -38,7 +38,7 @@ if testing_mainpy:
     os.system('main.py --runtype pictures --i C:/MotionMeerkat/PlotwatcherTest')
     
 
-testing_mainexe = False
+testing_mainexe = True
 if testing_mainexe:
     os.chdir('C:/Program Files (x86)/MotionMeerkat/')
     
@@ -70,10 +70,10 @@ if testing_mainexe:
 os.chdir('C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/')
 
 
-for mogl in np.arange(0.01,.52,.1):
-    for var in np.arange(10,40,10):
-        tosystem= "main.py --runtype batch --batchpool C:/Users/Ben/Desktop/M/ --fileD F:/MotionMeerkat/" + str(mogl) + "/"+ str(var) + " --moglearning " + str(mogl) + " --mogvariance " + str(var) + " --drawSmall enter --minSIZE 0.3 --adapt --todraw"
-        print(tosystem)
-        os.system(tosystem)
+#for mogl in [0.01,0.11,0.21]:
+    #for var in [40,50]:
+        #tosystem= "main.py --runtype batch --batchpool C:/Users/Ben/Desktop/M/ --fileD F:/MotionMeerkat/" + str(mogl) + "/"+ str(var) + " --moglearning " + str(mogl) + " --mogvariance " + str(var) + " --drawSmall enter --minSIZE 0.003 --adapt --todraw"
+        #print(tosystem)
+        #os.system(tosystem)
 
 #os.system('main.py --todraw')
