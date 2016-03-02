@@ -48,13 +48,14 @@ def ask_acc():
                         ask_acc()
 
 def ask_file():
-        in_f=raw_input("Enter video input:\n")
-        if not in_f: in_f = "C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv"
-        if in_f:
-                if os.path.isfile(in_f): return(in_f)
-                else:
-                    print("File path does not exist!")
-                    ask_file()
+        while True:
+            in_f=raw_input("Enter video input:\n")
+            if not in_f: 
+                in_f="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv"
+                return(in_f)
+            if os.path.isfile(in_f):
+                return(in_f)
+            print("File path does not exist!")
         
 #define a display function
 def display(window,t,image):
