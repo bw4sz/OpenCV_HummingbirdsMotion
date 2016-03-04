@@ -35,21 +35,23 @@ def report(ob):
                 log_report.write("\nVariance Rate: %s" % ob.mogvariance)
         
         if ob.subMethod == "Acc":
-                log_report.write("\nAccumulated Averaging: %s" % ob.accAvg)  
+                log_report.write("\nAccumulated Averaging: %s" % ob.accAvg) 
+                log_report.write("\nThreshold: %s" % ob.threshT)                
 
         if ob.adapt:
                 log_report.write("\nExpected hitrate: %s" % ob.frameHIT)
         
-        log_report.write("\nThreshold: %s" % ob.threshT)
-        log_report.write("\nMinimum contour area: %s" % ob.minSIZE)
+        log_report.write("\nFrame crop: %s" % ob.set_ROI)     
+        if ob.set_ROI:        
+                log_report.write("\nSet ROI: %s" % ob.ROI_include)        
+        log_report.write("\nMinimum size was drawn or entered?: %s" % ob.drawSmall)
+        log_report.write("\nMinimum area: %s" % ob.minSIZE)
         if ob.burnin > 0:
                 log_report.write("\nBurnin: %s" % ob.burnin)
         if ob.scan > 0:
                 log_report.write("\nScan frames: %s" % ob.scan)
         if ob.frameSET:
                 log_report.write("\nManual framerate: %s" % ob.frame_rate)
-        if ob.set_ROI:        
-                log_report.write("\nSet ROI: %s" % ob.ROI_include)
         if ob.set_areacounter:
                 log_report.write("\nArea counter: %s" % ob.set_areacounter)
         log_report.write("\nOutput type: %s\n\n" % ob.makeVID)
