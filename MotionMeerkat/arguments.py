@@ -25,7 +25,7 @@ def arguments(self):
                 if len(sys.argv)< 2:
                                 print Usage
                 else:
-                                self.parser.add_argument("--runtype", help="Batch or single file",default='file')
+                                self.parser.add_argument("--runtype", help="Batch, single file or pictures",default='file')
                                 self.parser.add_argument("--batchpool", help="run directory of videos",type=str)
                                 self.parser.add_argument("--inDEST", help="path of single video",type=str,default='C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv')
                                 self.parser.add_argument("--fileD", help="output directory",default="C:/MotionMeerkat")
@@ -52,10 +52,12 @@ def arguments(self):
                                 self.parser.add_argument("--todraw", help="Draw red boxes to highlight motion' ?",action="store_true",default=False)				
                                 self.parser.add_argument("--makeVID", help="Output images as 'frames','video','both', 'none' ?",default='frames',type=str)
                                 self.args = self.parser.parse_args(namespace=self)
+				
+				# Set pictures flag
 				if not self.runtype=="pictures":
 						self.pictures=False
-				self.segment = False
-                                print "\n"
+				else:
+						self.pictures=True
                                 print "\n"
                     
                 if(len(sys.argv)< 2):

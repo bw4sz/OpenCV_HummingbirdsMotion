@@ -29,8 +29,14 @@ class Motion:
                 
                 #report auto settings
                 print('Auto settings...')
-                print('Background MOG sensitivity set to %.2f' % self.moglearning)  
-                print('MOG Variance tolerance set to %d' % self.mogvariance)  
+                
+                if self.runtype=='pictures':
+                        self.subMethod="Acc"
+                        print("Setting pictures runtype and background method to accumulated averaging (Acc), if you would like to alter Acc settings, please use manual mode.\n")
+                        
+                if self.subMethod=="MOG":
+                        print('Background MOG sensitivity set to %.2f' % self.moglearning)  
+                        print('MOG Variance tolerance set to %d' % self.mogvariance)  
                 
                 #For debugging, visualize conditions.
                 self.vis=False
@@ -150,11 +156,13 @@ class Motion:
                         orig_image = self.cap.read()[1] 
                 else:
                         #File formats
-                        imagef=["*.jpg","*.JPG","*.jpeg","*.tif","*.tiff","*.JPEG","*.png"]
+                        imagef=["*.jpg","*.jpeg","*.tif","*.tiff","*.png"]
                         pathimage=[os.path.join(self.inDEST,x) for x in imagef]
                         self.jpgs=[]
                         for ext in pathimage:
-                                self.jpgs.extend(glob.glob(ext))
+                                found=glob.glob(ext)
+                                self.jpgs.extend(found)
+                                
                         print('%d pictures found' % len(self.jpgs))
                         orig_image=cv2.imread(self.jpgs[0])
                         self.total_frameC=len(self.jpgs)
@@ -224,7 +232,7 @@ class Motion:
 ######################################################             
 ##Function to compute background during the video loop
 ######################################################
-
+        @profile
         def run(self):
 
                 while True:
@@ -286,7 +294,6 @@ class Motion:
                         #############################
                         ###BACKGROUND SUBTRACTION
                         #############################
-                        
                         grey_image=self.BC.BackGroundSub(current_image,self.moglearning)
                         if self.vis: sourceM.displayV("Thresholded image",10,grey_image)
                         
