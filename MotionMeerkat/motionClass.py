@@ -232,7 +232,6 @@ class Motion:
 ######################################################             
 ##Function to compute background during the video loop
 ######################################################
-        @profile
         def run(self):
 
                 while True:

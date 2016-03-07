@@ -61,7 +61,7 @@ if testing_mainexe:
     os.system('main.exe --burnin 1')
     
     #Skip every other frame
-    os.system('main.exe --scan 1')
+    os.system('main.exe --i C:/Users/Ben/Desktop/M/test.avi --scan 1')
     
     #Change background subtractor
     os.system('main.exe --subMethod Acc --accAvg 0.4 --adapt')

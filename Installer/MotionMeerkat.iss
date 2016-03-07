@@ -18,7 +18,7 @@ LicenseFile=C:\Users\Ben\Documents\OpenCV_HummingbirdsMotion\License.txt
 OutputBaseFilename=MotionMeerkatSetup
 Compression=lzma
 SolidCompression=yes
-                                                  
+                                                   
 [Languages]                                                                           
 Name: "english"; MessagesFile: "compiler:Default.isl"
 

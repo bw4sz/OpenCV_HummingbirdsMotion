@@ -1,0 +1,353 @@
+Welcome to MotionMeerkat!
+
+
+
+
+
+Auto settings...
+Background MOG sensitivity set to 0.15
+MOG Variance tolerance set to 16
+Output path will be C:/MotionMeerkat\test
+File type is .tlv, setting frame rate to 1 fps
+Beginning Motion Detection
+
+20 % completed: 8 candidate motion frames
+40 % completed: 76 candidate motion frames
+60 % completed: 91 candidate motion frames
+80 % completed: 102 candidate motion frames
+
+
+Thank you for using MotionMeerkat! 
+
+Total run time (min): 2.69 
+ 
+Average frames processed per second: 34.92 
+ 
+Candidate motion events: 128 
+ 
+Frames skipped due to insufficient movement based on the threshold parameter: 5027 
+ 
+Frames skipped due to minimum size of the contours: 476 
+ 
+Total frames in files: 5631 
+ 
+Hitrate: 2.27 % 
+
+Filename: motionClass.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   235   68.895 MiB    0.000 MiB           @profile
+   236                                     def run(self):
+   237                             
+   238  103.121 MiB   34.227 MiB                   while True:
+   239                                                     #Was the last frame no motion; if not, scan frames
+   240  103.121 MiB    0.000 MiB                           if not self.scan ==0:
+   241                                                             if self.noMotion:
+   242                                                                     for x in range(1,self.scan):
+   243                                                                             if not self.pictures:
+   244                                                                                     self.cap.grab()
+   245                                                                             else:
+   246                                                                                     current_image=jpgs.pop()
+   247                                                                             self.frame_count=self.frame_count+1
+   248                                                             else:
+   249                                                                     pass
+   250                                                     else:
+   251                                                             pass
+   252                                                                     
+   253                                                     # Capture frame from file
+   254  103.121 MiB    0.000 MiB                           if not self.pictures:
+   255  103.121 MiB    0.000 MiB                                   ret,current_image = self.cap.read()
+   256  103.121 MiB    0.000 MiB                                   if not ret:
+   257                                                                     #If there are no more frames, break, need to reset AccAVG
+   258  102.223 MiB   -0.898 MiB                                           if self.subMethod=="Acc": 
+   259                                                                             self.accAvg=self.accAvgBegin
+   260                                                                     else:
+   261  102.223 MiB    0.000 MiB                                                   self.moglearning=self.moglearningBegin
+   262  102.223 MiB    0.000 MiB                                           break
+   263                                                     else:
+   264                                                             if len(self.jpgs)==0:
+   265                                                                     break
+   266                                                             else:
+   267                                                                     current_image=cv2.imread(self.jpgs.pop())
+   268                                                                     
+   269  103.121 MiB    0.898 MiB                           self.frame_count += 1
+   270  103.121 MiB    0.000 MiB                           frame_t0 = time.time()
+   271                                                     #create iterable for scanner
+   272                                             
+   273                                                     #Print trackbar
+   274                                                     #for some videos this capture doesn't work, and we need to ignore frame
+   275  103.121 MiB    0.000 MiB                           if not self.total_frameC == 0.0:
+   276                                                             #This is a bit convulted, but because of scanning, we might miss the flag to calculate time, give it a step size equal to scan size
+   277  103.121 MiB    0.000 MiB                                   countR=self.frame_count - np.arange(0,self.scan+1)
+   278                                                             
+   279                                                             #If percent compelted is a multiple of 10, print processing rate.
+   280                                                             #format frame count to percentage and interger
+   281  103.121 MiB    0.000 MiB                                   numbers = [ round(x/float(self.total_frameC),4)*100 for x in countR ]
+   282                                                             
+   283                                                             #is frame count a multiple of 10
+   284  103.121 MiB    0.000 MiB                                   if any([x %10 ==0 for x in numbers]):
+   285                                                                     
+   286  103.090 MiB   -0.031 MiB                                           fc=float(self.frame_count)/self.total_frameC*100
+   287                                                                     
+   288                                                                     #Give it a pause feature so it doesn't announce twice on the scan, i a bit ugly, but it doesn't run very often.
+   289                                                                     #if the last time the percent complete was printed was within the scan range, don't print again. 
+   290  103.090 MiB    0.000 MiB                                           if abs(self.frameC_announce - self.frame_count) >= self.scan:
+   291  103.090 MiB    0.000 MiB                                                   print("%.0f %% completed: %.0f candidate motion frames" % (fc, self.total_count))
+   292  103.090 MiB    0.000 MiB                                                   self.frameC_announce=self.frame_count                                                
+   293                             
+   294                                                     #############################
+   295                                                     ###BACKGROUND SUBTRACTION
+   296                                                     #############################
+   297  103.121 MiB    0.031 MiB                           grey_image=self.BC.BackGroundSub(current_image,self.moglearning)
+   298  103.121 MiB    0.000 MiB                           if self.vis: sourceM.displayV("Thresholded image",10,grey_image)
+   299                                                     
+   300                                                     #If set roi, subset the image
+   301  103.121 MiB    0.000 MiB                           if self.set_ROI:
+   302                                                             
+   303                                                             if self.ROI_include == "include":
+   304                                                                     #Crop
+   305                                                                     mask = np.ones(grey_image.shape, np.bool)
+   306                                                                     mask[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]] = False
+   307                                                                     grey_image[mask]=0
+   308                                                                     
+   309                                                             else: 
+   310                                                                     mask = np.ones(grey_image.shape, np.bool)
+   311                                                                     mask[self.roi_selected[1]:self.roi_selected[3], self.roi_selected[0]:self.roi_selected[2]] = False
+   312                                                                     grey_image[~mask]=0
+   313                                                                     
+   314                                                     #######################################
+   315                                                     ##Contour Analysis and Post-Proccessing
+   316                                                     #######################################
+   317                                                     
+   318  103.121 MiB    0.000 MiB                           points = []   # Was using this to hold camera_imageROIeither pixel coords or polygon coords.
+   319  103.121 MiB    0.000 MiB                           bounding_box_list = []
+   320                                                     
+   321                                                     # Now calculate movements using the white pixels as "motion" data
+   322  103.121 MiB    0.000 MiB                           _,contours,hierarchy = cv2.findContours(grey_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE )
+   323                                                     
+   324  103.121 MiB    0.000 MiB                           if len(contours) == 0 :
+   325                                                             #No movement, add to counter
+   326  103.121 MiB    0.000 MiB                                   self.nocountr=self.nocountr+1
+   327                                                             
+   328                                                             #Result was no motion
+   329  103.121 MiB    0.000 MiB                                   self.frame_results.append(False)
+   330                                                             
+   331                                                             #self.noMotion flag
+   332  103.121 MiB    0.000 MiB                                   self.noMotion=True
+   333  103.121 MiB    0.000 MiB                                   self.avg_area.append(0)                                                                                                                        
+   334  103.121 MiB    0.000 MiB                                   continue                    
+   335                                                     
+   336  103.121 MiB    0.000 MiB                           for cnt in contours:
+   337  103.121 MiB    0.000 MiB                                   bounding_rect = cv2.boundingRect( cnt )
+   338  103.121 MiB    0.000 MiB                                   point1 = ( bounding_rect[0], bounding_rect[1] )
+   339  103.121 MiB    0.000 MiB                                   point2 = ( bounding_rect[0] + bounding_rect[2], bounding_rect[1] + bounding_rect[3] )
+   340  103.121 MiB    0.000 MiB                                   bounding_box_list.append( ( point1, point2 ) )
+   341                                                             
+   342                                                     # Find the average size of the bbox (targets), then
+   343                                                     # remove any tiny bboxes (which are probably just noise).
+   344                                                     # "Tiny" is defined as any box with 1/10th the area of the average box.
+   345                                                     # This reduces false positives on tiny "sparkles" noise.
+   346  103.121 MiB    0.000 MiB                           box_areas = []
+   347  103.121 MiB    0.000 MiB                           for box in bounding_box_list:
+   348  103.121 MiB    0.000 MiB                                   box_width = box[self.right][0] - box[self.left][0]
+   349  103.121 MiB    0.000 MiB                                   box_height = box[self.bottom][0] - box[self.top][0]
+   350  103.121 MiB    0.000 MiB                                   box_areas.append( box_width * box_height )
+   351                                                             
+   352  103.121 MiB    0.000 MiB                           average_box_area = 0.0
+   353  103.121 MiB    0.000 MiB                           if len(box_areas): average_box_area = float( sum(box_areas) ) / len(box_areas)
+   354                                                     
+   355  103.121 MiB    0.000 MiB                           trimmed_box_list = []
+   356  103.121 MiB    0.000 MiB                           for box in bounding_box_list:
+   357  103.121 MiB    0.000 MiB                                   box_width = box[self.right][0] - box[self.left][0]
+   358  103.121 MiB    0.000 MiB                                   box_height = box[self.bottom][0] - box[self.top][0]
+   359                                                             
+   360                                                             # Only keep the box if it's not a tiny noise box:
+   361  103.121 MiB    0.000 MiB                                   if (box_width * box_height) > average_box_area*.3: 
+   362  103.121 MiB    0.000 MiB                                           trimmed_box_list.append( box )
+   363                                                     
+   364                                                     #shapely does a much faster job of polygon union
+   365                                                     #format into shapely bounding feature
+   366  103.121 MiB    0.000 MiB                           shape_list=[]
+   367                                                     
+   368                                                     ## Centroids of each target and hold on to target blobs
+   369  103.121 MiB    0.000 MiB                           bound_center=[]
+   370  103.121 MiB    0.000 MiB                           bound_casc_box=[]
+   371                                                     
+   372  103.121 MiB    0.000 MiB                           for out in trimmed_box_list:
+   373                                                             
+   374                                                             #shapely needs to boxes as minx, miny, max x maxy
+   375  103.121 MiB    0.000 MiB                                   minx=out[0][0]
+   376  103.121 MiB    0.000 MiB                                   miny=out[1][1]
+   377  103.121 MiB    0.000 MiB                                   maxx=out[1][0]
+   378  103.121 MiB    0.000 MiB                                   maxy=out[0][1]
+   379                                                             
+   380                                                             #make into a tuple
+   381  103.121 MiB    0.000 MiB                                   sh_out=sg.box(minx,miny,maxx,maxy)
+   382  103.121 MiB    0.000 MiB                                   shape_list.append(sh_out)
+   383                                                     
+   384                                                     #Merge boxes that touch
+   385  103.121 MiB    0.000 MiB                           casc=cascaded_union(shape_list).buffer(1)
+   386                                                     
+   387                                                     #Make an object to get the average box size
+   388  103.121 MiB    0.000 MiB                           sumbox = []
+   389                                                     
+   390  103.121 MiB    0.000 MiB                           if casc.type=="MultiPolygon":
+   391                                                         #draw shapely bounds
+   392  103.117 MiB   -0.004 MiB                                   for p in range(1,len(casc.geoms)):
+   393  103.117 MiB    0.000 MiB                                           b=casc.geoms[p].bounds
+   394                                                                     
+   395                                                                     #Numpy origin is top left
+   396                                                                     #Shapely origin is bottom left 
+   397  103.117 MiB    0.000 MiB                                           minx,miny,maxx,maxy=b
+   398                                                                     
+   399  103.117 MiB    0.000 MiB                                           topleft=(int(minx),int(maxy))
+   400  103.117 MiB    0.000 MiB                                           bottomright=(int(maxx),int(miny))
+   401                                                                     
+   402                                                                     #Append to summary
+   403  103.117 MiB    0.000 MiB                                           sumbox.append(casc.geoms[p].area)
+   404  103.117 MiB    0.000 MiB                                           if casc.geoms[p].area > ((self.width * self.height) * self.minSIZE):
+   405  103.117 MiB    0.000 MiB                                                           if self.todraw: 
+   406                                                                                             cv2.rectangle(current_image,topleft,bottomright,(0,0,255),thickness=3)
+   407                             
+   408                                                                                     #Return the centroid to list, rounded two decimals
+   409  103.117 MiB    0.000 MiB                                                           x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
+   410  103.117 MiB    0.000 MiB                                                           y=round(casc.geoms[p].centroid.coords.xy[1][0],2)
+   411  103.117 MiB    0.000 MiB                                                           bound_center.append((x,y))
+   412  103.117 MiB    0.000 MiB                                                           bound_casc_box.append(casc.geoms[p])
+   413                                                     else:
+   414  103.121 MiB    0.004 MiB                                   b=casc.bounds
+   415                                                             #get size 
+   416  103.121 MiB    0.000 MiB                                   sumbox.append(casc.area)
+   417                                                             
+   418                                                             #to draw polygon
+   419  103.121 MiB    0.000 MiB                                   minx,miny,maxx,maxy=b
+   420                                                             
+   421  103.121 MiB    0.000 MiB                                   topleft=(int(minx),int(maxy))
+   422  103.121 MiB    0.000 MiB                                   bottomright=(int(maxx),int(miny))                                
+   423                             
+   424                                                             #If bounding polygon is larger than the minsize, draw a rectangle
+   425  103.121 MiB    0.000 MiB                                   if casc.area > ((self.width * self.height) * self.minSIZE):
+   426  103.117 MiB   -0.004 MiB                                                   if self.todraw: 
+   427                                                                                     cv2.rectangle(current_image,topleft,bottomright,(0,0,255),thickness=3)                                                        
+   428                                                                                     
+   429  103.117 MiB    0.000 MiB                                                   x=round(casc.centroid.coords.xy[0][0],2)
+   430  103.117 MiB    0.000 MiB                                                   y=round(casc.centroid.coords.xy[1][0],2)
+   431  103.117 MiB    0.000 MiB                                                   bound_center.append((x,y))
+   432  103.117 MiB    0.000 MiB                                                   bound_casc_box.append(casc)
+   433                                                     
+   434                                                     #Get the average size of box
+   435  103.121 MiB    0.004 MiB                           self.avg_area.append(np.array(sumbox).max())                                                                                        
+   436                                                     
+   437  103.121 MiB    0.000 MiB                           if len(bound_center) == 0:
+   438                                                             
+   439                                                             #mark as too small
+   440  103.121 MiB    0.000 MiB                                   self.toosmall=self.toosmall+1
+   441                                                             
+   442                                                             #record output
+   443  103.121 MiB    0.000 MiB                                   self.frame_results.append(False)
+   444                                                             
+   445  103.121 MiB    0.000 MiB                                   self.noMotion=True                   
+   446                                                             #Go to next image
+   447  103.121 MiB    0.000 MiB                                   continue
+   448                                                                     
+   449                                                     #Set flag for inside area
+   450  103.117 MiB   -0.004 MiB                           inside_area=False
+   451  103.117 MiB    0.000 MiB                           if self.set_areacounter:
+   452                                                     #test drawing center circle
+   453                                                             for box in bound_center:
+   454                                                                     
+   455                                                                     #is the x coordinate within
+   456                                                                     if self.area_box[2] > box[0] > self.area_box[0]:
+   457                                                                             if self.area_box[3] > box[1] > self.area_box[1]:
+   458                                                                                             inside_area= not inside_area
+   459                                                                                             cv2.rectangle(current_image,(self.area_box[3],self.area_box[0]),(self.area_box[2],self.area_box[1]),(242,221,61),thickness=1,lineType=4)
+   460                               
+   461                                                     ##################################################
+   462                                                     ###############Write image to file################
+   463                                                     ##################################################
+   464                                                     
+   465  103.117 MiB    0.000 MiB                           if not self.makeVID == "none":
+   466                                                             if self.makeVID in ("frames","both"):
+   467                                                                     cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",current_image)
+   468                              
+   469                                                                     #Record frame as motion
+   470                                                                     self.frame_results.append(True)
+   471                                                                     
+   472                                                                     #Is it windy?
+   473                                                                     if self.windy:
+   474                                                                             
+   475                                                                             self.windy_threshold = int(self.windy_min * 60 * self.frame_rate)
+   476                                                                             runs=sum(self.frame_results[self.frame_count-self.windy_threshold:self.frame_count])/float(self.windy_threshold)
+   477                                                                             if runs > 0.9: 
+   478                                                                                     print("It is windy!\nDeleting the past %.0f returned frames" % self.windy_threshold)
+   479                                                                                     
+   480                                                                                     #reset the record to frames not returned
+   481                                                                                     self.frame_results[self.frame_count-self.windy_threshold:self.frame_count]=[False] *(self.windy_threshold)
+   482                                                                                     
+   483                                                                                     #Delete frames that encompassed that window
+   484                                                                                     todel=[self.file_destination + "/" + str(s) + ".jpg" for s in range(self.frame_count-self.windy_threshold,self.frame_count)]
+   485                                                                                     for x in todel: 
+   486                                                                                             if os.path.exists(x): 
+   487                                                                                                     self.windy_count=self.windy_count+1
+   488                                                                                                     os.remove(x)
+   489                                                                     
+   490                                                     #save the frame count and the time in video, in case user wants to check in the original
+   491                                                     #create a time object, this relies on the frame_rate being correct!
+   492                                                     #set seconds
+   493  103.117 MiB    0.000 MiB                           sec = timedelta(seconds=int(self.frame_count/float(self.frame_rate)))             
+   494  103.117 MiB    0.000 MiB                           d = datetime(1,1,1) + sec
+   495                             
+   496  103.117 MiB    0.000 MiB                           for target in bound_center:
+   497  103.117 MiB    0.000 MiB                                   stampadd=(str("%d:%d:%d "  % (d.hour,d.minute, d.second)), int(self.frame_count),target[0],target[1])
+   498  103.117 MiB    0.000 MiB                                   self.stamp.append(stampadd)
+   499                             
+   500                                                     #if inside area and counter is on, write stamp to a seperate file
+   501  103.117 MiB    0.000 MiB                           if self.set_areacounter & inside_area:
+   502                                                             for target in bound_center:
+   503                                                                     stampadd=(str("%d:%d:%d "  % (d.hour,d.minute, d.second)), int(self.frame_count),target[0],target[1])
+   504                                                                     self.areaC.append(stampadd)
+   505                                                             
+   506                                                     #Have a returned counter to balance hitRate
+   507  103.117 MiB    0.000 MiB                           self.total_count=self.total_count+1
+   508                                                     
+   509                                                     #set flag to motion
+   510  103.117 MiB    0.000 MiB                           self.noMotion=False
+   511                                                     
+   512                                                     ###Adaptation based on current conditions
+   513                                                     
+   514  103.117 MiB    0.000 MiB                           cutoff=int(self.frame_rate * 60 * 10)
+   515                                                     
+   516  103.117 MiB    0.000 MiB                           if self.adapt:
+   517                                                             
+   518                                                             #If current frame is a multiple of the 10 minute mark
+   519  103.117 MiB    0.000 MiB                                   if self.frame_count % cutoff == 0:                                  
+   520                                                             
+   521                                                                     #get the last 10 minutes
+   522                                                                     lastten=self.frame_results[-cutoff:]
+   523                                                                     
+   524                                                                     #If more than 20% of frames have been printed.
+   525                                                                     
+   526                                                                     if sum(lastten)/float(len(lastten)) > self.frameHIT:  
+   527                                                                             if self.subMethod == "MOG":
+   528                                                                                             
+   529                                                                                     #increase tolerance rate
+   530                                                                                     self.mogvariance=self.mogvariance+5
+   531                                                                     
+   532                                                                                     #add a ceiling
+   533                                                                                     if self.mogvariance > 50: self.mogvariance = 50
+   534                                                                                     
+   535                                                                                     print("Adapting to video conditions: increasing MOG variance tolerance to %d" % self.mogvariance)
+   536                                                                                     
+   537                                     
+   538                                                                             else:                       
+   539                             
+   540                                                                                     #Increase accumulated averaging
+   541                                                                                     self.accAvg=self.accAvg+0.05
+   542                                                                             
+   543                                                                                     #Build bounds. in a floor, the value can't be negative.
+   544                                                                                     if self.accAvg < 0.1: self.accAvg=0.1
+   545                                                                                     if self.accAvg > 0.55: self.accAvg=0.55
+   546                                                                                     print("Adapting to video conditions: accAvg is changed to: " + str(self.accAvg) + "\n")                                                        
+
+
