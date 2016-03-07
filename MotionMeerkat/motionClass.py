@@ -155,7 +155,7 @@ class Motion:
                         self.jpgs=[]
                         for ext in pathimage:
                                 self.jpgs.extend(glob.glob(ext))
-                        print('Finding images...complete')
+                        print('%d pictures found' % len(self.jpgs))
                         orig_image=cv2.imread(self.jpgs[0])
                         self.total_frameC=len(self.jpgs)
                         self.frame_rate=1
