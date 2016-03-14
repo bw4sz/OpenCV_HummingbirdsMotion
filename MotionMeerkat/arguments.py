@@ -64,6 +64,14 @@ def arguments(self):
 				self.minSIZE=float(self.minSIZE)/100
                     
                 if(len(sys.argv)< 2):
+				
+				#Run the gui, slightly unconventional
+				import GUI
+				
+				print("run")
+				#Retrieve variables
+				#print([a.mode,a.minSIZE,a.set_ROI, a.mogv,a.mogl,a.drawSmall,a.set_ROI])
+				
                                 #Batch or single file
                                 self.runtype=raw_input("'batch' run, single video 'file' or folder of ordered 'pictures'? (file):\n")   
                                 if not self.runtype: self.runtype="file"

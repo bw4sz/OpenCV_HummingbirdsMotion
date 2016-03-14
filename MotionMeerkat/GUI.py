@@ -1,5 +1,4 @@
 from kivy.app import App
-
 from kivy.uix.scatter import Scatter
 from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
@@ -43,11 +42,7 @@ class MotionMeerkatApp(App):
         top.add_widget(t1)
         top.add_widget(t2)
         top.add_widget(t3)
-        
-        
-        #lets work from top to bottom
-        #filechooser, we'll get there.
-        
+
         #Input file
         #########################
         
@@ -209,11 +204,8 @@ class MotionMeerkatApp(App):
         b.add_widget(t)
         
         return b
-        
-if __name__ == "__main__":
-    a=MotionMeerkatApp()
-    a.run()
-    
-    #Variables set
-    print([a.mode,a.minSIZE,a.set_ROI, a.mogv,a.mogl,a.drawSmall,a.set_ROI])
+#run
+a=MotionMeerkatApp()
+a.run()
 
+#set arguments
