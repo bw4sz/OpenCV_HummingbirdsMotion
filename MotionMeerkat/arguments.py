@@ -2,6 +2,7 @@ import sys
 import sourceM
 import argparse
 import numpy as np
+import GUI
 
 Usage = """
 
@@ -66,81 +67,59 @@ def arguments(self):
                 if(len(sys.argv)< 2):
 				
 				#Run the gui, slightly unconventional
-				import GUI
-				
-				print("run")
+				self.mode,self.minSIZE,self.set_ROI,q2,q1,self.drawSmall=GUI.GUI()
+								
 				#Retrieve variables
-				#print([a.mode,a.minSIZE,a.set_ROI, a.mogv,a.mogl,a.drawSmall,a.set_ROI])
+		
 				
-                                #Batch or single file
-                                self.runtype=raw_input("'batch' run, single video 'file' or folder of ordered 'pictures'? (file):\n")   
-                                if not self.runtype: self.runtype="file"
-                                
-                                if(self.runtype=="file"):
-                                                self.inDEST=sourceM.ask_file()
-                                                self.pictures=False
-                                if(self.runtype=="batch"):
-                                                self.batchpool=raw_input("Enter folder containing videos:\n")
-                                                self.pictures=False
-                                if(self.runtype=="pictures"):
-                                                self.inDEST=raw_input("Filenames need to be chronological order. Enter folder containing pictures:\n")                             
-                                                self.pictures=True
-                                #Destination of file
-                                self.fileD=raw_input("File Destination Folder (C:\MotionMeerkat):\n")   
-                                if not self.fileD: self.fileD = str("C:\MotionMeerkat")
+				#Array of movement options
+				q1select=np.arange(0,.16,.03)
+				self.moglearning=q1select[int(q1)]
+				q2select=np.arange(10,40,5)
+				self.mogvariance=q2select[int(q2)]				
+						
+				#Set defaults that weren't specified.
+				self.frameHIT=0.10
+				self.adapt=True
+				self.makeVID="frames"
+				self.scan = 0
+				self.threshT=30
+				self.burnin = 0
+				self.frameSET=False
+				self.frame_rate=0
+				self.set_areacounter=False
+				self.accAvg = 0.35
+				self.subMethod="MOG"
+				self.windy = False
+				self.todraw=False
+				self.remove_singles=False
+				self.single_distance = 10
+				self.runtype="file"
+						
+				if self.mode=="manual":
+						#Batch or single file
+						self.runtype=raw_input("'batch' run, single video 'file' or folder of ordered 'pictures'? (file):\n")   
+						if not self.runtype: self.runtype="file"
 				
-				##Automatic mode or manual
-                                self.mode=raw_input("'Auto' mode or 'manual'. Auto mode will define settings based on video properties. Manual mode allows greater flexibility. (auto)\n")   
-                                if not self.mode: self.mode = 'auto'
-				if self.mode: self.mode=self.mode.lower()
+						if(self.runtype=="file"):
+								self.inDEST=sourceM.ask_file()
+								self.pictures=False
+						if(self.runtype=="batch"):
+								self.batchpool=raw_input("Enter folder containing videos:\n")
+								self.pictures=False
+						if(self.runtype=="pictures"):
+								self.inDEST=raw_input("Filenames need to be chronological order. Enter folder containing pictures:\n")                             
+								self.pictures=True
+						#Destination of file
+						self.fileD=raw_input("File Destination Folder (C:\MotionMeerkat):\n")   
+						if not self.fileD: self.fileD = str("C:\MotionMeerkat")
 				
-				if self.mode=='auto':
-						print('''Automatic mode will try to set the settings based on questions and video characteristics. The settings will be printed in case the user wants to refine using manual mode. It usually better to be conservative and review more frames rather than risk missing an object of interest.\n''')
-						q1=raw_input("How much background variation [eg. wind, waves, debris] do you expect in your video?\nFrom 0[no movement, eg. underwater] to 5 [extreme movement, eg. windy trees]: (2)\n")
-						if not q1: q1 = 3
-						
-						#Array of movement options
-						q1select=np.arange(0,.16,.03)
-						self.moglearning=q1select[int(q1)]
-						
-						q2=raw_input("How quickly does your organism move?\nFrom 0 [slowly, eg. fish] to 5 [quickly, eg. flying insects] (2)\n")
-						if not q2: q2=3
-						q2select=np.arange(10,40,5)
-						self.mogvariance=q2select[int(q2)]
-						
-						self.drawSmall=raw_input("'Enter' or 'draw' the expected size of your smallest object of interest? (enter)\n")	
-						if not self.drawSmall: 
-								self.drawSmall='enter'
-						else: 
-								self.drawSmall=self.drawSmall.lower()
-						
-						if self.drawSmall=='enter':
-								self.minSIZE=raw_input("Minimum motion object size\nExpressed as the proportion of the screen.\nFor example, the default (0.3) would ignore objects less than 0.3% of the screen size (0.3):\n")
-								if not self.minSIZE: self.minSIZE = float(0.3/100)
-								else: self.minSIZE=float(self.minSIZE)/100						
+						##Automatic mode or manual
+						self.mode=raw_input("'Auto' mode or 'manual'. Auto mode will define settings based on video properties. Manual mode allows greater flexibility. (auto)\n")   
+						if not self.mode: self.mode = 'auto'
+						if self.mode: self.mode=self.mode.lower()
 
-						self.set_ROI ='y'==raw_input("Would you like to set a region of interest to crop based on expected location [ie. flower, nest, bait] (y)\n")
-						if self.set_ROI==True: 
-								self.ROI_include = 'include'
 						
-						#Set defaults that weren't specified.
-						self.frameHIT=0.10
-						self.adapt=True
-						self.makeVID="frames"
-						self.scan = 0
-						self.threshT=30
-						self.burnin = 0
-						self.frameSET=False
-						self.frame_rate=0
-						self.set_areacounter=False
-						self.accAvg = 0.35
-						self.subMethod="MOG"
-						self.windy = False
-						self.todraw=False
-						self.remove_singles=False
-						self.single_distance = 10
-						
-				else:
 						#Sensitivity to background 
 						self.moglearning=raw_input("\nSensitivity to background movement, ranging from 0 [very sensitive] to 1.\nRecommended between 0.05 for still videos and 0.2 for windy videos\nAs learning rate increases, fewer frames will be returned (0.15):\n")
 						if not self.moglearning: self.moglearning = 0.15

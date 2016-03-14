@@ -1,1 +1,4 @@
-from kivy.uix.slider import Slider
+import GUI
+
+a=GUI.GUI()
+print(a)
