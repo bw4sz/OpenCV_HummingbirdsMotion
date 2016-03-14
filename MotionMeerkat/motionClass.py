@@ -233,6 +233,8 @@ class Motion:
 ##Function to compute background during the video loop
 ######################################################
         def run(self):
+                
+                print("Processing...")
 
                 while True:
                         #Was the last frame no motion; if not, scan frames
@@ -529,7 +531,7 @@ class Motion:
                                                         self.mogvariance=self.mogvariance+5
                                         
                                                         #add a ceiling
-                                                        if self.mogvariance > 50: self.mogvariance = 50
+                                                        if self.mogvariance > 100: self.mogvariance = 100
                                                         
                                                         print("Adapting to video conditions: increasing MOG variance tolerance to %d" % self.mogvariance)
                                                         

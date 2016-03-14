@@ -59,6 +59,9 @@ def arguments(self):
 				else:
 						self.pictures=True
                                 print "\n"
+				
+				#standardize minimum size
+				self.minSIZE=float(self.minSIZE)/100
                     
                 if(len(sys.argv)< 2):
                                 #Batch or single file
