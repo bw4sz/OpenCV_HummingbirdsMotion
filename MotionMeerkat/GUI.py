@@ -52,6 +52,8 @@ def GUI():
                 self.stop()
                 
             self.fc=TextInput(text="Input File or Folder",font_size=20,size_hint=(1,.5))
+            self.outd=TextInput(text="Output Location (C:/MotionMeerktat)",font_size=20,size_hint=(.645,.5),pos_hint={'center_x':0.485})
+            
             mm=Button(text="Go to manual mode",size_hint=(.3,.5),on_press=mm_callback)
     
             banner = BoxLayout(orientation='horizontal',size_hint=(1,1))
@@ -61,6 +63,7 @@ def GUI():
             
             #add banner to overall 
             b.add_widget(banner)
+            b.add_widget(self.outd)
             
             #########################
             ####Mog sensitivity slider
@@ -207,6 +210,6 @@ def GUI():
     #run
     a=MotionMeerkatApp()
     a.run()
-    return([a.mode,a.set_ROI,a.mogv,a.mogl,a.drawSmall,float(a.mstext.text),a.fc.text])
+    return([a.mode,a.set_ROI,a.mogv,a.mogl,a.drawSmall,float(a.mstext.text),a.fc.text,a.outd])
     
     #set arguments

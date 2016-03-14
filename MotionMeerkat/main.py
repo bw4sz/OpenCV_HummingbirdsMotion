@@ -30,22 +30,18 @@ if __name__ == "__main__":
                     motionVid=motionClass.Motion()
                     arguments.arguments(motionVid)
                     wrapper.wrap(motionVid)
+                    break
                     
             except ValueError as e:        
                 cv2.destroyAllWindows()
                 print(str(e))
-                print("To report an error, submit a new issue: https://github.com/bw4sz/OpenCV_HummingbirdsMotion/issues,\nplease specify your input parameters and take a screenshot of your error message.") 
                 ch=ending()
                 if ch == 'r': continue
-                if ch == 'x': break                
+                if ch == 'x': break 
                 
-            #reboot or exit?
-            #if there were system arguments, immediately exit
-            if len(sys.argv)>=2:
-                    break
-            ch=ending()
-            if ch == 'r': continue
-            if ch == 'x': break
+                
+
+            
 
             
 

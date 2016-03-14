@@ -1,4 +1,5 @@
 import sys
+import os
 import sourceM
 import argparse
 import numpy as np
@@ -66,8 +67,10 @@ def arguments(self):
                     
                 if(len(sys.argv)< 2):
 				
+				print("Welcome to MotionMeerkat\nPlease use the GUI window to select settings\nOutput will appear in this terminal")
+				
 				#Run the gui, slightly unconventional
-				self.mode,self.set_ROI,q2,q1,self.drawSmall,self.minSIZE,self.inDEST=GUI.GUI()
+				self.mode,self.set_ROI,q2,q1,self.drawSmall,self.minSIZE,self.inDEST,self.fileD=GUI.GUI()
 		
 				#Array of movement options
 				q1select=np.arange(0,.16,.03)
@@ -78,6 +81,14 @@ def arguments(self):
 				#if no file was selected
 				if self.inDEST=="Input File or Folder":
 						self.inDEST="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv"
+				if self.fileD=="Output Location (C:/MotionMeerktat)":
+						self.fileD="C:/MotionMeerkat"
+				
+				#set runtype
+				if os.path.isdir(self.inDEST):
+						self.runtype="batch"
+				else:
+						self.runtype="file"
 						
 				#Set defaults that weren't specified.
 				self.fileD="C:\MotionMeerkat"
@@ -96,7 +107,6 @@ def arguments(self):
 				self.todraw=False
 				self.remove_singles=False
 				self.single_distance = 10
-				self.runtype="file"
 				self.pictures=False
 						
 				if self.mode=="manual":
