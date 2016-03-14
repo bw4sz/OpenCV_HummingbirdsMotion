@@ -19,7 +19,6 @@ def GUI():
             #Defaults for input variables
             self.mode='auto'
             self.set_ROI=False
-            self.minSIZE=0.3
             self.mogl=3
             self.mogv=3
             self.drawSmall=False
@@ -52,12 +51,12 @@ def GUI():
                 self.mode='manual'
                 self.stop()
                 
-            fc=TextInput(text="Input File or Folder",font_size=20,size_hint=(1,.5))
+            self.fc=TextInput(text="Input File or Folder",font_size=20,size_hint=(1,.5))
             mm=Button(text="Go to manual mode",size_hint=(.3,.5),on_press=mm_callback)
     
             banner = BoxLayout(orientation='horizontal',size_hint=(1,1))
             banner.add_widget(top)
-            banner.add_widget(fc)
+            banner.add_widget(self.fc)
             banner.add_widget(mm)
             
             #add banner to overall 
@@ -166,9 +165,10 @@ def GUI():
             # Minsize enter
             ms_layout=BoxLayout(orientation='vertical',size_hint=(.5,.9),pos_hint={'top':1})
             drawl=Label(text="Minimum object size (% frame)",font_size=13)
-            mstext=TextInput(text="0.03",size_hint=(.3,1),pos_hint={'center_x':0.5})
+            self.mstext=TextInput(text="0.03",size_hint=(.3,1),pos_hint={'center_x':0.5})
+            
             ms_layout.add_widget(drawl)
-            ms_layout.add_widget(mstext)
+            ms_layout.add_widget(self.mstext)
             
             #Minsize draw
             ms_draw_layout=BoxLayout(orientation='vertical',size_hint=(.5,.9),pos_hint={'top':1})
@@ -207,6 +207,6 @@ def GUI():
     #run
     a=MotionMeerkatApp()
     a.run()
-    return([a.mode,a.minSIZE,a.set_ROI, a.mogv,a.mogl,a.drawSmall])
+    return([a.mode,a.set_ROI,a.mogv,a.mogl,a.drawSmall,float(a.mstext.text),a.fc.text])
     
     #set arguments

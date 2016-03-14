@@ -67,18 +67,20 @@ def arguments(self):
                 if(len(sys.argv)< 2):
 				
 				#Run the gui, slightly unconventional
-				self.mode,self.minSIZE,self.set_ROI,q2,q1,self.drawSmall=GUI.GUI()
-								
-				#Retrieve variables
+				self.mode,self.set_ROI,q2,q1,self.drawSmall,self.minSIZE,self.inDEST=GUI.GUI()
 		
-				
 				#Array of movement options
 				q1select=np.arange(0,.16,.03)
 				self.moglearning=q1select[int(q1)]
 				q2select=np.arange(10,40,5)
-				self.mogvariance=q2select[int(q2)]				
+				self.mogvariance=q2select[int(q2)]
+				
+				#if no file was selected
+				if self.inDEST=="Input File or Folder":
+						self.inDEST="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv"
 						
 				#Set defaults that weren't specified.
+				self.fileD="C:\MotionMeerkat"
 				self.frameHIT=0.10
 				self.adapt=True
 				self.makeVID="frames"
@@ -95,6 +97,7 @@ def arguments(self):
 				self.remove_singles=False
 				self.single_distance = 10
 				self.runtype="file"
+				self.pictures=False
 						
 				if self.mode=="manual":
 						#Batch or single file
@@ -118,7 +121,6 @@ def arguments(self):
 						self.mode=raw_input("'Auto' mode or 'manual'. Auto mode will define settings based on video properties. Manual mode allows greater flexibility. (auto)\n")   
 						if not self.mode: self.mode = 'auto'
 						if self.mode: self.mode=self.mode.lower()
-
 						
 						#Sensitivity to background 
 						self.moglearning=raw_input("\nSensitivity to background movement, ranging from 0 [very sensitive] to 1.\nRecommended between 0.05 for still videos and 0.2 for windy videos\nAs learning rate increases, fewer frames will be returned (0.15):\n")
