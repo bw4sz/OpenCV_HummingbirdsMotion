@@ -44,7 +44,7 @@ class Motion:
                 
                 #Capture average minimum box size for plotting
                 self.avg_area = []
-                
+                                
                 #Empty list for time stamps
                 self.stamp=[]
 

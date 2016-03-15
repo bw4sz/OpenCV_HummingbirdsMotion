@@ -21,7 +21,7 @@ def GUI():
             self.set_ROI=False
             self.mogl=3
             self.mogv=3
-            self.drawSmall=False
+            self.drawSmall='enter'
             
             #create overall layout
             b = BoxLayout(orientation='vertical',spacing=0)
@@ -180,9 +180,9 @@ def GUI():
             #Drawing checkbox
             def on_check_draw(checkbox, value):
                 if value:
-                    self.drawSmall
+                    self.drawSmall='draw'
                 else:
-                    self.drawSmall
+                    self.drawSmall='enter'
             
             draw = CheckBox()
             draw.bind(active=on_check_draw)      

@@ -87,6 +87,7 @@ def arguments(self):
 				#set runtype
 				if os.path.isdir(self.inDEST):
 						self.runtype="batch"
+						self.batchpool=self.inDEST
 				else:
 						self.runtype="file"
 						
@@ -108,6 +109,7 @@ def arguments(self):
 				self.remove_singles=False
 				self.single_distance = 10
 				self.pictures=False
+				self.ROI_include='include'
 						
 				if self.mode=="manual":
 						#Batch or single file

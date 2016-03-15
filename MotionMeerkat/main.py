@@ -32,9 +32,9 @@ if __name__ == "__main__":
                     wrapper.wrap(motionVid)
                     break
                     
-            except ValueError as e:        
+            except:       
                 cv2.destroyAllWindows()
-                print(str(e))
+                traceback.print_exc()
                 ch=ending()
                 if ch == 'r': continue
                 if ch == 'x': break 

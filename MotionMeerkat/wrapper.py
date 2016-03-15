@@ -35,35 +35,26 @@ def wrap(ob) :
                      
                         #Place run inside try catch loop; in case of error, step to next video
                         ##Run Motion Function
+                        
                         #override to set the inDEST file to loop from batch videos
                         ob.inDEST=vid
-                        try:
-                                ob.prep()
-                                ob.run()
-                                ob.videoM()
-                                report.report(ob)
-                        except Exception, e:
-                                print( "Error %s " % e + "\n" )
-                                print 'Error in Video:',vid
+                        ob.prep()
+                        ob.run()
+                        ob.videoM()
+                        report.report(ob)
+
 
         ###If runtype is a single file - run file destination        
         if (ob.runtype == "file"):
-                try:
-                        ob.prep()
-                        ob.run()
-                        ob.videoM()
-                        report.report(ob)                                
-                except:
-                        traceback.print_exc()
-                        print 'Error in input file:',ob.inDEST
+
+                ob.prep()
+                ob.run()
+                ob.videoM()
+                report.report(ob)                                
 
         ###If runtype is a single file - run file destination        
         if (ob.runtype == "pictures"):
-                try:
-                        ob.prep()
-                        ob.run()
-                        ob.videoM()
-                        report.report(ob)                                
-                except:
-                        traceback.print_exc()
-                        print 'Error in input file:',ob.inDEST        
+                ob.prep()
+                ob.run()
+                ob.videoM()
+                report.report(ob)                                    
