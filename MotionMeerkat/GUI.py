@@ -110,9 +110,9 @@ def GUI():
             
             #images
             cartoons=BoxLayout(size_hint=(.8,.4),pos_hint={'center_x':0.47})
-            shark=Image(source="C:/Users/Ben/Documents/Kivy/images/shark.png")
-            butterfly=Image(source="C:/Users/Ben/Documents/Kivy/images/butterfly.png")        
-            Bird=Image(source="C:/Users/Ben/Documents/Kivy/images/bird.png")        
+            shark=Image(source="images/shark.png")
+            butterfly=Image(source="images/butterfly.png")        
+            Bird=Image(source="images/bird.png")        
             
             cartoons.add_widget(shark)
             cartoons.add_widget(butterfly)        
