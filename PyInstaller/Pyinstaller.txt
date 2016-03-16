@@ -4,6 +4,9 @@ cd MotionMeerkat
 #execute, if already created, if not, pyinstaller main.py --onedir
 pyinstaller -y --onedir main.spec
 
+#edit the spec
+
+
 #copy shapely
 cp -r c:/Python27/Lib/site-packages/shapely/ dist/main/
 
@@ -13,6 +16,9 @@ cp c:/Python27/lib/lib-tk/Dialog.py dist/main/
 
 #Copy icon
 cp C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/thumbnail.ico dist/main/
+
+#copy images
+cp -R C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/images/ dist/main/
 
 #Copy plotwatcher test file
 cp C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/PlotwatcherTest.TLV dist/main/
