@@ -112,6 +112,8 @@ def arguments(self):
 				self.ROI_include='include'
 						
 				if self.mode=="manual":
+						print("\n\n Entering manual mode")
+						
 						#Batch or single file
 						self.runtype=raw_input("'batch' run, single video 'file' or folder of ordered 'pictures'? (file):\n")   
 						if not self.runtype: self.runtype="file"

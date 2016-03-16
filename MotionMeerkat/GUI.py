@@ -201,7 +201,7 @@ def GUI():
             
             #Run!
             def run_press(instance):
-                self.stop()        
+                self.stop()    
             t = Button(text='Run',font_size=40,size_hint=(1,.6),on_press=run_press)
                
             b.add_widget(t)
