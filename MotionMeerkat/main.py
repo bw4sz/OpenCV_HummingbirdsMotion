@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-import motionClass
-import wrapper
-import arguments
+
 import traceback
 import sys
 import numpy as np
@@ -13,29 +11,31 @@ import cv2
 import FileDialog
 import GUI
 
+#MotionMeerkat
+import CommandArgs
+import motionClass
+import wrapper
+
 #==================
 # MAIN ENTRY POINT
 #==================
 
-#Define ending function
-def ending():
-    while True:
-        ch=raw_input("Enter r to reboot, Enter x to exit \n")
-        if ch=='r':
-            return(ch)
-        if ch=='x':
-            return(ch)
-
 if __name__ == "__main__":
         while True:
-            try:
-                GUI.GUI()
-            except:       
-                cv2.destroyAllWindows()
-                traceback.print_exc()
-                ch=ending()
-                if ch == 'r': continue
-                if ch == 'x': break 
+            
+                #Read in system arguments if they exist
+                if len(sys.argv)> 2:
+                        
+                        motionVid=motionClass.Motion()                
+                        CommandArgs.commandargs(motionVid)
+                        wrapper.wrap(motionVid)                
+                else:            
+                        try:
+                                GUI.GUI()
+                        except:       
+                                cv2.destroyAllWindows()
+                                traceback.print_exc()
+
                 
                 
 

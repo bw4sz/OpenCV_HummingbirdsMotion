@@ -1,4 +1,6 @@
 def GUI():
+    
+    #KIVY modules
     from kivy.logger import Logger    
     from kivy.app import App
     from kivy.uix.scatter import Scatter
@@ -11,6 +13,10 @@ def GUI():
     from kivy.uix.checkbox import CheckBox
     from kivy.uix.image import Image
     
+    #MotionMeerkat
+    import motionClass
+    import wrapper
+    import arguments    
     
     #For hyperlinks
     import webbrowser
@@ -202,9 +208,8 @@ def GUI():
             
             #Run!
             def run_press(instance):
-                    motionVid=motionClass.Motion()
-                    arguments.arguments(motionVid)   
-                    wrapper.wrap(motionVid)
+                motionVid=motionClass.Motion()                
+                wrapper.wrap(motionVid)  
                     
             t = Button(text='Run',font_size=40,size_hint=(1,.6),on_press=run_press)
                
@@ -214,5 +219,5 @@ def GUI():
     #run
     a=MotionMeerkatApp()
     a.run()
-    return([a.mode,a.set_ROI,a.mogv,a.mogl,a.drawSmall,float(a.mstext.text),a.fc.text,a.outd])
-    #set arguments
+    a.stop()
+    
