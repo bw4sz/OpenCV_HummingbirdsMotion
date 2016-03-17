@@ -1,4 +1,5 @@
 def GUI():
+    from kivy.logger import Logger    
     from kivy.app import App
     from kivy.uix.scatter import Scatter
     from kivy.uix.label import Label
@@ -10,6 +11,10 @@ def GUI():
     from kivy.uix.checkbox import CheckBox
     from kivy.uix.image import Image
     
+    
+    #Turn off logger for now
+    Logger.disabled=True    
+
     #For hyperlinks
     import webbrowser
             
@@ -49,7 +54,7 @@ def GUI():
             #send to manual mode on press.
             def mm_callback(instance):
                 self.mode='manual'
-                self.stop()
+                self.exit()
                 
             self.fc=TextInput(text="Input File or Folder",font_size=20,size_hint=(1,.5))
             self.outd=TextInput(text="Output Location (C:/MotionMeerktat)",font_size=20,size_hint=(.645,.5),pos_hint={'center_x':0.485})
@@ -211,5 +216,4 @@ def GUI():
     a=MotionMeerkatApp()
     a.run()
     return([a.mode,a.set_ROI,a.mogv,a.mogl,a.drawSmall,float(a.mstext.text),a.fc.text,a.outd])
-    
     #set arguments
