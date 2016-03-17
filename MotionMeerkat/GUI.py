@@ -12,9 +12,6 @@ def GUI():
     from kivy.uix.image import Image
     
     
-    #Turn off logger for now
-    Logger.disabled=True    
-
     #For hyperlinks
     import webbrowser
             
@@ -50,7 +47,6 @@ def GUI():
     
             #Input file
             #########################
-            
             #send to manual mode on press.
             def mm_callback(instance):
                 self.mode='manual'
@@ -206,7 +202,10 @@ def GUI():
             
             #Run!
             def run_press(instance):
-                self.stop()    
+                    motionVid=motionClass.Motion()
+                    arguments.arguments(motionVid)   
+                    wrapper.wrap(motionVid)
+                    
             t = Button(text='Run',font_size=40,size_hint=(1,.6),on_press=run_press)
                
             b.add_widget(t)

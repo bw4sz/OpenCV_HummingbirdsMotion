@@ -11,6 +11,7 @@ import ctypes
 import shapely
 import cv2
 import FileDialog
+import GUI
 
 #==================
 # MAIN ENTRY POINT
@@ -28,11 +29,7 @@ def ending():
 if __name__ == "__main__":
         while True:
             try:
-                    motionVid=motionClass.Motion()
-                    arguments.arguments(motionVid)
-                    wrapper.wrap(motionVid)
-                    break
-                    
+                GUI.GUI()
             except:       
                 cv2.destroyAllWindows()
                 traceback.print_exc()
