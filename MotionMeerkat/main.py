@@ -36,7 +36,7 @@ if __name__ == "__main__":
                                 cv2.destroyAllWindows()
                                 traceback.print_exc()
 
-                
+                break
                 
 
             
