@@ -208,7 +208,37 @@ def GUI():
             
             #Run!
             def run_press(instance):
-                motionVid=motionClass.Motion()                
+                
+                #Create a MotionInstance
+                motionVid=motionClass.Motion()
+                
+                ################################
+                #Set arguments by gui
+                ################################
+                
+                #File
+                motionVid.inDEST=self.fc.text
+            
+                #destination
+                motionVid.fileD=self.outd.text                
+                
+                #mode
+                motionVid.mode=self.mode
+                
+                #region of interest
+                motionVid.set_ROI=self.set_ROI
+                
+                #Mog params
+                motionVid.q1=self.mogl
+                motionVid.q2=self.mogv
+                
+                #size params
+                motionVid.drawSmall=self.drawSmall
+                motionVid.minSIZE=float(self.mstext.text)
+                                
+                #send to the rest of arguments
+                arguments.arguments(motionVid)
+                
                 wrapper.wrap(motionVid)  
                     
             t = Button(text='Run',font_size=40,size_hint=(1,.6),on_press=run_press)
