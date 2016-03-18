@@ -1,147 +1,159 @@
 
+<MyScreenManager>:
+    MainScreen:
+    
+    
 <MainScreen>:
-    orientation:'vertical'
+    name:'GUI'
     BoxLayout:
+        orientation:'vertical'
         BoxLayout:
-            orientation:'vertical'
-            spacing:-1
-            size_hint:(0.25,1)
-            Label:
-                text:"MotionMeerkat V2.0"
-                font_size:12
-            Button:
-                text:"Help"
-                font_size:10
-                on_press: root.help_site()
-            Button:
-                text:"Submit Issue"
-                font_size:10
-                on_press: root.help_issue()
-        TextInput:
-            id:fc
-            text:"Input File or Folder"
-            on_text: root.motionVid.inDEST=self.text
-            font_size:20
-            size_hint:(1,.5)
-        Button:
-            text:"Manual mode"
-            #on_press:screen manager?
-            size_hint:(0.3,0.5)
-    TextInput:
-        id:outd
-        text:"Output Location (C:/MotionMeerkat)"
-        on_text: root.motionVid.fileD=self.text
-        font_size:20
-        size_hint:(.645,.5)
-        pos_hint:{'center_x':0.485}
-    BoxLayout:
-        orientation:'horizontal'
-        spacing:10
-        size_hint:(1,0.5)
-        pos_hint:{'center_x':0.5}
-        Label:
-            text:"How much background variation [eg. wind, waves, debris] do you expect in your video?"
-            font_size:15
-            size_hint:(1,1)
-    BoxLayout:
-        spacing:10
-        size_hint:(1,.3)
-        pos_hint:{'center_x':0.5}
-        Label:
-            text:"No Movement"
-            font_size:15
-            size_hint:(.15,1)
-        Slider:
-            id:moglearn
-            min:0
-            max:5
-            value:3
-            on_value:root.motionVid.q1=self.value
-            step:1
-            size_hint:(0.7,1)    
-        Label:
-            text:"Extreme Movement"
-            font_size:15
-            size_hint:(.15,1)
-        Label:
-            text:str(int(moglearn.value))
-            size_hint:(0.1,1)
-    BoxLayout:
-        orientation:'horizontal'
-        spacing:10
-        size_hint:(1,0.5)
-        pos_hint:{'center_y':0.1}
-        Label:
-            text:"How quickly does your organism move?"
-            font_size:15
-            size_hint:(1,0.6)
-    BoxLayout:
-        orientation:'horizontal'
-        size_hint:(0.8,0.4)
-        pos_hint:{'center_x':0.47}
-        Image:
-            source:"images/shark.png"
-        Image:
-            source:"images/butterfly.png"       
-        Image:
-            source:"images/bird.png"
-    BoxLayout:
-        spacing:10
-        size_hint:(1,.6)
-        pos_hint:{'center_y':0.1}
-        Label:
-            text:"Slow"
-            font_size:15
-            size_hint:(.15,1)
-        Slider:
-            id:tollearn
-            min:0
-            max:5
-            value:3
-            step:1
-            size_hint:(0.7,1)
-            on_value: root.motionVid.q2=self.value
-        Label:
-            text:"Fast"
-            font_size:15
-            size_hint:(.15,1)
-        Label:
-            text:str(int(tollearn.value))
-            size_hint:(.1,1)
-    BoxLayout:
-        BoxLayout:
-            orientation:'vertical'
-            size_hint:(0.5,0.9)
-            pos_hint:{'top':1}
-            Label:
-                text:"Minimum object size (% frame)"
-                font_size:13
+            BoxLayout:
+                orientation:'vertical'
+                spacing:-1
+                size_hint:(0.25,1)
+                Label:
+                    text:"MotionMeerkat V2.0"
+                    font_size:12
+                Button:
+                    text:"Help"
+                    font_size:10
+                    on_press: root.help_site()
+                Button:
+                    text:"Submit Issue"
+                    font_size:10
+                    on_press: root.help_issue()
             TextInput:
-                id:mstext
-                text:"0.03"
-                size_hint:(0.3,1)
-                pos_hint:{'center_x':0.5}
+                id:fc
+                text:"Input File or Folder"
+                on_text: app.root.motionVid.inDEST=self.text
+                font_size:20
+                size_hint:(1,.5)
+            Button:
+                text:"Manual mode"
+                #on_press:
+                size_hint:(0.3,0.5)
+        TextInput:
+            id:outd
+            text:"Output Location (C:/MotionMeerkat)"
+            on_text: app.root.motionVid.fileD=self.text
+            font_size:20
+            size_hint:(.645,.5)
+            pos_hint:{'center_x':0.485}
         BoxLayout:
-            orientation:'vertical'
-            size_hint:(0.5,0.9)
-            pos_hint:{'top':1}
+            orientation:'horizontal'
+            spacing:10
+            size_hint:(1,0.5)
+            pos_hint:{'center_x':0.5}
             Label:
-                text:"[b]Or [/b] Draw your object size on screen"
-                font_size:13
-                markup:True
-            CheckBox:
-                on_active: root.on_check_draw(self.active)
+                text:"How much background variation [eg. wind, waves, debris] do you expect in your video?"
+                font_size:15
+                size_hint:(1,1)
         BoxLayout:
-            orientation:'vertical'
-            size_hint:(1,0.9)
-            pos_hint:{'top':1}
+            spacing:10
+            size_hint:(1,.3)
+            pos_hint:{'center_x':0.5}
             Label:
-                text:"Crop area of motion detection"
-                font_size:13
-            CheckBox:
-                on_active: root.on_check_roi(self.active)
-    Button: 
-        text:"Run"
-        font_size:40
-        size_hint:(1,0.6)
-        on_press:root.run_press()
+                text:"No Movement"
+                font_size:15
+                size_hint:(.15,1)
+            Slider:
+                id:moglearn
+                min:0
+                max:5
+                value:3
+                on_value:app.root.motionVid.q1=self.value
+                step:1
+                size_hint:(0.7,1)    
+            Label:
+                text:"Extreme Movement"
+                font_size:15
+                size_hint:(.15,1)
+            Label:
+                text:str(int(moglearn.value))
+                size_hint:(0.1,1)
+        BoxLayout:
+            orientation:'horizontal'
+            spacing:10
+            size_hint:(1,0.5)
+            pos_hint:{'center_y':0.1}
+            Label:
+                text:"How quickly does your organism move?"
+                font_size:15
+                size_hint:(1,0.6)
+        BoxLayout:
+            orientation:'horizontal'
+            size_hint:(0.8,0.4)
+            pos_hint:{'center_x':0.47}
+            Image:
+                source:"images/shark.png"
+            Image:
+                source:"images/butterfly.png"       
+            Image:
+                source:"images/bird.png"
+        BoxLayout:
+            spacing:10
+            size_hint:(1,.6)
+            pos_hint:{'center_y':0.1}
+            Label:
+                text:"Slow"
+                font_size:15
+                size_hint:(.15,1)
+            Slider:
+                id:tollearn
+                min:0
+                max:5
+                value:3
+                step:1
+                size_hint:(0.7,1)
+                on_value: app.root.motionVid.q2=self.value
+            Label:
+                text:"Fast"
+                font_size:15
+                size_hint:(.15,1)
+            Label:
+                text:str(int(tollearn.value))
+                size_hint:(.1,1)
+        BoxLayout:
+            BoxLayout:
+                orientation:'vertical'
+                size_hint:(0.5,0.9)
+                pos_hint:{'top':1}
+                Label:
+                    text:"Minimum object size (% frame)"
+                    font_size:13
+                TextInput:
+                    id:mstext
+                    text:"0.03"
+                    size_hint:(0.3,1)
+                    pos_hint:{'center_x':0.5}
+            BoxLayout:
+                orientation:'vertical'
+                size_hint:(0.5,0.9)
+                pos_hint:{'top':1}
+                Label:
+                    text:"[b]Or [/b] Draw your object size on screen"
+                    font_size:13
+                    markup:True
+                CheckBox:
+                    on_active: root.on_check_draw(self.active,app.root.motionVid)
+            BoxLayout:
+                orientation:'vertical'
+                size_hint:(1,0.9)
+                pos_hint:{'top':1}
+                Label:
+                    text:"Crop area of motion detection"
+                    font_size:13
+                CheckBox:
+                    on_active: root.on_check_roi(self.active,app.root.motionVid)
+        Button: 
+            text:"Run"
+            font_size:40
+            size_hint:(1,0.6)
+            on_release:root.run_press(app.root)
+            
+<ProgressScreen>
+    BoxLayout:
+        Button:
+            text: 'Press'
+            on_press: root.MotionM(app.root.motionVid)

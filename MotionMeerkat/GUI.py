@@ -9,6 +9,10 @@ from kivy.uix.slider import Slider
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.image import Image
 
+#Screen manager
+from kivy.lang import Builder
+from kivy.uix.screenmanager import ScreenManager, Screen
+
 #For hyperlinks
 import webbrowser
 
@@ -16,8 +20,42 @@ import webbrowser
 import motionClass
 import arguments
 import wrapper
+
+
+class MainScreen(Screen):
+         
+     #The behavior of these defaults are then overridden by user interaction.
      
-class MainScreen(BoxLayout):
+     def help_site(instance):
+          webbrowser.open("https://github.com/bw4sz/OpenCV_HummingbirdsMotion/wiki")
+        
+     def help_issue(instance):
+          webbrowser.open("https://github.com/bw4sz/OpenCV_HummingbirdsMotion/issues")
+     
+     def on_check_roi(self, value,motionVid):
+          if value:
+               motionVid.set_ROI=True
+          else:
+               motionVid.set_ROI=False
+     
+     #Drawing checkbox
+     def on_check_draw(self, value,motionVid):     
+          if value:
+               motionVid.drawSmall='draw'
+          else:
+               motionVid.drawSmall='enter'
+     
+     def run_press(self,root):
+          root.getProgress()
+
+          #App.get_running_app().stop()          
+
+class ProgressScreen(Screen):
+     def MotionM(self,motionVid):
+          arguments.arguments(motionVid)
+          wrapper.wrap(motionVid)
+
+class MyScreenManager(ScreenManager):
     
      #Create motion instance class
      motionVid=motionClass.Motion()
@@ -31,36 +69,16 @@ class MainScreen(BoxLayout):
      motionVid.drawSmall='enter'
      motionVid.minSIZE=0.03
      motionVid.set_ROI=False
-     
-     #The behavior of these defaults are then overridden by user interaction.
-     
-     def help_site(instance):
-          webbrowser.open("https://github.com/bw4sz/OpenCV_HummingbirdsMotion/wiki")
-        
-     def help_issue(instance):
-          webbrowser.open("https://github.com/bw4sz/OpenCV_HummingbirdsMotion/issues")
-     
-     def on_check_roi(self, value):
-          if value:
-               self.set_ROI=True
-          else:
-               self.set_ROI=False
-     
-     #Drawing checkbox
-     def on_check_draw(self, value):     
-          if value:
-               self.drawSmall=True
-          else:
-               self.drawSmall=False
-     
-     def run_press(self):
-          arguments.arguments(self.motionVid)
-          wrapper.wrap(self.motionVid)
-          App.get_running_app().stop()
-          
+
+     def getProgress(self):
+          name='P'
+          s=ProgressScreen(name=name)
+          self.add_widget(s)
+          self.current='P'
+
 class MotionMeerkatApp(App):
      def build(self):
-          return MainScreen()
+          return MyScreenManager()
        
 if __name__ == "__main__":
      MotionMeerkatApp().run()
