@@ -3,25 +3,19 @@ import os
 import sourceM
 import argparse
 import numpy as np
-import GUI
-
 
 def arguments(self):
 			
 	if self.mode=="auto":
 
-		#Array of movement options
+		#Array of movement options, first slider
 		q1select=np.arange(0,.16,.03)
 		self.moglearning=q1select[int(self.q1)]
+		
+		#Second slider
 		q2select=np.arange(10,40,5)
 		self.mogvariance=q2select[int(self.q2)]
-		
-		#if no file was selected
-		if self.inDEST=="Input File or Folder":
-				self.inDEST="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv"
-		if self.fileD=="Output Location (C:/MotionMeerktat)":
-				self.fileD="C:/MotionMeerkat"
-		
+
 		#set runtype
 		if os.path.isdir(self.inDEST):
 				self.runtype="batch"
