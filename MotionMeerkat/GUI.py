@@ -21,6 +21,7 @@ import webbrowser
 import motionClass
 import arguments
 import wrapper
+import Plotting
 
 #temp
 from time import sleep
@@ -51,8 +52,7 @@ class MainScreen(Screen):
      def run_press(self,root):
           root.getProgress()
      
-           
-     
+          
 class ProgressScreen(Screen):
      def MotionM(self,motionVid):
           arguments.arguments(motionVid)
@@ -67,6 +67,17 @@ class ProgressScreen(Screen):
           screenmanage.current='R'        
 
 class ResultsScreen(Screen):
+     
+     #generate plots
+     
+     def plots(self,motionVid):
+          #Show if file, don't let it hang command line
+          if motionVid.runtype == 'file':
+     
+               Plotting.combineplots(motionVid.scale_size,motionVid.frame_results,motionVid.minSIZE/100,motionVid.file_destination + "/" + "Diagnostics.png",show=True)
+          else:
+               Plotting.combineplots(motionVid.scale_size,motionVid.frame_results,motionVid.minSIZE/100,motionVid.file_destination + "/" + "Diagnostics.png",show=False)
+     
      if ord=='27':
           App.get_running_app().stop()                    
 

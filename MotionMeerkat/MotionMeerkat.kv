@@ -180,7 +180,9 @@
                 on_value: if self.value >= 100: root.gotoresults(app.root)
                 
 <ResultsScreen>
+    on_enter: root.plots(app.root.motionVid)
     BoxLayout:
+        orientation:'vertical'
         Label:
             text: "Run time (min): " #+ str(app.root.motionVid.total_count)
         Label:

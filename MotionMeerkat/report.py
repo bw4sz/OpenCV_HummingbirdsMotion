@@ -108,17 +108,10 @@ def report(ob):
         ####Generate plots        
         #Show box size by area
         tarea=(ob.width * ob.height)
-        scale_size=[x/tarea for x in ob.avg_area]
+        ob.scale_size=[x/tarea for x in ob.avg_area]
         #First frame is artifact of intilization
-        scale_size[0]=None
-        
-        #Show if file, don't let it hang command line
-        if ob.runtype == 'file':
-
-                Plotting.combineplots(scale_size,ob.frame_results,ob.minSIZE/100,ob.file_destination + "/" + "Diagnostics.png",show=True)
-        else:
-                Plotting.combineplots(scale_size,ob.frame_results,ob.minSIZE/100,ob.file_destination + "/" + "Diagnostics.png",show=False)
-                
+        ob.scale_size[0]=None
+                        
         #reset frame count if in batch loop
         ob.frame_count=0
         ob.total_count=0
