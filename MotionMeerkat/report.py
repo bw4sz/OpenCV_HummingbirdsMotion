@@ -60,14 +60,14 @@ def report(ob):
         end=time.time()
 
         #total_time()
-        total_min=(end-ob.start)/60
+        ob.total_min=(end-ob.start)/60
 
         #processed frames per second
-        pfps=float(ob.frame_count)/(total_min*60)
+        pfps=float(ob.frame_count)/(ob.total_min*60)
 
         ##Write to log file
         log_report.write("Processing\n")        
-        log_report.write("Total run time (min): %.2f \n" % total_min)
+        log_report.write("Total run time (min): %.2f \n" % ob.total_min)
         log_report.write("Average frames per second: %.2f \n " % pfps)
 
         #End of program, report some statistic to screen and log
@@ -88,7 +88,7 @@ def report(ob):
 
         #print to screen
         print("\n\nThank you for using MotionMeerkat! \n")
-        print("Total run time (min): %.2f \n " % total_min)
+        print("Total run time (min): %.2f \n " % ob.total_min)
         print("Average frames processed per second: %.2f \n " % pfps)   
         print("Candidate motion events: %.0f \n " % ob.total_count )
         print("Frames skipped due to insufficient movement based on the threshold parameter: %.0f \n " % ob.nocountr)

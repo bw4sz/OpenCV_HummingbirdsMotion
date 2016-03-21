@@ -8,6 +8,7 @@ from kivy.uix.button import Button
 from kivy.uix.slider import Slider
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.image import Image
+from kivy.uix.progressbar import ProgressBar
 
 #Screen manager
 from kivy.lang import Builder
@@ -21,6 +22,8 @@ import motionClass
 import arguments
 import wrapper
 
+#temp
+from time import sleep
 
 class MainScreen(Screen):
          
@@ -47,13 +50,26 @@ class MainScreen(Screen):
      
      def run_press(self,root):
           root.getProgress()
-
-          #App.get_running_app().stop()          
-
+     
+           
+     
 class ProgressScreen(Screen):
      def MotionM(self,motionVid):
           arguments.arguments(motionVid)
           wrapper.wrap(motionVid)
+          self.ids.pb.value=75
+          sleep(1)
+          self.ids.pb.value=100     
+     def gotoresults(self,screenmanage):
+          name='R'
+          s=ResultsScreen(name=name)
+          screenmanage.add_widget(s)
+          screenmanage.current='R'        
+
+class ResultsScreen(Screen):
+     if ord=='27':
+          App.get_running_app().stop()                    
+
 
 class MyScreenManager(ScreenManager):
     

@@ -153,7 +153,43 @@
             on_release:root.run_press(app.root)
             
 <ProgressScreen>
+    on_enter: root.MotionM(app.root.motionVid)
+    
     BoxLayout:
+        orientation:'vertical'
+        BoxLayout:
+            size_hint:(0.5,0.2)
+            orientation:'vertical'
+            Label:
+                text: "[b]Input File:[/b] " + str(app.root.motionVid.inDEST)
+                markup: True
+            Label:
+                text: "[b]Output Directory:[/b] " + str(app.root.motionVid.fileD)
+                markup: True
+        BoxLayout:
+            size_hint:(0.9,1)
+            
+            Label:
+                text: 'Progress'
+                size_hint:(0.25,1)
+                font_size:20
+            ProgressBar:
+                id:pb
+                value: 50
+                size_hint:(0.8,1)
+                on_value: if self.value >= 100: root.gotoresults(app.root)
+                
+<ResultsScreen>
+    BoxLayout:
+        Label:
+            text: "Run time (min): " #+ str(app.root.motionVid.total_count)
+        Label:
+            text:"Candidate Motion Events: " #+ str(app.root.motionVid.total_count)
+        Label:
+            text: "Hitrate: " #+ str(float(app.root.motionVid.total_count)/app.root.motionVid.frame_count*100)
         Button:
-            text: 'Press'
-            on_press: root.MotionM(app.root.motionVid)
+            text: "For more statistics and parameter information"
+            #on_press: root.open_param()
+                    
+            
+            
