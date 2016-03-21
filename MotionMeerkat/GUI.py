@@ -9,6 +9,7 @@ from kivy.uix.slider import Slider
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.image import Image
 from kivy.uix.progressbar import ProgressBar
+from kivy.uix.togglebutton import ToggleButton
 
 #Screen manager
 from kivy.lang import Builder
@@ -52,7 +53,16 @@ class MainScreen(Screen):
      def run_press(self,root):
           root.getProgress()
      
+     def gotoAdvanced(self,screenmanage):
+          name='A'
+          s=AdvancedScreen(name=name)
+          screenmanage.add_widget(s)
+          screenmanage.current='A'
           
+class AdvancedScreen(Screen):
+     def gotoMain(self,screenmanage):
+          screenmanage.current='GUI'          
+
 class ProgressScreen(Screen):
      def MotionM(self,motionVid):
           arguments.arguments(motionVid)

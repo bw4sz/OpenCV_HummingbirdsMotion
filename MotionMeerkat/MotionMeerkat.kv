@@ -30,8 +30,8 @@
                 font_size:20
                 size_hint:(1,.5)
             Button:
-                text:"Manual mode"
-                #on_press:
+                text:"Advanced settings"
+                on_press: root.gotoAdvanced(app.root)
                 size_hint:(0.3,0.5)
         TextInput:
             id:outd
@@ -178,6 +178,56 @@
                 value: 50
                 size_hint:(0.8,1)
                 on_value: if self.value >= 100: root.gotoresults(app.root)
+
+<AdvancedScreen>
+
+    BoxLayout:
+        orientation:'vertical'
+        Button:
+            text: "Back"
+            size_hint:(0.2,.3)
+            pos_hint:{'top':0}
+            on_press:root.gotoMain(app.root)
+        BoxLayout:
+            Label:
+                text:"Motion Detection Method:"
+            ToggleButton:
+                text: "MOG"
+                group:"Submethod"
+            ToggleButton:
+                text:"Acc"
+                group:"Submethod"
+        BoxLayout:
+            Label:
+                text:"Adapt"
+            CheckBox:
+                active: True
+        BoxLayout:
+            Label:
+                text: "Draw Motion Objects"
+            CheckBox:
+                active: False
+        BoxLayout:
+            Label:
+                text: "Delay motion detection (minutes)"
+            TextInput:
+        BoxLayout:
+            Label:
+                text: "Output Format"
+            ToggleButton:
+                text:"Frames"
+                group:"Out"
+            ToggleButton:
+                text:"Video"
+                group:"Out"
+            ToggleButton:
+                text:"Both"
+                group:"Out"
+                
+            
+            
+            
+                
                 
 <ResultsScreen>
     on_enter: root.plots(app.root.motionVid)
