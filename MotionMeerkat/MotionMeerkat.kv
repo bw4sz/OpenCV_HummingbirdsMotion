@@ -248,21 +248,15 @@
             markup: True
             font_size:20
         Label:
-            text: "Minsize: " + str(app.root.motionVid.minSIZE)
+            text: "Run time: " + str(round(app.root.motionVid.total_min,2)) + " min"
             font_size:20
         Label:
-            text: "Run time: " + str(app.root.motionVid.total_count) + " min"
-            font_size:20
-        Label:
-            text:"Candidate Motion Events: " + str(app.root.motionVid.total_count)
-            font_size:20
-        Label:
-            #text: "Hitrate: " + str(float(app.root.motionVid.total_count)/app.root.motionVid.frame_count*100)
+            text:str(app.root.motionVid.total_count) + " candidate motion frames " + "from " + str(app.root.motionVid.frame_count) + " images (" + str(round(float(app.root.motionVid.total_count)/app.root.motionVid.frame_count,2)*100) + "%)"
             font_size:20
         Button:
             text: "More statistics and parameter information"
             size_hint:(1,0.5)
-            #on_press: root.open_param()
+            on_press: root.openfile(app.root.motionVid)   
 
                     
             

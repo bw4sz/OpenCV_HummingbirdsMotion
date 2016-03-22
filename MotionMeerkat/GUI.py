@@ -25,8 +25,11 @@ import arguments
 import wrapper
 import Plotting
 
+
+
 #temp
 from time import sleep
+from os import startfile
 
 class MainScreen(Screen):
          
@@ -72,10 +75,9 @@ class ProgressScreen(Screen):
           self.ids.pb.value=75
           sleep(1)
           self.ids.pb.value=100
-          print(motionVid.frame_count)
           
      def gotoresults(self,screenmanage):
-          screenmanage.transition.direction='right'                   
+          screenmanage.transition.direction='left'                   
           name='R'
           s=ResultsScreen(name=name)
           screenmanage.add_widget(s)
@@ -90,7 +92,8 @@ class ResultsScreen(Screen):
      def plots(self,motionVid):
           Plotting.combineplots(motionVid.scale_size,motionVid.frame_results,motionVid.minSIZE/100,motionVid.file_destination + "/" + "Diagnostics.png",show=True)
 
-
+     def openfile(self,motionVid):
+          startfile(motionVid.file_destination + "/" + "Parameters_Results.log")
 class MyScreenManager(ScreenManager):
     
      #Create motion instance class

@@ -727,10 +727,11 @@ class Motion:
                 self.scale_size[0]=None
                                 
                 #reset frame count if in batch loop
-                self.frame_count=0
-                self.total_count=0
-                self.toosmall=0
-                self.nocountr=0
+                if self.runtype=='batch':
+                        self.frame_count=0
+                        self.total_count=0
+                        self.toosmall=0
+                        self.nocountr=0
                 
                 #Write csv of time stamps and frame counts
                 #file name
