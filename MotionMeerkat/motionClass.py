@@ -15,6 +15,8 @@ import shapely.geometry as sg
 import traceback
 import sourceM
 import BackgroundSubtractor
+import Plotting
+import PostProcessing
           
 ###Create motion class with sensible defaults
 
@@ -160,7 +162,7 @@ class Motion:
                         pathimage=[os.path.join(self.inDEST,x) for x in imagef]
                         self.jpgs=[]
                         for ext in pathimage:
-                                found=glob.glob(ext)
+                                found=glself.glob(ext)
                                 self.jpgs.extend(found)
                                 
                         print('%d pictures found' % len(self.jpgs))
@@ -575,7 +577,7 @@ class Motion:
                         os.makedirs(self.file_destination)
                 
                 #Find all jpegs
-                jpgs=glob.glob(os.path.join(self.file_destination,"*.jpg"))                  
+                jpgs=glself.glob(os.path.join(self.file_destination,"*.jpg"))                  
                 
                 #Get frame rate and size of images
                 if not self.pictures:
@@ -615,3 +617,187 @@ class Motion:
                 if self.makeVID == "video":
                         for f in jpgs:
                                 os.remove(f)
+                                
+        def report(self):
+                
+                #Run is over, destroy display windows
+                #Postprocessing
+                cv2.destroyAllWindows()
+                if self.remove_singles:
+                        singles_removed=PostProcessing.remove_singletons(self.frame_results,self.single_distance*self.frame_rate,self.file_destination)
+                
+                #Create log file
+                log_file_report = self.file_destination + "/" + "Parameters_Results.log"
+                log_report = file(log_file_report, 'a' )
+        
+                #Print parameters
+                #Batch or single file
+                log_report.write("Input Parameters")        
+                log_report.write("\nRun type: %s" % self.runtype)
+                if self.runtype in ["file","pictures"]:
+                        log_report.write("\nInput file path: %s" % self.inDEST)
+                        
+                else:
+                        log_report.write("\nInput file path: %s" % self.batchpool)
+                log_report.write("\nOutput dir: %s" % self.fileD)
+                log_report.write("\nBackground Subtraction Method?: %s" % self.subMethod)
+                log_report.write("\nAdapt settings: %s" % self.adapt)
+                log_report.write("\nFrame Rate: %s" % self.frame_rate)
+                
+                if self.subMethod == "MOG":
+                        log_report.write("\nLearning Rate: %s" % self.moglearning)
+                        log_report.write("\nVariance Rate: %s" % self.mogvariance)
+                
+                if self.subMethod == "Acc":
+                        log_report.write("\nAccumulated Averaging: %s" % self.accAvg) 
+                        log_report.write("\nThreshold: %s" % self.threshT)                
+        
+                if self.adapt:
+                        log_report.write("\nExpected hitrate: %s" % self.frameHIT)
+                
+                log_report.write("\nFrame crop: %s" % self.set_ROI)     
+                if self.set_ROI:        
+                        log_report.write("\nSet ROI: %s" % self.ROI_include)        
+                log_report.write("\nMinimum size was drawn or entered?: %s" % self.drawSmall)
+                log_report.write("\nMinimum area: %s" % self.minSIZE)
+                if self.burnin > 0:
+                        log_report.write("\nBurnin: %s" % self.burnin)
+                if self.scan > 0:
+                        log_report.write("\nScan frames: %s" % self.scan)
+                if self.frameSET:
+                        log_report.write("\nManual framerate: %s" % self.frame_rate)
+                if self.set_areacounter:
+                        log_report.write("\nArea counter: %s" % self.set_areacounter)
+                log_report.write("\nOutput type: %s\n\n" % self.makeVID)
+        
+                #Ending time
+                end=time.time()
+        
+                #total_time()
+                self.total_min=(end-self.start)/60
+        
+                #processed frames per second
+                pfps=float(self.frame_count)/(self.total_min*60)
+        
+                ##Write to log file
+                log_report.write("Processing\n")        
+                log_report.write("Total run time (min): %.2f \n" % self.total_min)
+                log_report.write("Average frames per second: %.2f \n " % pfps)
+        
+                #End of program, report some statistic to screen and log
+                #log
+                log_report.write("\nResults\n")
+                log_report.write("Candidate motion events: %.0f \n" % self.total_count )
+                log_report.write("Frames skipped due to insufficient movement based on the threshold parameter: %.0f \n" % self.nocountr)
+                log_report.write("Frames skipped due to minimum size of the contours: %.0f \n" % self.toosmall)
+                if self.windy:
+                        log_report.write("Frames deleted due to windy conditions: %.0f \n" % self.windy_count)
+                if self.remove_singles:
+                        log_report.write("Frames deleted due to singletons: %.0f \n" % singles_removed)
+               
+                log_report.write("Total frames in files: %.0f \n" % self.frame_count)
+                
+                rate=float(self.total_count)/self.frame_count*100
+                log_report.write("Hitrate: %.2f %% \n" % rate)
+        
+                #print to screen
+                print("\n\nThank you for using MotionMeerkat! \n")
+                print("Total run time (min): %.2f \n " % self.total_min)
+                print("Average frames processed per second: %.2f \n " % pfps)   
+                print("Candidate motion events: %.0f \n " % self.total_count )
+                print("Frames skipped due to insufficient movement based on the threshold parameter: %.0f \n " % self.nocountr)
+                print("Frames skipped due to minimum size of the contours: %.0f \n " % self.toosmall)
+                
+                #if windy
+                if self.windy:
+                        print("Frames skipped due to windy conditions: %.0f \n " % self.windy_count)
+                if self.remove_singles:
+                        print("Frames deleted due to singletons: %.0f \n" % singles_removed)
+                        
+                print("Total frames in files: %.0f \n " % self.frame_count)
+        
+                rate=float(self.total_count)/self.frame_count*100
+                print("Hitrate: %.2f %% \n" % rate)
+                
+                ####Generate plots        
+                #Show box size by area
+                tarea=(self.width * self.height)
+                self.scale_size=[x/tarea for x in self.avg_area]
+                #First frame is artifact of intilization
+                self.scale_size[0]=None
+                                
+                #reset frame count if in batch loop
+                self.frame_count=0
+                self.total_count=0
+                self.toosmall=0
+                self.nocountr=0
+                
+                #Write csv of time stamps and frame counts
+                #file name
+                time_stamp_report = self.file_destination + "/" + "Frames.csv"
+        
+                with open(time_stamp_report, 'wb') as f:
+                        writer = csv.writer(f)
+                        writer.writerows(self.stamp)
+                if self.set_areacounter:
+                        area_report = self.file_destination + "/" + "AreaCounter.csv"
+                        with open(area_report, 'wb') as f:
+                                writer = csv.writer(f)
+                                writer.writerows(self.areaC)
+        
+        ########################################
+        ###Run Analysis on a Pool of videos
+        ########################################
+        def wrap(self) :
+                #quick error check.
+                if self.runtype=="file":
+                        if os.path.isfile(self.inDEST): pass
+                        else:
+                                print("File path does not exist!")
+                elif self.runtype=="batch":
+                        if os.path.isdir(self.batchpool): pass
+                        else:
+                                print("Directory does not exist!")
+                elif self.runtype=="pictures":                
+                        if os.path.isdir(self.inDEST): pass
+                        else:
+                                print("File path does not exist!")                
+        
+                ###Run Batch Mode                
+                if (self.runtype == "batch"):
+                        ##Overall destination
+                        
+                        videoPool= []
+                        #Create Pool of Videos
+                        for (root, dirs, files) in os.walk(self.batchpool):
+                                for files in files:
+                                        if files.endswith((".TLV",".AVI",".avi",".MPG",".mp4",".MOD",".MTS",".wmv",".WMV",".mpg",".tlv")):
+                                                videoPool.append(os.path.join(root, files))
+                        
+                        for vid in videoPool:      
+                             
+                                #Place run inside try catch loop; in case of error, step to next video
+                                ##Run Motion Function
+                                
+                                #override to set the inDEST file to loop from batch videos
+                                self.inDEST=vid
+                                self.prep()
+                                self.run()
+                                self.videoM()
+                                self.report()
+        
+        
+                ###If runtype is a single file - run file destination        
+                if (self.runtype == "file"):
+        
+                        self.prep()
+                        self.run()
+                        self.videoM()
+                        self.report()                              
+        
+                ###If runtype is a single file - run file destination        
+                if (self.runtype == "pictures"):
+                        self.prep()
+                        self.run()
+                        self.videoM()
+                        self.report()                                            

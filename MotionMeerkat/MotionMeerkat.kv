@@ -127,6 +127,7 @@
                     text:"0.03"
                     size_hint:(0.3,1)
                     pos_hint:{'center_x':0.5}
+                    on_text: app.root.motionVid.minSIZE=float(self.text)
             BoxLayout:
                 orientation:'vertical'
                 size_hint:(0.5,0.9)
@@ -152,33 +153,6 @@
             size_hint:(1,0.6)
             on_release:root.run_press(app.root)
             
-<ProgressScreen>
-    on_enter: root.MotionM(app.root.motionVid)
-    
-    BoxLayout:
-        orientation:'vertical'
-        BoxLayout:
-            size_hint:(0.5,0.2)
-            orientation:'vertical'
-            Label:
-                text: "[b]Input File:[/b] " + str(app.root.motionVid.inDEST)
-                markup: True
-            Label:
-                text: "[b]Output Directory:[/b] " + str(app.root.motionVid.fileD)
-                markup: True
-        BoxLayout:
-            size_hint:(0.9,1)
-            
-            Label:
-                text: 'Progress'
-                size_hint:(0.25,1)
-                font_size:20
-            ProgressBar:
-                id:pb
-                value: 50
-                size_hint:(0.8,1)
-                on_value: if self.value >= 100: root.gotoresults(app.root)
-
 <AdvancedScreen>
 
     BoxLayout:
@@ -225,23 +199,71 @@
                 group:"Out"
                 
             
-            
-            
-                
-                
-<ResultsScreen>
-    on_enter: root.plots(app.root.motionVid)
+<ProgressScreen>
+    on_enter: root.MotionM(app.root.motionVid)
+    
     BoxLayout:
         orientation:'vertical'
-        Label:
-            text: "Run time (min): " #+ str(app.root.motionVid.total_count)
-        Label:
-            text:"Candidate Motion Events: " #+ str(app.root.motionVid.total_count)
-        Label:
-            text: "Hitrate: " #+ str(float(app.root.motionVid.total_count)/app.root.motionVid.frame_count*100)
+        BoxLayout:
+            size_hint:(1,1)
+            pos_hint:{'center_y':1}
+            orientation:'vertical'
+            Label:
+                text: "[b]Input File:[/b] " + str(app.root.motionVid.inDEST)
+                markup: True
+                font_size:20
+            Label:
+                text: "[b]Output Directory:[/b] " + str(app.root.motionVid.fileD)
+                markup: True
+                font_size:20
+        BoxLayout:
+            size_hint:(0.9,1)
+            
+            Label:
+                text: 'Progress'
+                size_hint:(0.25,1)
+                font_size:20
+            ProgressBar:
+                id:pb
+                value: 50
+                size_hint:(0.8,1)
+                on_value: if self.value >= 100: root.gotoresults(app.root)
+                          
+<ResultsScreen>
+    on_enter: root.plots(app.root.motionVid)
+
+    BoxLayout:
+        orientation:'vertical'
         Button:
-            text: "For more statistics and parameter information"
+            text: "Restart"
+            size_hint:(0.2,.3)
+            pos_hint:{'top':0}
+            on_press:root.gotoMain(app.root)
+        Label:
+            text: "[b]Input File:[/b] " + str(app.root.motionVid.inDEST)
+            markup: True
+            font_size:20
+        Label:
+            text: "[b]Output Directory:[/b] " + str(app.root.motionVid.fileD)
+            markup: True
+            font_size:20
+        Label:
+            text: "Minsize: " + str(app.root.motionVid.minSIZE)
+            font_size:20
+        Label:
+            text: "Run time: " + str(app.root.motionVid.total_count) + " min"
+            font_size:20
+        Label:
+            text:"Candidate Motion Events: " + str(app.root.motionVid.total_count)
+            font_size:20
+        Label:
+            #text: "Hitrate: " + str(float(app.root.motionVid.total_count)/app.root.motionVid.frame_count*100)
+            font_size:20
+        Button:
+            text: "More statistics and parameter information"
+            size_hint:(1,0.5)
             #on_press: root.open_param()
+
                     
             
             

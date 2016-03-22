@@ -10,6 +10,7 @@ from kivy.uix.checkbox import CheckBox
 from kivy.uix.image import Image
 from kivy.uix.progressbar import ProgressBar
 from kivy.uix.togglebutton import ToggleButton
+from kivy.clock import Clock
 
 #Screen manager
 from kivy.lang import Builder
@@ -61,41 +62,43 @@ class MainScreen(Screen):
           
 class AdvancedScreen(Screen):
      def gotoMain(self,screenmanage):
-          screenmanage.current='GUI'          
-
-class ProgressScreen(Screen):
+          screenmanage.transition.direction='right'          
+          screenmanage.current='GUI'   
+          
+class ProgressScreen(Screen):     
      def MotionM(self,motionVid):
           arguments.arguments(motionVid)
-          wrapper.wrap(motionVid)
+          motionVid.wrap()
           self.ids.pb.value=75
           sleep(1)
-          self.ids.pb.value=100     
+          self.ids.pb.value=100
+          print(motionVid.frame_count)
+          
      def gotoresults(self,screenmanage):
+          screenmanage.transition.direction='right'                   
           name='R'
           s=ResultsScreen(name=name)
           screenmanage.add_widget(s)
           screenmanage.current='R'        
 
 class ResultsScreen(Screen):
-     
+          
+     def gotoMain(self,screenmanage):
+          screenmanage.transition.direction='left'          
+          screenmanage.current='GUI'    
      #generate plots
-     
      def plots(self,motionVid):
-          #Show if file, don't let it hang command line
-          if motionVid.runtype == 'file':
-     
-               Plotting.combineplots(motionVid.scale_size,motionVid.frame_results,motionVid.minSIZE/100,motionVid.file_destination + "/" + "Diagnostics.png",show=True)
-          else:
-               Plotting.combineplots(motionVid.scale_size,motionVid.frame_results,motionVid.minSIZE/100,motionVid.file_destination + "/" + "Diagnostics.png",show=False)
-     
-     if ord=='27':
-          App.get_running_app().stop()                    
+          Plotting.combineplots(motionVid.scale_size,motionVid.frame_results,motionVid.minSIZE/100,motionVid.file_destination + "/" + "Diagnostics.png",show=True)
 
 
 class MyScreenManager(ScreenManager):
     
      #Create motion instance class
      motionVid=motionClass.Motion()
+     
+     #Initialize properties
+     #def __init__(self,**kwargs):
+      #    motionVid.mode=
      
      #set defaults by auto mode, could be done clear through kivy properties
      motionVid.mode='auto'
