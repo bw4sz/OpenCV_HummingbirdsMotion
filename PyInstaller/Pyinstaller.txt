@@ -1,10 +1,15 @@
 #!/bin/bash
 cd C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion
 cd MotionMeerkat
+
+#remove all previous installs
+rm -rf dist/
+
 #execute, if already created, if not, pyinstaller main.py --onedir
 pyinstaller -y --onedir main.spec
 
-#edit the spec
+#copy kivy .kv
+cp -R C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/MotionMeerkat.kv dist/main/
 
 
 #copy shapely

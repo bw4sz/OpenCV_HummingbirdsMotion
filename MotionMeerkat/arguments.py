@@ -18,10 +18,25 @@ def arguments(self):
 
 		#set runtype
 		if os.path.isdir(self.inDEST):
+			#what's in the directory
+			
+			#Check for photos
+			#File formats
+			imagef=["*.jpg","*.jpeg","*.tif","*.tiff","*.png"]
+			pathimage=[os.path.join(self.inDEST,x) for x in imagef]
+			jpgs=[]
+			for ext in pathimage:
+				found=glself.glob(ext)
+				jpgs.extend(found)			
+			if len(jpgs) > 2:
+				self.pictures=True
+			else:
 				self.runtype="batch"
 				self.batchpool=self.inDEST
+				self.pictures=False			
 		else:
-				self.runtype="file"
+			self.runtype="file"
+			self.pictures=False			
 				
 		#Set defaults that weren't specified.
 		self.fileD="C:\MotionMeerkat"
@@ -40,7 +55,6 @@ def arguments(self):
 		self.todraw=False
 		self.remove_singles=False
 		self.single_distance = 10
-		self.pictures=False
 		self.ROI_include='include'
 			
 	else:
