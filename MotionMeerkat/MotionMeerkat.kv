@@ -2,7 +2,6 @@
 <MyScreenManager>:
     MainScreen:
     
-    
 <MainScreen>:
     name:'GUI'
     BoxLayout:
@@ -198,10 +197,9 @@
                 text:"Both"
                 group:"Out"
                 
-            
 <ProgressScreen>
     on_enter: root.MotionM(app.root.motionVid)
-    
+    on_waitflag: root.gotoresults(app.root)
     BoxLayout:
         orientation:'vertical'
         BoxLayout:
@@ -227,7 +225,7 @@
                 id:pb
                 value: 50
                 size_hint:(0.8,1)
-                on_value: if self.value >= 100: root.gotoresults(app.root)
+                
                           
 <ResultsScreen>
     on_enter: root.plots(app.root.motionVid)
@@ -248,7 +246,8 @@
             markup: True
             font_size:20
         Label:
-            text: "Run time: " + str(round(app.root.motionVid.total_min,2)) + " min"
+            text: "[b]Run time:[/b] " + str(round(app.root.motionVid.total_min,2)) + " min"
+            markup: True
             font_size:20
         Label:
             text:str(app.root.motionVid.total_count) + " candidate motion frames " + "from " + str(app.root.motionVid.frame_count) + " images (" + str(round(float(app.root.motionVid.total_count)/app.root.motionVid.frame_count,2)*100) + "%)"

@@ -77,11 +77,7 @@ class Motion:
                 
                 #Frames removed due to wind
                 self.windy_count=0
-                
-                #Count the number of frames returned
-                self.frame_count=0
-                self.total_count=0
-                
+                               
                 #Set time and frame constants
                 self.frameC_announce=0
     
@@ -236,6 +232,10 @@ class Motion:
 ######################################################
         def run(self):
                 
+                #Count the number of frames returned
+                self.frame_count=0
+                self.total_count=0                
+
                 print("Processing...")
 
                 while True:

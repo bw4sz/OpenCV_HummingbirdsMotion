@@ -3,6 +3,7 @@ import os
 import sourceM
 import argparse
 import numpy as np
+import glob
 
 def arguments(self):
 			
@@ -26,7 +27,7 @@ def arguments(self):
 			pathimage=[os.path.join(self.inDEST,x) for x in imagef]
 			jpgs=[]
 			for ext in pathimage:
-				found=glself.glob(ext)
+				found=glob.glob(ext)
 				jpgs.extend(found)			
 			if len(jpgs) > 2:
 				self.pictures=True
