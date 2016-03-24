@@ -156,7 +156,7 @@
             on_release:root.run_press(app.root)
             
 <AdvancedScreen>
-
+    on_enter:app.root.motionVid.mode='advanced'
     BoxLayout:
         orientation:'vertical'
         Button:
@@ -170,44 +170,57 @@
             ToggleButton:
                 text: "MOG"
                 group:"Submethod"
+                state:'down'
+                on_press:app.root.motionVid.subMethod='MOG'
             ToggleButton:
                 text:"Acc"
                 group:"Submethod"
+                on_press:app.root.motionVid.subMethod='Acc'
         BoxLayout:
             Label:
                 text:"Adapt"
             CheckBox:
                 active: True
-                on_active:app.root.motionVid.adapt=self.value
+                on_active:app.root.motionVid.adapt=self.active
         BoxLayout:
             Label:
                 text: "Draw Motion Objects"
             CheckBox:
                 active: False
-                on_active:app.root.motionVid.todraw=self.value
+                on_active:app.root.motionVid.todraw=self.active
 
         BoxLayout:
             Label:
                 text: "Delay motion detection (minutes)"
             TextInput:
+                text:str(0)
                 multiline:False
-                on_text:app.root.motionVid.burnin=self.value
+                on_text:app.root.motionVid.burnin=float(self.text)
         BoxLayout:
             Label:
                 text: "Output Format"
             ToggleButton:
                 text:"Frames"
                 group:"Out"
+                on_press:app.root.motionVid.makeVid="frames"
+                state:'down'
             ToggleButton:
                 text:"Video"
                 group:"Out"
+                on_press:app.root.motionVid.makeVid="video"
             ToggleButton:
                 text:"Both"
                 group:"Out"
-                
+                on_press:app.root.motionVid.makeVid="both"
+        Button:
+            text:"Run"
+            font_size:40
+            size_hint:(1,0.6)
+            on_release:root.run_press(app.root)
+
 <ProgressScreen>
     on_enter: root.MotionM(app.root.motionVid)
-    on_waitflag: root.gotoresults(app.root)
+    on_waitflag: if self.waitflag==1: root.gotoresults(app.root)
     BoxLayout:
         orientation:'vertical'
         BoxLayout:

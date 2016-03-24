@@ -25,9 +25,26 @@ class Motion:
         def __init__(self):                  
                 print("Welcome to MotionMeerkat!\n")
                 
+                #Create initial conditions
+                #Set defaults that weren't specified.
+                self.frameHIT=0.10
+                self.adapt=True
+                self.makeVID="frames"
+                self.scan = 0
+                self.burnin = 0
+                self.frameSET=False
+                self.frame_rate=0
+                self.set_areacounter=False
+                self.windy = False
+                self.todraw=False
+                self.remove_singles=False
+                self.single_distance = 10
+                self.ROI_include='include'
+                self.subMethod='MOG'
+                
+                
         def prep(self):
                 
-                #Create initial conditions
                 
                 #report auto settings
                 print('Auto settings...')

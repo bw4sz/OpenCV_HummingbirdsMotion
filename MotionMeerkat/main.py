@@ -72,6 +72,7 @@ class MainScreen(Screen):
           else:
                self.ids.fc.background_color=(1,0,0,1)
           
+          #send text to motion object
           motionVid.inDEST=self.ids.fc.text
                
      def run_press(self,root):
@@ -87,11 +88,14 @@ class AdvancedScreen(Screen):
      def gotoMain(self,screenmanage):
           screenmanage.transition.direction='right'          
           screenmanage.current='GUI'   
+     def run_press(self,root):
+          root.getProgress()     
           
 class ProgressScreen(Screen):       
      waitflag = NumericProperty()
      
      def MotionM(self,motionVid):
+          self.waitflag=0                          
           Thread(target=self.worker,kwargs=dict(motionVid=motionVid)).start()
           self.ids.pb.value=75
           sleep(1)
@@ -107,8 +111,8 @@ class ProgressScreen(Screen):
           name='R'
           s=ResultsScreen(name=name)
           screenmanage.add_widget(s)
-          screenmanage.current='R'        
-
+          screenmanage.current='R'
+          
 class ResultsScreen(Screen):
           
      def gotoMain(self,screenmanage):
@@ -121,6 +125,7 @@ class ResultsScreen(Screen):
 
      def openfile(self,motionVid):
           startfile(motionVid.file_destination + "/" + "Parameters_Results.log")
+          
 class MyScreenManager(ScreenManager):
     
      #Create motion instance class
