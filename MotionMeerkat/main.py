@@ -27,6 +27,7 @@ from kivy.uix.progressbar import ProgressBar
 from kivy.uix.togglebutton import ToggleButton
 from kivy.clock import Clock
 from kivy.properties import NumericProperty
+from kivy.properties import BooleanProperty
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 
@@ -37,10 +38,10 @@ from threading import Thread
 import webbrowser
 from time import sleep
 from os import startfile
+from os.path import isdir
+from os.path import isfile
 
 class MainScreen(Screen):
-         
-     #The behavior of these defaults are then overridden by user interaction.
      
      def help_site(instance):
           webbrowser.open("https://github.com/bw4sz/OpenCV_HummingbirdsMotion/wiki")
@@ -61,6 +62,18 @@ class MainScreen(Screen):
           else:
                motionVid.drawSmall='enter'
      
+     def checkfile(self,motionVid):
+          if isfile(self.ids.fc.text):
+               self.ids.fc.background_color=(1,1,1,1)
+          elif isdir(self.ids.fc.text):
+               self.ids.fc.background_color=(1,1,1,1)
+          elif self.ids.fc.text=="Input File or Folder":
+               self.ids.fc.background_color=(1,1,1,1)
+          else:
+               self.ids.fc.background_color=(1,0,0,1)
+          
+          motionVid.inDEST=self.ids.fc.text
+               
      def run_press(self,root):
           root.getProgress()
      
