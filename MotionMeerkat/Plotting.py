@@ -9,7 +9,6 @@ def minsizeplot(array,mincontour) :
     plt.axhline(y=mincontour,color='r',ls='dashed')
     plt.ylim(0,max([max(array),mincontour+0.001]))
     
-    
 def returnplots(array):
     x=range(0,len(array))
     plt.step(x=x,y=array)

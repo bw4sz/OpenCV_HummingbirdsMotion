@@ -219,8 +219,11 @@
             on_release:root.run_press(app.root)
 
 <ProgressScreen>
+    id: P
     on_enter: root.MotionM(app.root.motionVid)
     on_waitflag: if self.waitflag==1: root.gotoresults(app.root)
+    on_errorflag: if self.errorflag==1: root.gotoErrorScreen(app.root)
+
     BoxLayout:
         orientation:'vertical'
         BoxLayout:
@@ -277,6 +280,22 @@
             size_hint:(1,0.5)
             on_press: root.openfile(app.root.motionVid)   
 
-                    
-            
-            
+<ErrorScreen>
+    on_enter:root.getMessage(app.root)
+    BoxLayout:
+        orientation:'vertical'
+        Button:
+            text:"Restart"
+            on_press:root.gotoMain(app.root)
+            size_hint:(0.25,0.4)
+        Label:
+            text: "Error occurred!"
+        Label: 
+            text: "None"
+        Label:
+            text: "If you believe this is a bug, please send a detailed explanation of your error, with a description of your video and parameters"
+        Button:
+            text: "Send Error Report"
+            on_press: root.help_issue()
+
+    

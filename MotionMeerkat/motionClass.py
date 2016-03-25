@@ -24,7 +24,7 @@ class Motion:
 
         def __init__(self):                  
                 print("Welcome to MotionMeerkat!\n")
-                
+                        
                 #Create initial conditions
                 #Set defaults that weren't specified.
                 self.frameHIT=0.10
@@ -44,7 +44,6 @@ class Motion:
                 
                 
         def prep(self):
-                
                 
                 #report auto settings
                 print('Auto settings...')
@@ -249,6 +248,9 @@ class Motion:
 ######################################################
         def run(self):
                 
+                #create error
+                raise ValueError("I'm a error")
+        
                 #Count the number of frames returned
                 self.frame_count=0
                 self.total_count=0                

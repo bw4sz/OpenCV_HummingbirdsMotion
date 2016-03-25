@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-import traceback
 import sys
 import numpy as np
 import numpy.core.multiarray
 import ctypes
 import cv2
+import traceback
 
 #MotionMeerkat
 #import CommandArgs
@@ -27,7 +27,7 @@ from kivy.uix.progressbar import ProgressBar
 from kivy.uix.togglebutton import ToggleButton
 from kivy.clock import Clock
 from kivy.properties import NumericProperty
-from kivy.properties import BooleanProperty
+from kivy.properties import ListProperty
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 
@@ -93,18 +93,27 @@ class AdvancedScreen(Screen):
           
 class ProgressScreen(Screen):       
      waitflag = NumericProperty()
+     errorflag= NumericProperty()
+     tb= ListProperty([])
+     
      
      def MotionM(self,motionVid):
-          self.waitflag=0                          
+          self.waitflag=0   
+          self.errorflag=0                          
           Thread(target=self.worker,kwargs=dict(motionVid=motionVid)).start()
           self.ids.pb.value=75
           sleep(1)
           self.ids.pb.value=100          
      
      def worker(self,motionVid):
-          arguments.arguments(motionVid)
-          motionVid.wrap()
-          self.waitflag=1                
+          try:
+               arguments.arguments(motionVid)
+               motionVid.wrap()
+               self.waitflag=1
+          except Exception as e:
+               self.errorflag=1
+               self.tb.extend(traceback.format_stack())
+               print(self.tb)
           
      def gotoresults(self,screenmanage):          
           screenmanage.transition.direction='left'                   
@@ -112,6 +121,11 @@ class ProgressScreen(Screen):
           s=ResultsScreen(name=name)
           screenmanage.add_widget(s)
           screenmanage.current='R'
+     def gotoErrorScreen(self,screenmanage):
+          name='e'
+          e=ErrorScreen(name=name)
+          screenmanage.add_widget(e)
+          screenmanage.current='e'           
           
 class ResultsScreen(Screen):
           
@@ -125,6 +139,19 @@ class ResultsScreen(Screen):
 
      def openfile(self,motionVid):
           startfile(motionVid.file_destination + "/" + "Parameters_Results.log")
+
+class ErrorScreen(Screen):
+     def getMessage(self,screenmanage):
+          self.PScreen=screenmanage.get_screen("P")
+          print(self.Pscreen.ids.tb)
+          
+     
+     def help_issue(instance):
+          webbrowser.open("https://github.com/bw4sz/OpenCV_HummingbirdsMotion/issues")
+     
+     def gotoMain(self,screenmanage):
+          screenmanage.transition.direction='right'          
+          screenmanage.current='GUI' 
           
 class MyScreenManager(ScreenManager):
     
@@ -167,3 +194,5 @@ if __name__ == "__main__":
      else:            
           MotionMeerkatApp().run()
           cv2.destroyAllWindows()
+ 
+               
