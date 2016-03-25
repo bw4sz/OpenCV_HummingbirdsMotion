@@ -249,7 +249,7 @@ class Motion:
         def run(self):
                 
                 #create error
-                raise ValueError("I'm a error")
+                aasdasdasd
         
                 #Count the number of frames returned
                 self.frame_count=0

@@ -27,9 +27,11 @@ from kivy.uix.progressbar import ProgressBar
 from kivy.uix.togglebutton import ToggleButton
 from kivy.clock import Clock
 from kivy.properties import NumericProperty
+from kivy.properties import StringProperty
 from kivy.properties import ListProperty
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.core.clipboard import Clipboard
 
 #threading
 from threading import Thread
@@ -111,9 +113,9 @@ class ProgressScreen(Screen):
                motionVid.wrap()
                self.waitflag=1
           except Exception as e:
+               self.tb.append(str(traceback.format_exc()))
                self.errorflag=1
-               self.tb.extend(traceback.format_stack())
-               print(self.tb)
+               
           
      def gotoresults(self,screenmanage):          
           screenmanage.transition.direction='left'                   
@@ -141,9 +143,10 @@ class ResultsScreen(Screen):
           startfile(motionVid.file_destination + "/" + "Parameters_Results.log")
 
 class ErrorScreen(Screen):
+     em=StringProperty()
      def getMessage(self,screenmanage):
-          self.PScreen=screenmanage.get_screen("P")
-          print(self.Pscreen.ids.tb)
+          PScreen=screenmanage.get_screen("P")
+          self.em=PScreen.tb.pop()
           
      
      def help_issue(instance):

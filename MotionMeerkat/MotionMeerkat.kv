@@ -290,12 +290,16 @@
             size_hint:(0.25,0.4)
         Label:
             text: "Error occurred!"
-        Label: 
-            text: "None"
+            font_size:20
+        TextInput:
+            id:"emessage'
+            text: root.em
+            size_hint:(1,2)
         Label:
-            text: "If you believe this is a bug, please send a detailed explanation of your error, with a description of your video and parameters"
+            text: "If you believe this is a bug, please send a detailed\nexplanation of your error, with a description of your video and parameters"            
         Button:
             text: "Send Error Report"
             on_press: root.help_issue()
+            size_hint:(1,0.5)
 
     
