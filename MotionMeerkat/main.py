@@ -113,6 +113,7 @@ class ProgressScreen(Screen):
                self.waitflag=1
           except Exception as e:
                self.tb.append(str(traceback.format_exc()))
+               motionVid.report()               
                self.errorflag=1
                
           
@@ -155,6 +156,9 @@ class ErrorScreen(Screen):
           screenmanage.transition.direction='right'          
           screenmanage.current='GUI' 
           
+     def openfile(self,motionVid):
+          startfile(motionVid.file_destination + "/" + "Parameters_Results.log")
+     
 class MyScreenManager(ScreenManager):
     
      #Create motion instance class

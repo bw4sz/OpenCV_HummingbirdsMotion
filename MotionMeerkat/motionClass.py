@@ -247,11 +247,13 @@ class Motion:
 ##Function to compute background during the video loop
 ######################################################
         def run(self):
-                        
+                
                 #Count the number of frames returned
                 self.frame_count=0
                 self.total_count=0                
-
+                
+                #error
+                asdasda
                 print("Processing...")
 
                 while True:
@@ -694,7 +696,7 @@ class Motion:
         
                 #processed frames per second
                 pfps=float(self.frame_count)/(self.total_min*60)
-        
+                
                 ##Write to log file
                 log_report.write("Processing\n")        
                 log_report.write("Total run time (min): %.2f \n" % self.total_min)
@@ -713,7 +715,10 @@ class Motion:
                
                 log_report.write("Total frames in files: %.0f \n" % self.frame_count)
                 
-                rate=float(self.total_count)/self.frame_count*100
+                try:
+                        rate=float(self.total_count)/self.frame_count*100
+                except:
+                        rate=0
                 log_report.write("Hitrate: %.2f %% \n" % rate)
         
                 #print to screen
@@ -732,7 +737,6 @@ class Motion:
                         
                 print("Total frames in files: %.0f \n " % self.frame_count)
         
-                rate=float(self.total_count)/self.frame_count*100
                 print("Hitrate: %.2f %% \n" % rate)
                 
                 ####Generate plots        
@@ -740,7 +744,10 @@ class Motion:
                 tarea=(self.width * self.height)
                 self.scale_size=[x/tarea for x in self.avg_area]
                 #First frame is artifact of intilization
-                self.scale_size[0]=None
+                try:
+                        self.scale_size[0]=None
+                except:
+                        pass
                                 
                 #reset frame count if in batch loop
                 if self.runtype=='batch':

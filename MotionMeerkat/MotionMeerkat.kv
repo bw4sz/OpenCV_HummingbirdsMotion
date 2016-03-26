@@ -295,8 +295,12 @@
             id:"emessage'
             text: root.em
             size_hint:(1,2)
+        Button:
+            text: "Parameter Log"
+            size_hint:(1,0.5)
+            on_press: root.openfile(app.root.motionVid)           
         Label:
-            text: "If you believe this is a bug, please send a detailed\nexplanation of your error, with a description of your video and parameters"            
+            text: "If you believe this is a bug, submit the parameter log,\na copy of your error, and a description of your video to the link below."            
         Button:
             text: "Send Error Report"
             on_press: root.help_issue()
