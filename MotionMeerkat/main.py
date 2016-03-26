@@ -98,7 +98,6 @@ class ProgressScreen(Screen):
      errorflag= NumericProperty()
      tb= ListProperty([])
      
-     
      def MotionM(self,motionVid):
           self.waitflag=0   
           self.errorflag=0                          

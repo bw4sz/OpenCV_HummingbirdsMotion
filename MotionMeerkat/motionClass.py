@@ -247,10 +247,7 @@ class Motion:
 ##Function to compute background during the video loop
 ######################################################
         def run(self):
-                
-                #create error
-                aasdasdasd
-        
+                        
                 #Count the number of frames returned
                 self.frame_count=0
                 self.total_count=0                
