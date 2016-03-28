@@ -17,7 +17,6 @@ import sourceM
 import BackgroundSubtractor
 import Plotting
 import PostProcessing
-          
 ###Create motion class with sensible defaults
 
 class Motion:
@@ -41,7 +40,6 @@ class Motion:
                 self.single_distance = 10
                 self.ROI_include='include'
                 self.subMethod='MOG'
-                
                 
         def prep(self):
                 
@@ -204,7 +202,7 @@ class Motion:
 
                 #make a copy for the markup
                 iorig=orig_image.copy()
-
+                
                 #Set region of interest 
                 if self.set_ROI:
                         self.roi_selected=sourceM.Urect(iorig,"Region of Interest")
@@ -246,14 +244,13 @@ class Motion:
 ######################################################             
 ##Function to compute background during the video loop
 ######################################################
-        def run(self):
+        def run(self,pbar):
                 
                 #Count the number of frames returned
                 self.frame_count=0
                 self.total_count=0                
                 
-                #error
-                asdasda
+                
                 print("Processing...")
 
                 while True:
@@ -310,6 +307,7 @@ class Motion:
                                         #if the last time the percent complete was printed was within the scan range, don't print again. 
                                         if abs(self.frameC_announce - self.frame_count) >= self.scan:
                                                 print("%.0f %% completed: %.0f candidate motion frames" % (fc, self.total_count))
+                                                pbar.value=fc
                                                 self.frameC_announce=self.frame_count                                                
 
                         #############################
@@ -695,7 +693,14 @@ class Motion:
                 self.total_min=(end-self.start)/60
         
                 #processed frames per second
-                pfps=float(self.frame_count)/(self.total_min*60)
+                try:
+                        pfps=float(self.frame_count)/(self.total_min*60)
+                except:
+                        #run failed before initialization
+                        self.frame_count=0
+                        pfps=0
+                        self.total_min=0
+                        self.total_count=0
                 
                 ##Write to log file
                 log_report.write("Processing\n")        
@@ -741,10 +746,11 @@ class Motion:
                 
                 ####Generate plots        
                 #Show box size by area
-                tarea=(self.width * self.height)
-                self.scale_size=[x/tarea for x in self.avg_area]
+
                 #First frame is artifact of intilization
                 try:
+                        tarea=(self.width * self.height)
+                        self.scale_size=[x/tarea for x in self.avg_area]                        
                         self.scale_size[0]=None
                 except:
                         pass
@@ -772,7 +778,8 @@ class Motion:
         ########################################
         ###Run Analysis on a Pool of videos
         ########################################
-        def wrap(self) :
+        def wrap(self,pbar,video_id) :
+                
                 #quick error check.
                 if self.runtype=="file":
                         if os.path.isfile(self.inDEST): pass
@@ -797,31 +804,29 @@ class Motion:
                                 for files in files:
                                         if files.endswith((".TLV",".AVI",".avi",".MPG",".mp4",".MOD",".MTS",".wmv",".WMV",".mpg",".tlv")):
                                                 videoPool.append(os.path.join(root, files))
-                        
                         for vid in videoPool:      
-                             
+                                
                                 #Place run inside try catch loop; in case of error, step to next video
                                 ##Run Motion Function
                                 
                                 #override to set the inDEST file to loop from batch videos
+                                
+                                #send to progress screen
+                                video_id.append(vid)
+                                
+                                #run file
                                 self.inDEST=vid
                                 self.prep()
-                                self.run()
+                                self.run(pbar)
                                 self.videoM()
                                 self.report()
         
         
                 ###If runtype is a single file - run file destination        
-                if (self.runtype == "file"):
-        
+                if (self.runtype in ["file",'pictures']):
+                        video_id.append(self.inDEST)                        
                         self.prep()
-                        self.run()
+                        self.run(pbar)                         
                         self.videoM()
                         self.report()                              
-        
-                ###If runtype is a single file - run file destination        
-                if (self.runtype == "pictures"):
-                        self.prep()
-                        self.run()
-                        self.videoM()
-                        self.report()                                            
+                               

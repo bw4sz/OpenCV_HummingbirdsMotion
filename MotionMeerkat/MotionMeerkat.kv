@@ -220,6 +220,7 @@
 
 <ProgressScreen>
     id: P
+    on_pre_enter:root.assignname(app.root.motionVid)
     on_enter: root.MotionM(app.root.motionVid)
     on_waitflag: if self.waitflag==1: root.gotoresults(app.root)
     on_errorflag: if self.errorflag==1: root.gotoErrorScreen(app.root)
@@ -231,7 +232,7 @@
             pos_hint:{'center_y':1}
             orientation:'vertical'
             Label:
-                text: "[b]Input File:[/b] " + str(app.root.motionVid.inDEST)
+                text: "[b]Input File:[/b] " + str(root.video_id[-1])
                 markup: True
                 font_size:20
             Label:
@@ -247,7 +248,7 @@
                 font_size:20
             ProgressBar:
                 id:pb
-                value: 25
+                value: 0
                 size_hint:(0.8,1)
                                           
 <ResultsScreen>

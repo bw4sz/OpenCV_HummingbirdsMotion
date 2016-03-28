@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 import sys
-import numpy as np
-import numpy.core.multiarray
-import ctypes
 import cv2
 import traceback
 
@@ -81,10 +78,7 @@ class MainScreen(Screen):
           root.getProgress()
      
      def gotoAdvanced(self,screenmanage):
-          name='A'
-          s=AdvancedScreen(name=name)
-          screenmanage.add_widget(s)
-          screenmanage.current='A'
+          screenmanage.switch_to(AdvancedScreen,direction='left')
           
 class AdvancedScreen(Screen):
      def gotoMain(self,screenmanage):
@@ -97,19 +91,21 @@ class ProgressScreen(Screen):
      waitflag = NumericProperty()
      errorflag= NumericProperty()
      tb= ListProperty([])
+     video_id=ListProperty(["Retrieving File"])
+     video_count=ListProperty(["1"])
+     
+     def assignname(self,motionVid):
+          self.video_id.append(motionVid.inDEST)
      
      def MotionM(self,motionVid):
           self.waitflag=0   
-          self.errorflag=0                          
-          Thread(target=self.worker,kwargs=dict(motionVid=motionVid)).start()
-          self.ids.pb.value=75
-          sleep(1)
-          self.ids.pb.value=100          
-     
-     def worker(self,motionVid):
+          self.errorflag=0                    
+          Thread(target=self.worker,kwargs=dict(motionVid=motionVid,pbar=self.ids.pb)).start()
+        
+     def worker(self,motionVid,pbar):
           try:
                arguments.arguments(motionVid)
-               motionVid.wrap()
+               motionVid.wrap(pbar=pbar,video_id=self.video_id)          
                self.waitflag=1
           except Exception as e:
                self.tb.append(str(traceback.format_exc()))
@@ -118,22 +114,20 @@ class ProgressScreen(Screen):
                
           
      def gotoresults(self,screenmanage):          
-          screenmanage.transition.direction='left'                   
-          name='R'
-          s=ResultsScreen(name=name)
-          screenmanage.add_widget(s)
-          screenmanage.current='R'
+          screenmanage.switch_to(ResultsScreen(),direction='left')
+          
      def gotoErrorScreen(self,screenmanage):
-          name='e'
+          name="E"
           e=ErrorScreen(name=name)
           screenmanage.add_widget(e)
-          screenmanage.current='e'           
+          screenmanage.transition.direction='left'          
+          screenmanage.current='E'
           
 class ResultsScreen(Screen):
           
      def gotoMain(self,screenmanage):
-          screenmanage.transition.direction='left'          
-          screenmanage.current='GUI'    
+          screenmanage.transition.direction='right'          
+          screenmanage.current='GUI'   
 
      #generate plots
      def plots(self,motionVid):
@@ -147,14 +141,14 @@ class ErrorScreen(Screen):
      def getMessage(self,screenmanage):
           PScreen=screenmanage.get_screen("P")
           self.em=PScreen.tb.pop()
-          
      
      def help_issue(instance):
           webbrowser.open("https://github.com/bw4sz/OpenCV_HummingbirdsMotion/issues")
      
      def gotoMain(self,screenmanage):
+          #restart
           screenmanage.transition.direction='right'          
-          screenmanage.current='GUI' 
+          screenmanage.current='GUI'      
           
      def openfile(self,motionVid):
           startfile(motionVid.file_destination + "/" + "Parameters_Results.log")
@@ -163,12 +157,6 @@ class MyScreenManager(ScreenManager):
     
      #Create motion instance class
      motionVid=motionClass.Motion()
-     
-     #Create wait parameter
-     
-     #Initialize properties
-     #def __init__(self,**kwargs):
-      #    motionVid.mode=
      
      #set defaults by auto mode, could be done clear through kivy properties
      motionVid.mode='auto'
@@ -181,9 +169,10 @@ class MyScreenManager(ScreenManager):
      motionVid.set_ROI=False
 
      def getProgress(self):
-          name='P'
+          name="P"
           s=ProgressScreen(name=name)
           self.add_widget(s)
+          self.transition.direction='left'          
           self.current='P'
 
 class MotionMeerkatApp(App):
