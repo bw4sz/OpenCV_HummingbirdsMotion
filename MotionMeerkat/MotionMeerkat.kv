@@ -196,6 +196,28 @@
                 text:str(0)
                 multiline:False
                 on_text:app.root.motionVid.burnin=float(self.text)
+                size_hint:(0.3,1)
+                pos_hint:{'center_x':0.5}
+                font_size:20
+        BoxLayout:
+            Label:
+                text: "Scan Video (frames)"
+            TextInput:
+                text:str(0)
+                multiline:False
+                on_text:app.root.motionVid.scan=float(self.text)
+                size_hint:(0.3,1)
+                font_size:20
+        BoxLayout:
+            Label:
+                text: "Remove singles (frames)"
+            TextInput:
+                text:str(0)
+                on_text: if self.text > float(0): self.remove_singles=True
+                multiline:False
+                on_text:app.root.motionVid.single_distance=float(self.text)
+                size_hint:(0.3,1)
+                font_size:20
         BoxLayout:
             Label:
                 text: "Output Format"
@@ -274,7 +296,7 @@
             markup: True
             font_size:20
         Label:
-            text:str(app.root.motionVid.total_count) + " candidate motion frames " + "from " + str(app.root.motionVid.frame_count) + " images (" + str(round(float(app.root.motionVid.total_count)/app.root.motionVid.frame_count,2)*100) + "%)"
+            text:str(app.root.motionVid.total_count) + " candidate motion frames " + "from " + str(app.root.motionVid.frame_count) + " images (" + str(round(float(app.root.motionVid.total_count)/app.root.motionVid.frame_count,3)*100) + "%)"
             font_size:20
         Button:
             text: "More statistics and parameter information"

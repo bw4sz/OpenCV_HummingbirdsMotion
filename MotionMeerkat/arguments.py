@@ -44,6 +44,7 @@ def arguments(self):
 			jpgs.extend(found)			
 		if len(jpgs) > 2:
 			self.pictures=True
+			self.runtype="pictures"			
 		else:
 			self.runtype="batch"
 			self.batchpool=self.inDEST

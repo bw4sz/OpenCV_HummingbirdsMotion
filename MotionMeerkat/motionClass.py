@@ -172,7 +172,7 @@ class Motion:
                         pathimage=[os.path.join(self.inDEST,x) for x in imagef]
                         self.jpgs=[]
                         for ext in pathimage:
-                                found=glself.glob(ext)
+                                found=glob.glob(ext)
                                 self.jpgs.extend(found)
                                 
                         print('%d pictures found' % len(self.jpgs))
@@ -249,7 +249,6 @@ class Motion:
                 #Count the number of frames returned
                 self.frame_count=0
                 self.total_count=0                
-                
                 
                 print("Processing...")
 
@@ -648,7 +647,7 @@ class Motion:
         
                 #Print parameters
                 #Batch or single file
-                log_report.write("Input Parameters")        
+                log_report.write("\nInput Parameters")        
                 log_report.write("\nRun type: %s" % self.runtype)
                 if self.runtype in ["file","pictures"]:
                         log_report.write("\nInput file path: %s" % self.inDEST)
@@ -697,7 +696,7 @@ class Motion:
                         pfps=float(self.frame_count)/(self.total_min*60)
                 except:
                         #run failed before initialization
-                        self.frame_count=0
+                        self.frame_count=1
                         pfps=0
                         self.total_min=0
                         self.total_count=0
@@ -755,12 +754,6 @@ class Motion:
                 except:
                         pass
                                 
-                #reset frame count if in batch loop
-                if self.runtype=='batch':
-                        self.frame_count=0
-                        self.total_count=0
-                        self.toosmall=0
-                        self.nocountr=0
                 
                 #Write csv of time stamps and frame counts
                 #file name
@@ -813,6 +806,9 @@ class Motion:
                                 
                                 #send to progress screen
                                 video_id.append(vid)
+                                
+                                #reset progress bar
+                                pbar.value=0
                                 
                                 #run file
                                 self.inDEST=vid

@@ -78,7 +78,11 @@ class MainScreen(Screen):
           root.getProgress()
      
      def gotoAdvanced(self,screenmanage):
-          screenmanage.switch_to(AdvancedScreen,direction='left')
+          name="A"
+          a=AdvancedScreen(name=name)
+          screenmanage.add_widget(a)
+          screenmanage.transition.direction='left'          
+          screenmanage.current='A'
           
 class AdvancedScreen(Screen):
      def gotoMain(self,screenmanage):
@@ -109,7 +113,10 @@ class ProgressScreen(Screen):
                self.waitflag=1
           except Exception as e:
                self.tb.append(str(traceback.format_exc()))
-               motionVid.report()               
+               try:
+                    motionVid.report()               
+               except:
+                    pass
                self.errorflag=1
                
           
@@ -131,6 +138,7 @@ class ResultsScreen(Screen):
 
      #generate plots
      def plots(self,motionVid):
+          sleep(1)
           Plotting.combineplots(motionVid.scale_size,motionVid.frame_results,motionVid.minSIZE/100,motionVid.file_destination + "/" + "Diagnostics.png",show=True)
 
      def openfile(self,motionVid):
@@ -155,19 +163,25 @@ class ErrorScreen(Screen):
      
 class MyScreenManager(ScreenManager):
     
-     #Create motion instance class
-     motionVid=motionClass.Motion()
-     
-     #set defaults by auto mode, could be done clear through kivy properties
-     motionVid.mode='auto'
-     motionVid.inDEST="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv"
-     motionVid.fileD="C:/MotionMeerkat"
-     motionVid.q1=3
-     motionVid.q2=3
-     motionVid.drawSmall='enter'
-     motionVid.minSIZE=0.03
-     motionVid.set_ROI=False
-
+     try:
+          #Create motion instance class
+          motionVid=motionClass.Motion()
+          
+          #set defaults by auto mode, could be done clear through kivy properties
+          motionVid.mode='auto'
+          motionVid.inDEST="C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv"
+          motionVid.fileD="C:/MotionMeerkat"
+          motionVid.q1=3
+          motionVid.q2=3
+          motionVid.drawSmall='enter'
+          motionVid.minSIZE=0.03
+          motionVid.set_ROI=False
+     except Exception as e:
+          traceback.print_exc()
+          if len(sys.argv)< 2:          
+               k=raw_input("Enter any key to exit:")
+               sys.exit(0)
+          
      def getProgress(self):
           name="P"
           s=ProgressScreen(name=name)
