@@ -153,11 +153,10 @@ class Motion:
                         sys.stderr.write("frame rate: %s\n" % self.frame_rate)
                         
                         #Burnin and first image
-                        
+                        #
                         #apply burn in, skip the the first X frames according to user input
                         for x in range(1,int(float(self.burnin) * int(self.frame_rate) * 60)): 
                                 self.cap.grab()
-                                self.frame_count=self.frame_count+1
                                 
                         print("Beginning Motion Detection\n")
                         
@@ -795,7 +794,7 @@ class Motion:
                         #Create Pool of Videos
                         for (root, dirs, files) in os.walk(self.batchpool):
                                 for files in files:
-                                        if files.endswith((".TLV",".AVI",".avi",".MPG",".mp4",".MOD",".MTS",".wmv",".WMV",".mpg",".tlv")):
+                                        if files.endswith((".TLV",".AVI",".avi",".MPG",".mp4",".MOD",".MTS",".wmv",".WMV",".mpg",".tlv",".MOV")):
                                                 videoPool.append(os.path.join(root, files))
                         for vid in videoPool:      
                                 

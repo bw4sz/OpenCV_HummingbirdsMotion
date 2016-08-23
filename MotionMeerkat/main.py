@@ -4,7 +4,7 @@ import cv2
 import traceback
 
 #MotionMeerkat
-#import CommandArgs
+import CommandArgs
 import motionClass
 import arguments
 import Plotting
@@ -194,7 +194,7 @@ class MotionMeerkatApp(App):
           return MyScreenManager()
        
 if __name__ == "__main__":
-
+     print(len(sys.argv))
      #Read in system arguments if they exist
      if len(sys.argv)> 2:
           motionVid=motionClass.Motion()                
