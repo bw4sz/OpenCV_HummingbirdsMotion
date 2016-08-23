@@ -157,14 +157,18 @@ class Motion:
                         #apply burn in, skip the the first X frames according to user input
                         for x in range(1,int(float(self.burnin) * int(self.frame_rate) * 60)): 
                                 self.cap.grab()
-                                
+                        
                         print("Beginning Motion Detection\n")
                         
                         #Set frame skip counter if downsampling 
                         frameSKIP=0
                         
                         # Capture the first frame from file for image properties
-                        orig_image = self.cap.read()[1] 
+                        ret,orig_image = self.cap.read() 
+                                                
+                        if not ret:
+                                raise ValueError('Error: No images in file. Either the burnin was too long, or the file is empty.')
+                                 
                 else:
                         #File formats
                         imagef=["*.jpg","*.jpeg","*.tif","*.tiff","*.png"]
