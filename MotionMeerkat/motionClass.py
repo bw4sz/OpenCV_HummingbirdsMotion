@@ -142,8 +142,9 @@ class Motion:
                                         
                                 self.frame_rate=round(self.cap.get(5))
                                 #This seems to misinterpret just .tlv files
-                                if extension in ['.tlv','.TLV']: self.frame_rate=1
-                                print("File type is .tlv, setting frame rate to 1 fps")
+                                if extension in ['.tlv','.TLV']: 
+                                        self.frame_rate=1
+                                        print("File type is .tlv, setting frame rate to 1 fps")
                         
                         #get frame time relative to start
                         frame_time=self.cap.get(0)     
@@ -198,7 +199,7 @@ class Motion:
                         
                         #report area
                         objectsize=float(minh*minw)/float(ih*iw)
-                        self.minSIZE=objectsize/(3 * self.frame_rate)
+                        self.minSIZE=objectsize
                         
                         print('\nExpected object size set to %.2f percent of frame.\n' % (objectsize*100))
                         print('Minimum motion object size set to %.2f percent of frame based on input and frame rate.\n' % (self.minSIZE*100)) 
@@ -551,7 +552,7 @@ class Motion:
                                                         self.mogvariance=self.mogvariance+5
                                         
                                                         #add a ceiling
-                                                        if self.mogvariance > 100: self.mogvariance = 100
+                                                        if self.mogvariance > 120: self.mogvariance = 120
                                                         
                                                         print("Adapting to video conditions: increasing MOG variance tolerance to %d" % self.mogvariance)
                                                         
