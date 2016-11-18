@@ -41,9 +41,7 @@ class Motion:
                 self.ROI_include='include'
                 self.subMethod='MOG'
                 self.progressb=True
-                
-                
-                
+                     
         def prep(self):
                 
                 #report auto settings
@@ -196,8 +194,7 @@ class Motion:
                         objectsize=float(minh*minw)/float(ih*iw)
                         self.minSIZE=objectsize
                         
-                        print('\nExpected object size set to %.2f percent of frame.\n' % (objectsize*100))
-                        print('Minimum motion object size set to %.2f percent of frame based on input and frame rate.\n' % (self.minSIZE*100)) 
+                        print('Minimum motion object size set to %.2f percent of frame based on input.\n' % (self.minSIZE*100)) 
 
                 #make a copy for the markup
                 iorig=orig_image.copy()
@@ -672,7 +669,7 @@ class Motion:
                 if self.set_ROI:        
                         log_report.write("\nSet ROI: %s" % self.ROI_include)        
                 log_report.write("\nMinimum size was drawn or entered?: %s" % self.drawSmall)
-                log_report.write("\nMinimum area: %s as a percent of the frame" % (self.minSIZE * 100))
+                log_report.write("\nMinimum area: %s percent of frame" % (self.minSIZE * 100))
                 if self.burnin > 0:
                         log_report.write("\nBurnin: %s" % self.burnin)
                 if self.scan > 0:

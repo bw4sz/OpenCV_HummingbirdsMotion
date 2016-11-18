@@ -4,9 +4,18 @@ import matplotlib.lines as mlines
 import numpy as np
 
 def minsizeplot(array,mincontour) :
+
+    #first position is 0
+    array[0]=0
+    
+    #plot array as a %, not a decimal
+    array=[x * 100 for x in array]
+    
     plt.plot(array)
     plt.ylabel("Max Size of Motion Objects\n(% of Frame)")
-    plt.axhline(y=mincontour,color='r',ls='dashed')
+    
+    #multiply by 100, return it as a % not a decimal
+    plt.axhline(y=mincontour*100,color='r',ls='dashed')
     plt.ylim(0,max([max(array),mincontour]))
     
 def returnplots(array):

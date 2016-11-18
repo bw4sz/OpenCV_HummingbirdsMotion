@@ -154,7 +154,7 @@ if __name__ == "__main__":
                     screenmanage.transition.direction='right'          
                     screenmanage.current='GUI'   
           
-               #generate plots
+               #generate plots - the user wants to see minsize as a % not a decimal
                def plots(self,motionVid):
                     sleep(1)
                     Plotting.combineplots(motionVid.scale_size,motionVid.frame_results,motionVid.minSIZE,motionVid.file_destination + "/" + "Diagnostics.png",show=True)
@@ -192,7 +192,7 @@ if __name__ == "__main__":
                     motionVid.q1=3
                     motionVid.q2=3
                     motionVid.drawSmall='enter'
-                    motionVid.minSIZE=0.1
+                    motionVid.minSIZE=0.1/100
                     motionVid.set_ROI=False
                except Exception as e:
                     traceback.print_exc()

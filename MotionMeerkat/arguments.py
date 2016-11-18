@@ -16,6 +16,7 @@ def arguments(self):
 		q2select=np.arange(10,40,5)
 		self.mogvariance=q2select[int(self.q2)]
 		
+		#set ACC params, these are ignored
 		self.accAvg=0.35
 		self.threshT=30
 	else:
@@ -27,6 +28,7 @@ def arguments(self):
 		q2select=[5,15,25,35,45,55]
 		self.threshT=q2select[int(self.q2)]	
 		
+		#set MOG params, these are ignored
 		self.moglearning=0.1
 		self.mogvariance=16		
 	
