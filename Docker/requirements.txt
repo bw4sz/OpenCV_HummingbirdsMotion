@@ -1,4 +1,3 @@
 #requirements for MotionMeerkat
 shapely
 matplotlib
-tkinter
