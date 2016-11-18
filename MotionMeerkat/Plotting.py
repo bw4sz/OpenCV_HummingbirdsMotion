@@ -7,7 +7,7 @@ def minsizeplot(array,mincontour) :
     plt.plot(array)
     plt.ylabel("Max Size of Motion Objects\n(% of Frame)")
     plt.axhline(y=mincontour,color='r',ls='dashed')
-    plt.ylim(0,max([max(array),mincontour+0.001]))
+    plt.ylim(0,max([max(array),mincontour]))
     
 def returnplots(array):
     x=range(0,len(array))

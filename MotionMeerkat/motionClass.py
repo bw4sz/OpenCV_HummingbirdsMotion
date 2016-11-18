@@ -40,6 +40,9 @@ class Motion:
                 self.single_distance = 10
                 self.ROI_include='include'
                 self.subMethod='MOG'
+                self.progressb=True
+                
+                
                 
         def prep(self):
                 
@@ -254,6 +257,9 @@ class Motion:
                 self.frame_count=0
                 self.total_count=0                
                 
+                #if this is run from the gui it needs a progress bar switch
+                if len(sys.argv)>= 2: self.progressb = False                
+                
                 print("Processing...")
 
                 while True:
@@ -310,7 +316,8 @@ class Motion:
                                         #if the last time the percent complete was printed was within the scan range, don't print again. 
                                         if abs(self.frameC_announce - self.frame_count) >= self.scan:
                                                 print("%.0f %% completed: %.0f candidate motion frames" % (fc, self.total_count))
-                                                pbar.value=fc
+                                                #if running from the gui report progress bar
+                                                if self.progressb: pbar.value=fc
                                                 self.frameC_announce=self.frame_count                                                
 
                         #############################
@@ -678,7 +685,7 @@ class Motion:
                 if self.set_ROI:        
                         log_report.write("\nSet ROI: %s" % self.ROI_include)        
                 log_report.write("\nMinimum size was drawn or entered?: %s" % self.drawSmall)
-                log_report.write("\nMinimum area: %s" % self.minSIZE)
+                log_report.write("\nMinimum area: %s as a percent of the frame" % (self.minSIZE * 100))
                 if self.burnin > 0:
                         log_report.write("\nBurnin: %s" % self.burnin)
                 if self.scan > 0:
@@ -812,7 +819,7 @@ class Motion:
                                 video_id.append(vid)
                                 
                                 #reset progress bar
-                                pbar.value=0
+                                if self.progressb: pbar.value=0
                                 
                                 #run file
                                 self.inDEST=vid

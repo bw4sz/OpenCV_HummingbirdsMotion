@@ -125,11 +125,11 @@
                     font_size:13
                 TextInput:
                     id:mstext
-                    text:"0.03"
+                    text:"0.5"
                     size_hint:(0.3,1)
                     multiline:False
                     pos_hint:{'center_x':0.5}
-                    on_text: app.root.motionVid.minSIZE=float(self.text)
+                    on_text: app.root.motionVid.minSIZE=float(self.text)/100
             BoxLayout:
                 orientation:'vertical'
                 size_hint:(0.5,0.9)
