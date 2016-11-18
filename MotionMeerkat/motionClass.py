@@ -273,11 +273,6 @@ class Motion:
                         if not self.pictures:
                                 ret,current_image = self.cap.read()
                                 if not ret:
-                                        #If there are no more frames, break, need to reset AccAVG
-                                        if self.subMethod=="Acc": 
-                                                self.accAvg=self.accAvgBegin
-                                        else:
-                                                self.moglearning=self.moglearningBegin
                                         break
                         else:
                                 if len(self.jpgs)==0:
@@ -829,7 +824,13 @@ class Motion:
                                 self.run(pbar)
                                 self.videoM()
                                 self.report()
-        
+                                
+                                #reset the adapt parameters for the next video
+                                #If there are no more frames, break, need to reset AccAVG
+                                if self.subMethod=="Acc": 
+                                        self.accAvg=self.accAvgBegin
+                                else:
+                                        self.moglearning=self.moglearningBegin                                
         
                 ###If runtype is a single file - run file destination        
                 if (self.runtype in ["file",'pictures']):

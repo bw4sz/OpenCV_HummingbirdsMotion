@@ -192,7 +192,7 @@ if __name__ == "__main__":
                     motionVid.q1=3
                     motionVid.q2=3
                     motionVid.drawSmall='enter'
-                    motionVid.minSIZE=0.5
+                    motionVid.minSIZE=0.1
                     motionVid.set_ROI=False
                except Exception as e:
                     traceback.print_exc()

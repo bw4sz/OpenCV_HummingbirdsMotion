@@ -13,7 +13,7 @@ def commandargs(self):
     self.parser.add_argument("--frameHIT", help="Expected percentage of motion frames",default=0.5,type=float)
     self.parser.add_argument("--threshT", help="Threshold of movement",default=30,type=int)
     self.parser.add_argument("--drawSmall", help="'Draw' or 'enter' object size",type=str,default='enter')
-    self.parser.add_argument("--minSIZE", help="Minimum size of contour",default=0.05,type=float)
+    self.parser.add_argument("--minSIZE", help="Minimum size of contour",default=0.1,type=float)
     self.parser.add_argument("--burnin", help="Delay time",default=0,type=int)
     self.parser.add_argument("--scan", help="Scan one of every X frames for motion",default=0,type=int)
     self.parser.add_argument("--frameSET", help="Set frame_rate?",action='store_true',default=False)
