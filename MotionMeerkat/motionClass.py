@@ -112,14 +112,6 @@ class Motion:
                 (filepath, filename)=os.path.split(normFP)
                 (shortname, extension) = os.path.splitext(filename)
                 (_,IDFL) = os.path.split(filepath)
-                
-                #we want to name the output a folder from the output destination with the named extension        
-                #set original parameters if needed
-                if self.subMethod=="Acc":
-                        #set an original to reset at the end
-                        self.accAvgBegin=self.accAvg
-                else:
-                        self.moglearningBegin=self.moglearning
 
                 #If its batch, give an extra folder
                 if self.runtype == 'batch':
@@ -800,6 +792,16 @@ class Motion:
         
                 ###Run Batch Mode                
                 if (self.runtype == "batch"):
+                        
+                        #hold on to settings that adapt, reset during the loop
+                        #we want to name the output a folder from the output destination with the named extension        
+                        #set original parameters if needed
+                        if self.subMethod=="Acc":
+                                #set an original to reset at the end
+                                self.accAvgBegin=self.accAvg
+                        else:
+                                self.moglearningBegin=self.moglearning                                
+                        
                         ##Overall destination
                         
                         videoPool= []
@@ -820,7 +822,7 @@ class Motion:
                                 
                                 #reset progress bar
                                 if self.progressb: pbar.value=0
-                                
+                                                                
                                 #run file
                                 self.inDEST=vid
                                 self.prep()

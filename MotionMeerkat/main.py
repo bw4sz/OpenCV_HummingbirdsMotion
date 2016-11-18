@@ -138,7 +138,6 @@ if __name__ == "__main__":
                               pass
                          self.errorflag=1
                          
-                    
                def gotoresults(self,screenmanage):          
                     screenmanage.switch_to(ResultsScreen(),direction='left')
                     
