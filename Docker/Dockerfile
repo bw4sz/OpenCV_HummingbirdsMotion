@@ -23,6 +23,16 @@ RUN cd ~/ &&\
     cd opencv && mkdir build && cd build && cmake  -DWITH_QT=ON -DWITH_OPENGL=ON -DFORCE_VTK=ON -DWITH_TBB=ON -DWITH_GDAL=ON -DWITH_XINE=ON -DBUILD_EXAMPLES=ON .. && \
     make -j4 && make install && ldconfig
 
+RUN cd ~/ &&\
+    git clone https://github.com/bw4sz/OpenCV_HummingbirdsMotion.git --depth 1
+
+#install python modules
+#tkinter is easier by apt-get
+RUN apt-get install python-tk
+
+RUN cd ~/OpenCV_HummingbirdsMotion/Docker &&\
+    pip install -r requirements.txt
+
 # Set the appropriate link
 RUN ln /dev/null /dev/raw1394
 
