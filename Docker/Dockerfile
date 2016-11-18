@@ -28,7 +28,7 @@ RUN cd ~/ && \
 
 #install python modules
 #tkinter is easier by apt-get
-RUN apt-get install python-tk
+RUN apt-get -y install python-tk
 
 #install the rest of python modules
 RUN cd ~/OpenCV_HummingbirdsMotion/Docker &&\
