@@ -193,11 +193,11 @@ if __name__ == "__main__":
                     motionVid.q1=3
                     motionVid.q2=3
                     motionVid.drawSmall='enter'
-                    motionVid.minSIZE=0.003
+                    motionVid.minSIZE=0.5
                     motionVid.set_ROI=False
                except Exception as e:
                     traceback.print_exc()
-                    if len(sys.argv)< 2:          
+                    if len(sys.argv)<= 2:          
                          k=raw_input("Enter any key to exit:")
                          sys.exit(0)
                     

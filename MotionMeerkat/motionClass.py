@@ -22,7 +22,7 @@ import PostProcessing
 class Motion:
 
         def __init__(self):                  
-                print("Welcome to MotionMeerkat!\n")
+                print("\nWelcome to MotionMeerkat!\n")
                         
                 #Create initial conditions
                 #Set defaults that weren't specified.
