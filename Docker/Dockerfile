@@ -30,10 +30,12 @@ RUN cd ~/ &&\
 #tkinter is easier by apt-get
 RUN apt-get install python-tk
 
+#install the rest of python modules
 RUN cd ~/OpenCV_HummingbirdsMotion/Docker &&\
     pip install -r requirements.txt
 
 # Set the appropriate link
 RUN ln /dev/null /dev/raw1394
 
-RUN cd ~/opencv
+#start at home
+RUN cd ~
