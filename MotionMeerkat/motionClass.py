@@ -791,7 +791,7 @@ class Motion:
                                 #set an original to reset at the end
                                 self.accAvgBegin=self.accAvg
                         else:
-                                self.mogvariancegBegin=self.mogvariance                                
+                                self.mogvarianceBegin=self.mogvariance                                
                         
                         ##Overall destination
                         
