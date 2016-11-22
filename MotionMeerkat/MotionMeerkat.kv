@@ -79,7 +79,7 @@
             size_hint:(1,0.5)
             pos_hint:{'center_y':0.1}
             Label:
-                text:"How quickly does your organism move?"
+                text:"How quickly does your organism move?\n      Increasing returns fewer frames"
                 font_size:15
                 size_hint:(1,0.6)
         BoxLayout:
@@ -121,10 +121,11 @@
                 size_hint:(0.5,0.9)
                 pos_hint:{'top':1}
                 Label:
-                    text:"Minimum object size (% frame)"
+                    text:"Min. object size (0-100% of frame)"
                     font_size:13
                 TextInput:
                     id:mstext
+                    font_size:20
                     text:"0.1"
                     size_hint:(0.3,1)
                     multiline:False
@@ -146,7 +147,7 @@
                 pos_hint:{'top':1}
                 Label:
                     text:"Crop area of motion detection"
-                    font_size:13
+                    font_size:15
                 CheckBox:
                     on_active: root.on_check_roi(self.active,app.root.motionVid)
         Button: 

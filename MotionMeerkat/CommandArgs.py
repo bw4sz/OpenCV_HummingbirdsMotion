@@ -3,7 +3,7 @@ import argparse
 def commandargs(self):
     #If there were system argument
     self.parser = argparse.ArgumentParser()
-    
+
     self.parser.add_argument("--runtype", help="Batch, single file or pictures",default='file')
     self.parser.add_argument("--batchpool", help="run directory of videos",type=str)
     self.parser.add_argument("--inDEST", help="path of single video",type=str,default='C:/Program Files (x86)/MotionMeerkat/PlotwatcherTest.tlv')

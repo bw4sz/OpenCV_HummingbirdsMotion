@@ -544,7 +544,6 @@ class Motion:
                                         
                                                         #add a ceiling
                                                         if self.mogvariance > 120: self.mogvariance = 120
-                                                        
                                                         print("Adapting to video conditions: increasing MOG variance tolerance to %d" % self.mogvariance)
                                                         
         
@@ -792,7 +791,7 @@ class Motion:
                                 #set an original to reset at the end
                                 self.accAvgBegin=self.accAvg
                         else:
-                                self.moglearningBegin=self.moglearning                                
+                                self.mogvariancegBegin=self.mogvariance                                
                         
                         ##Overall destination
                         
@@ -827,7 +826,7 @@ class Motion:
                                 if self.subMethod=="Acc": 
                                         self.accAvg=self.accAvgBegin
                                 else:
-                                        self.moglearning=self.moglearningBegin                                
+                                        self.mogvariance=self.mogvarianceBegin                                
         
                 ###If runtype is a single file - run file destination        
                 if (self.runtype in ["file",'pictures']):
