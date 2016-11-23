@@ -1,0 +1,4 @@
+#pushing to dockerhub, need to work on ssh! yikes.
+winpty docker login -p 0docker0 -u bw4sz
+docker build -t  bw4sz/bw4sz:MotionMeerkat .
+docker push bw4sz/bw4sz:MotionMeerkat
