@@ -23,12 +23,13 @@ RUN cd ~/ &&\
     cd opencv && mkdir build && cd build && cmake  -DWITH_QT=ON -DWITH_OPENGL=ON -DFORCE_VTK=ON -DWITH_TBB=ON -DWITH_GDAL=ON -DWITH_XINE=ON -DBUILD_EXAMPLES=ON .. && \
     make -j4 && make install && ldconfig
 
-RUN cd ~/ && \
-    git clone https://github.com/bw4sz/OpenCV_HummingbirdsMotion.git --depth 1
-
 #install python modules
 #tkinter is easier by apt-get
 RUN apt-get -y install python-tk
+
+#Clone MotionMeerkat at the end, cache everything else
+RUN cd ~/ && \
+    git clone https://github.com/bw4sz/OpenCV_HummingbirdsMotion.git --depth 1
 
 #install the rest of python modules
 RUN cd ~/OpenCV_HummingbirdsMotion/Docker &&\
