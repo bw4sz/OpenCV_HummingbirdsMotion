@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER Chenna Varri
+MAINTAINER Ben Weinstein
 
 RUN apt-get update
 RUN apt-get install -y build-essential apt-utils
