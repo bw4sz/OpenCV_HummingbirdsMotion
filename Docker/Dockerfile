@@ -29,7 +29,7 @@ RUN apt-get -y install python-tk
 
 #Clone MotionMeerkat at the end, cache everything else
 RUN cd ~/ && \
-    git clone https://github.com/bw4sz/OpenCV_HummingbirdsMotion.git --depth 1
+    git clone https://github.com/bw4sz/OpenCV_HummingbirdsMotion.git --depth 1 --single-branch -b dev
 
 #install the rest of python modules
 RUN cd ~/OpenCV_HummingbirdsMotion/Docker &&\
