@@ -1,4 +1,4 @@
-#To run on ec2 startup
+#!/bin/bash 
 
 #install docker
 sudo yum -y install  docker 
@@ -10,10 +10,11 @@ sudo service docker start
 sudo docker pull bw4sz/bw4sz:MotionMeerkat
 
 #Run MotionMeerkat Container
-sudo docker run -it bw4sz/bw4sz:MotionMeerkat
+sudo docker run -i bw4sz/bw4sz:MotionMeerkat
 
 #cd home
 cd ~
+
 #Run MotionMeerkat
 python OpenCV_HummingbirdsMotion/MotionMeerkat/main.py --i ~/OpenCV_HummingbirdsMotion/PlotwatcherTest.tlv --fileD ~/MotionMeerkat
 

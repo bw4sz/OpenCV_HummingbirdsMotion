@@ -1,7 +1,7 @@
 #!/bin/bash 
 
 # spawn instance and store id, need a larger default block size
-instance_id=$(aws ec2 run-instances --image-id ami-5ec1673e --security-group-ids sg-923a98f6 --count 1 --instance-type t2.micro --key-name rstudio --instance-initiated-shutdown-behavior stop --query 'Instances[0].{d:InstanceId}' --output text --iam-instance-profile Name="Ben" --block-device-mappings '[{"DeviceName":"/dev/sdb","Ebs":{"VolumeSize":12,"DeleteOnTermination":false,"VolumeType":"standard"}}])
+instance_id=$(aws ec2 run-instances --image-id ami-5ec1673e --security-group-ids sg-923a98f6 --count 1 --instance-type t2.micro --key-name rstudio --instance-initiated-shutdown-behavior stop --query 'Instances[0].{d:InstanceId}' --output text --iam-instance-profile Name="Ben" --block-device-mappings '[{"DeviceName":"/dev/xvda","Ebs":{"VolumeSize":12,"DeleteOnTermination":true,"VolumeType":"standard"}}]')
 
 # wait until instance is up and running
 aws ec2 wait instance-running --instance-ids $instance_id
@@ -16,12 +16,12 @@ aws cloudwatch put-metric-alarm --alarm-name memory --alarm-description "Alarm w
 # retrieve public dns
 dns=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[*].Instances[*].PublicDnsName' --output text | grep a)
 
-#Wait for port to be ready, takes about a minute.
-sleep 50
+#Wait for port to be ready
+sleep 30
 
 # copy over Job.bash to instance
 scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i '/c/Users/Ben/.ssh/rstudio.pem' /c/Users/Ben/Documents/OpenCV_HummingbirdsMotion/Amazon/RunMotionMeerkat.bash ec2-user@$dns:~
 
 # run job script on instance, don't wait for finish and disconnect terminal
 #add nohup and & if you like
-time ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "/c/Users/Ben/.ssh/rstudio.pem" ubuntu@$dns "nohup ./RunMotionMeerkat.bash"
+time ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "/c/Users/Ben/.ssh/rstudio.pem" ec2-user@$dns "nohup ./RunMotionMeerkat.bash"
