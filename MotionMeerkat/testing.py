@@ -1,11 +1,13 @@
 #Testing script to run a bunch of different command line cases to ensure motionmeerkat functionality.
-
 import os
 import numpy as np
-
+import profile
 #cd into direction holding main.py - for users this would be the directory holding main.exe
 
-# Run from command line, using default video to test state
+### Profile Code
+profile.run("os.system('main.py --minSIZE 0.3')")
+
+# Run from command line, using default video to test state 
 testing_mainpy = False
 if testing_mainpy:
     os.chdir('C:/Users/Ben/Documents/OpenCV_HummingbirdsMotion/MotionMeerkat/')
@@ -38,7 +40,7 @@ if testing_mainpy:
     os.system('main.py --runtype pictures --i C:/MotionMeerkat/PlotwatcherTest')
     
 
-testing_mainexe = True
+testing_mainexe = False
 if testing_mainexe:
     os.chdir('C:/Program Files (x86)/MotionMeerkat/')
     
