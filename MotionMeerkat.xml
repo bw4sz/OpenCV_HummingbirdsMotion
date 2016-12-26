@@ -84,7 +84,7 @@ Methods in Ecology and Evolution 6 (3), 357-362"/>
 	<tag name="thumbnail" type="file" value="public/thumbnail.ico"/>
 	<tag name="help"      type="file" value="public/help.html" />
 	<tag name="execute_options">
-		<tag name="iterable" value="resource_url" type="dataset" />
+		<tag name="iterable" value="image_url" type="dataset" />
 	</tag>   
 
 </module>

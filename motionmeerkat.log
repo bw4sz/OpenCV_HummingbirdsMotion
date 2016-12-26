@@ -3519,3 +3519,217 @@ DEBUG:requests.packages.urllib3.connectionpool:"POST /import/transfer HTTP/1.1" 
 DEBUG:bqapi.comm:postxml http://bovary.iplantcollaborative.org/module_service/mex/00-fX9U5fW53s8NkeTRNGSwE3  content <mex uri="http://bovary.iplantcollaborative.org/module_service/mex/00-fX9U5fW53s8NkeTRNGSwE3" value="FINISHED"><tag name="outputs"><tag type="file" name="frames_csv" value="http://bovary.iplantcollaborative.org/data_service/00-n9XwLMtg38bU3ccC6uAy5L"/></tag></mex> 
 DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/module_service/mex/00-fX9U5fW53s8NkeTRNGSwE3?view=short req {'Content-Type': 'text/xml', 'Accept': 'text/xml'}
 DEBUG:requests.packages.urllib3.connectionpool:"POST /module_service/mex/00-fX9U5fW53s8NkeTRNGSwE3?view=short HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/services 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/services req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): bovary.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"GET /services HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/module_service/mex/00-fPxkCw6Z2RWdtxYEqzktVi?view=deep 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/module_service/mex/00-fPxkCw6Z2RWdtxYEqzktVi?view=deep req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /module_service/mex/00-fPxkCw6Z2RWdtxYEqzktVi?view=deep HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/data_service/00-WGx4dtDuAcGX2kayn8ZfHc 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/data_service/00-WGx4dtDuAcGX2kayn8ZfHc req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /data_service/00-WGx4dtDuAcGX2kayn8ZfHc HTTP/1.1" 200 None
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/blob_service/00-WGx4dtDuAcGX2kayn8ZfHc req  header=None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /blob_service/00-WGx4dtDuAcGX2kayn8ZfHc HTTP/1.1" 200 1727930368
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/import/transfer req {'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Resetting dropped connection: bovary.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"POST /import/transfer HTTP/1.1" 504 182
+DEBUG:bqapi.comm:Error body: <html>
+<head><title>504 Gateway Time-out</title></head>
+<body bgcolor="white">
+<center><h1>504 Gateway Time-out</h1></center>
+<hr><center>nginx/1.2.6</center>
+</body>
+</html>
+
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/services 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/services req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): bovary.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"GET /services HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/module_service/mex/00-sYgobgFt69cTbot8pQfxvY?view=deep 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/module_service/mex/00-sYgobgFt69cTbot8pQfxvY?view=deep req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /module_service/mex/00-sYgobgFt69cTbot8pQfxvY?view=deep HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /data_service/00-82eQHcBM8zt9jLuEZB8tvm HTTP/1.1" 200 None
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/blob_service/00-82eQHcBM8zt9jLuEZB8tvm req  header=None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /blob_service/00-82eQHcBM8zt9jLuEZB8tvm HTTP/1.1" 200 8965664
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/import/transfer req {'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"POST /import/transfer HTTP/1.1" 200 None
+DEBUG:bqapi.comm:postxml http://bovary.iplantcollaborative.org/module_service/mex/00-sYgobgFt69cTbot8pQfxvY  content <mex uri="http://bovary.iplantcollaborative.org/module_service/mex/00-sYgobgFt69cTbot8pQfxvY" value="FINISHED"><tag name="outputs"><tag type="file" name="frames_csv" value="http://bovary.iplantcollaborative.org/data_service/00-rPTyK2c49EKtNFkZWQZu6L"/></tag></mex> 
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/module_service/mex/00-sYgobgFt69cTbot8pQfxvY?view=short req {'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"POST /module_service/mex/00-sYgobgFt69cTbot8pQfxvY?view=short HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/services 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/services req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): bovary.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"GET /services HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/module_service/mex/00-F7gcxe97HeGVh4aVF2jDq?view=deep 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/module_service/mex/00-F7gcxe97HeGVh4aVF2jDq?view=deep req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /module_service/mex/00-F7gcxe97HeGVh4aVF2jDq?view=deep HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /data_service/00-82eQHcBM8zt9jLuEZB8tvm HTTP/1.1" 200 None
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/blob_service/00-82eQHcBM8zt9jLuEZB8tvm req  header=None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /blob_service/00-82eQHcBM8zt9jLuEZB8tvm HTTP/1.1" 200 8965664
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/import/transfer req {'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"POST /import/transfer HTTP/1.1" 200 None
+DEBUG:bqapi.comm:postxml http://bovary.iplantcollaborative.org/module_service/mex/00-F7gcxe97HeGVh4aVF2jDq  content <mex uri="http://bovary.iplantcollaborative.org/module_service/mex/00-F7gcxe97HeGVh4aVF2jDq" value="FINISHED"><tag name="outputs"><tag type="file" name="frames_csv" value="http://bovary.iplantcollaborative.org/data_service/00-tnuLyKRqktmYsTKMq2u6oV"/></tag></mex> 
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/module_service/mex/00-F7gcxe97HeGVh4aVF2jDq?view=short req {'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"POST /module_service/mex/00-F7gcxe97HeGVh4aVF2jDq?view=short HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/services 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/services req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): bovary.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"GET /services HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/module_service/mex/00-NMkn9RJz7q7MRthf9CqZA3?view=deep 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/module_service/mex/00-NMkn9RJz7q7MRthf9CqZA3?view=deep req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /module_service/mex/00-NMkn9RJz7q7MRthf9CqZA3?view=deep HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /data_service/00-82eQHcBM8zt9jLuEZB8tvm HTTP/1.1" 200 None
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/blob_service/00-82eQHcBM8zt9jLuEZB8tvm req  header=None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /blob_service/00-82eQHcBM8zt9jLuEZB8tvm HTTP/1.1" 200 8965664
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/import/transfer req {'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"POST /import/transfer HTTP/1.1" 200 None
+DEBUG:bqapi.comm:postxml http://bovary.iplantcollaborative.org/module_service/mex/00-NMkn9RJz7q7MRthf9CqZA3  content <mex uri="http://bovary.iplantcollaborative.org/module_service/mex/00-NMkn9RJz7q7MRthf9CqZA3" value="FINISHED"><tag name="outputs"><tag type="file" name="frames_csv" value="http://bovary.iplantcollaborative.org/data_service/00-o3DT6d26m5kYwkQfKapM3M"/></tag></mex> 
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/module_service/mex/00-NMkn9RJz7q7MRthf9CqZA3?view=short req {'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"POST /module_service/mex/00-NMkn9RJz7q7MRthf9CqZA3?view=short HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/services 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/services req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): bovary.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"GET /services HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/module_service/mex/00-xuRUJM883j9ZSU6m2jtpEi?view=deep 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/module_service/mex/00-xuRUJM883j9ZSU6m2jtpEi?view=deep req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /module_service/mex/00-xuRUJM883j9ZSU6m2jtpEi?view=deep HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/data_service/00-cHt7pKCphJftCURCUBNshN 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/data_service/00-cHt7pKCphJftCURCUBNshN req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /data_service/00-cHt7pKCphJftCURCUBNshN HTTP/1.1" 200 None
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/blob_service/00-cHt7pKCphJftCURCUBNshN req  header=None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /blob_service/00-cHt7pKCphJftCURCUBNshN HTTP/1.1" 500 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/services 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/services req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): bovary.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"GET /services HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/module_service/mex/00-ExcXTkZYxeVHkaAmBEiD95?view=deep 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/module_service/mex/00-ExcXTkZYxeVHkaAmBEiD95?view=deep req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /module_service/mex/00-ExcXTkZYxeVHkaAmBEiD95?view=deep HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /data_service/00-82eQHcBM8zt9jLuEZB8tvm HTTP/1.1" 200 None
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/blob_service/00-82eQHcBM8zt9jLuEZB8tvm req  header=None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /blob_service/00-82eQHcBM8zt9jLuEZB8tvm HTTP/1.1" 200 8965664
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/import/transfer req {'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"POST /import/transfer HTTP/1.1" 200 None
+DEBUG:bqapi.comm:postxml http://bovary.iplantcollaborative.org/module_service/mex/00-ExcXTkZYxeVHkaAmBEiD95  content <mex uri="http://bovary.iplantcollaborative.org/module_service/mex/00-ExcXTkZYxeVHkaAmBEiD95" value="FINISHED"><tag name="outputs"><tag type="file" name="frames_csv" value="http://bovary.iplantcollaborative.org/data_service/00-MTMri3pPzSVThjmve37YSn"/></tag></mex> 
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/module_service/mex/00-ExcXTkZYxeVHkaAmBEiD95?view=short req {'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"POST /module_service/mex/00-ExcXTkZYxeVHkaAmBEiD95?view=short HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/services 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/services req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): bovary.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"GET /services HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/module_service/mex/00-SMrM5zfP8Efvz7GBGSArS3?view=deep 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/module_service/mex/00-SMrM5zfP8Efvz7GBGSArS3?view=deep req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /module_service/mex/00-SMrM5zfP8Efvz7GBGSArS3?view=deep HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/data_service/00-cHt7pKCphJftCURCUBNshN 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/data_service/00-cHt7pKCphJftCURCUBNshN req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /data_service/00-cHt7pKCphJftCURCUBNshN HTTP/1.1" 200 None
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/blob_service/00-cHt7pKCphJftCURCUBNshN req  header=None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /blob_service/00-cHt7pKCphJftCURCUBNshN HTTP/1.1" 500 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/services 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/services req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): bovary.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"GET /services HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/module_service/mex/00-nAq4WKoS7hdqxfDQkD8npa?view=deep 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/module_service/mex/00-nAq4WKoS7hdqxfDQkD8npa?view=deep req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /module_service/mex/00-nAq4WKoS7hdqxfDQkD8npa?view=deep HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/data_service/00-82eQHcBM8zt9jLuEZB8tvm req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /data_service/00-82eQHcBM8zt9jLuEZB8tvm HTTP/1.1" 200 None
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/blob_service/00-82eQHcBM8zt9jLuEZB8tvm req  header=None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /blob_service/00-82eQHcBM8zt9jLuEZB8tvm HTTP/1.1" 200 8965664
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/import/transfer req {'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"POST /import/transfer HTTP/1.1" 200 None
+DEBUG:bqapi.comm:postxml http://bovary.iplantcollaborative.org/module_service/mex/00-nAq4WKoS7hdqxfDQkD8npa  content <mex uri="http://bovary.iplantcollaborative.org/module_service/mex/00-nAq4WKoS7hdqxfDQkD8npa" value="FINISHED"><tag name="outputs"><tag type="file" name="frames_csv" value="http://bovary.iplantcollaborative.org/data_service/00-Hycfs5hcaDcWq4EmcaUu4A"/></tag></mex> 
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/module_service/mex/00-nAq4WKoS7hdqxfDQkD8npa?view=short req {'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"POST /module_service/mex/00-nAq4WKoS7hdqxfDQkD8npa?view=short HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/services 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/services req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): bovary.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"GET /services HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/module_service/mex/00-SMrM5zfP8Efvz7GBGSArS3?view=deep 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/module_service/mex/00-SMrM5zfP8Efvz7GBGSArS3?view=deep req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /module_service/mex/00-SMrM5zfP8Efvz7GBGSArS3?view=deep HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/data_service/00-cHt7pKCphJftCURCUBNshN 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/data_service/00-cHt7pKCphJftCURCUBNshN req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /data_service/00-cHt7pKCphJftCURCUBNshN HTTP/1.1" 200 None
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/blob_service/00-cHt7pKCphJftCURCUBNshN req  header=None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /blob_service/00-cHt7pKCphJftCURCUBNshN HTTP/1.1" 500 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/services 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/services req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): bovary.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"GET /services HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/module_service/mex/00-DNNeCAd6Y62nMx3xRFkZiL?view=deep 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/module_service/mex/00-DNNeCAd6Y62nMx3xRFkZiL?view=deep req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /module_service/mex/00-DNNeCAd6Y62nMx3xRFkZiL?view=deep HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/data_service/00-6bqEPyQo48mNuGhHGu92U4 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/data_service/00-6bqEPyQo48mNuGhHGu92U4 req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /data_service/00-6bqEPyQo48mNuGhHGu92U4 HTTP/1.1" 200 None
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/blob_service/00-6bqEPyQo48mNuGhHGu92U4 req  header=None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /blob_service/00-6bqEPyQo48mNuGhHGu92U4 HTTP/1.1" 500 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/services 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/services req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): bovary.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"GET /services HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/module_service/mex/00-jDi8by75FtLYkbVmqqraVb?view=deep 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/module_service/mex/00-jDi8by75FtLYkbVmqqraVb?view=deep req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /module_service/mex/00-jDi8by75FtLYkbVmqqraVb?view=deep HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/data_service/00-HPPy4kTt4cafUY9YgEmHTR 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/data_service/00-HPPy4kTt4cafUY9YgEmHTR req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /data_service/00-HPPy4kTt4cafUY9YgEmHTR HTTP/1.1" 200 None
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/blob_service/00-HPPy4kTt4cafUY9YgEmHTR req  header=None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /blob_service/00-HPPy4kTt4cafUY9YgEmHTR HTTP/1.1" 200 18678299
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/import/transfer req {'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"POST /import/transfer HTTP/1.1" 200 None
+DEBUG:bqapi.comm:postxml http://bovary.iplantcollaborative.org/module_service/mex/00-jDi8by75FtLYkbVmqqraVb  content <mex uri="http://bovary.iplantcollaborative.org/module_service/mex/00-jDi8by75FtLYkbVmqqraVb" value="FINISHED"><tag name="outputs"><tag type="file" name="frames_csv" value="http://bovary.iplantcollaborative.org/data_service/00-FZprhrhiGRsafhXASEPZmM"/></tag></mex> 
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/module_service/mex/00-jDi8by75FtLYkbVmqqraVb?view=short req {'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"POST /module_service/mex/00-jDi8by75FtLYkbVmqqraVb?view=short HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/services 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/services req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): bovary.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"GET /services HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/module_service/mex/00-iR5nHhVoEMewzdGvBCcJLk?view=deep 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/module_service/mex/00-iR5nHhVoEMewzdGvBCcJLk?view=deep req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /module_service/mex/00-iR5nHhVoEMewzdGvBCcJLk?view=deep HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/data_service/00-HPPy4kTt4cafUY9YgEmHTR 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/data_service/00-HPPy4kTt4cafUY9YgEmHTR req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /data_service/00-HPPy4kTt4cafUY9YgEmHTR HTTP/1.1" 200 None
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/blob_service/00-HPPy4kTt4cafUY9YgEmHTR req  header=None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /blob_service/00-HPPy4kTt4cafUY9YgEmHTR HTTP/1.1" 200 18678299
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/import/transfer req {'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"POST /import/transfer HTTP/1.1" 200 None
+DEBUG:bqapi.comm:postxml http://bovary.iplantcollaborative.org/module_service/mex/00-iR5nHhVoEMewzdGvBCcJLk  content <mex uri="http://bovary.iplantcollaborative.org/module_service/mex/00-iR5nHhVoEMewzdGvBCcJLk" value="FINISHED"><tag name="outputs"><tag type="file" name="frames_csv" value="http://bovary.iplantcollaborative.org/data_service/00-P3duVowu2omfCPj3hBMWQa"/></tag></mex> 
+DEBUG:bqapi.comm:POST http://bovary.iplantcollaborative.org/module_service/mex/00-iR5nHhVoEMewzdGvBCcJLk?view=short req {'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"POST /module_service/mex/00-iR5nHhVoEMewzdGvBCcJLk?view=short HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/services 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/services req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): bovary.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"GET /services HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/module_service/mex/00-gGRD9HFJWbNsonnd7kwtQ3?view=deep 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/module_service/mex/00-gGRD9HFJWbNsonnd7kwtQ3?view=deep req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /module_service/mex/00-gGRD9HFJWbNsonnd7kwtQ3?view=deep HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bovary.iplantcollaborative.org/data_service/00-6bqEPyQo48mNuGhHGu92U4 
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/data_service/00-6bqEPyQo48mNuGhHGu92U4 req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /data_service/00-6bqEPyQo48mNuGhHGu92U4 HTTP/1.1" 200 None
+DEBUG:bqapi.comm:get: http://bovary.iplantcollaborative.org/blob_service/00-6bqEPyQo48mNuGhHGu92U4 req  header=None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /blob_service/00-6bqEPyQo48mNuGhHGu92U4 HTTP/1.1" 500 None
+DEBUG:bqapi.comm:fetchxml http://bisque.iplantcollaborative.org/services 
+DEBUG:bqapi.comm:get: http://bisque.iplantcollaborative.org/services req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): bisque.iplantcollaborative.org
+DEBUG:requests.packages.urllib3.connectionpool:"GET /services HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bisque.iplantcollaborative.org/module_service/mex/00-WDbKc2H2CSpbpfHEHyQyNe?view=deep 
+DEBUG:bqapi.comm:get: http://bisque.iplantcollaborative.org/module_service/mex/00-WDbKc2H2CSpbpfHEHyQyNe?view=deep req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /module_service/mex/00-WDbKc2H2CSpbpfHEHyQyNe?view=deep HTTP/1.1" 200 None
+DEBUG:bqapi.comm:fetchxml http://bisque.iplantcollaborative.org/data_service/00-VNLyB5Nxk8bYg6qyxEkByZ 
+DEBUG:bqapi.comm:get: http://bisque.iplantcollaborative.org/data_service/00-VNLyB5Nxk8bYg6qyxEkByZ req  header={'Content-Type': 'text/xml', 'Accept': 'text/xml'}
+DEBUG:requests.packages.urllib3.connectionpool:"GET /data_service/00-VNLyB5Nxk8bYg6qyxEkByZ HTTP/1.1" 200 None
+DEBUG:bqapi.comm:get: http://bisque.iplantcollaborative.org/blob_service/00-VNLyB5Nxk8bYg6qyxEkByZ req  header=None
+DEBUG:requests.packages.urllib3.connectionpool:"GET /blob_service/00-VNLyB5Nxk8bYg6qyxEkByZ HTTP/1.1" 200 1654653
