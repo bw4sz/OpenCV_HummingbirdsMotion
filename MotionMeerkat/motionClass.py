@@ -43,14 +43,7 @@ class Motion:
                 self.progressb=True
                      
         def prep(self):
-                
-                #report auto settings
-                print('Auto settings...')
-                
-                if self.runtype=='pictures':
-                        self.subMethod="Acc"
-                        print("Setting pictures runtype and background method to accumulated averaging (Acc), if you would like to alter Acc settings, please use manual mode.\n")
-                        
+                                                        
                 if self.subMethod=="MOG":
                         print('Background MOG sensitivity set to %.2f' % self.moglearning)  
                         print('MOG Variance tolerance set to %d' % self.mogvariance)  
@@ -276,6 +269,9 @@ class Motion:
                                         break
                                 else:
                                         current_image=cv2.imread(self.jpgs.pop())
+                                        #if needed resize image, some of the large pictures are holding up memory in the background subtraction
+                                        #current_image=cv2.resize(current_imageraw,(self.height/2,self.width/2))
+                                        
                                         
                         self.frame_count += 1
                         frame_t0 = time.time()
