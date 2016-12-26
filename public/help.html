@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<title>Welcome to MotionMeerkat!</title>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+</head>
+
+<body>
+
+<style type="text/css">
+.main-container {
+  max-width:500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+h2 {
+	line-height= 50%;
+	}
+h1 {
+	line-height= 80%;
+	}
+h3 {
+	line-height= 60%;
+	}
+</style>
+<div class="container-fluid main-container">
+<div id="what-is-motionmeerkat" class="section level3">
+<h2>What is MotionMeerkat?</h2>
+<p>MotionMeerkat is an open source tool that finds candidate motion events in video. <br>
+Frames within movement that match the users parameters are returned, along with time stamps and coordinates of movement within the frame
+<br>
+<a href="https://github.com/bw4sz/OpenCV_HummingbirdsMotion/tree/Bisque">Source code is on github</a>
+	</p>
+<h1 id="arguments">Arguments</h1>
+<h3 id="threshold">Movement Threshold</h3>
+<p> Filters out small movements, ranging from 0 (include all movement) to 255 (include no movement).</p>
+<h3 id="minimum-motion-contour-size-02">Minimum motion contour size</h3>
+<p> Smallest size of bounding box around movement. Expressed in percentage of the total frame. Help remove small pixel movements.</p>
+<h3 id="accumulated-averaging-acc-or-mixture-of-gaussian-mog-background-method-acc">Accumulated Averaging [Acc] or Mixture of Gaussian [MOG] background method?</h3>
+<p>The motion detection approach. See Citation. <a href="http://docs.opencv.org/master/db/d5c/tutorial_py_bg_subtraction.html">Tutorial here</a> </p>
+<p>. If the user’s goal is to find the top 10% of motion frames, use Accumulated Averaging and adapt with expected hitrate of 10. If the user’s goal is to find the series of images to describe the movement of an organism, the mixture of gaussian approach provides a smoother capture of animal movement. </p>
+<p>If the scene is highly variables then mixture of gaussian will work best. It adapts much better and is smoother than Accumulated Averaging. I've left Accumulated averaging as the default, but its really a toss up depending on your video. Definitely try both.</p>
+<p><strong> The following two options are followed in Accumulated averegaing (Acc) is selected:</strong></p>
+<h3 id="accumulated-averaging-sensitivity-035">Accumulated averaging sensitivity:</h3>
+<p> The background image is created by calculating a running average of the recent frames. This parameter controls the degree to which more recent frames contribute more to the new background state. Lower values are more sensitive to movement.</p>
+<h3 id="expected-percentage-of-frames-with-motion-decimal-001">"Expected percentage of frames with motion:</h3>
+<p>This the ratio of frames expected to have motion events for adaptive averaging. Value expressed as a ratio, so 0.01 is 1% of frames. The software will attune sensitivity to this level.</p>
+<p><strong> The following two options are followed if Mixture of Gaussion (MOG) is selected:</strong></p>
+<h3 id="history-of-frames-for-gaussian-500">MOG History</h3>
+<p>The length of history for the updating background image. Higher values incorporate more information and update slower.</p>
+<h3 id="variance-in-mog-to-select-background-16">MOG Variance</h3>
+<p>How different does the current value need to be than the background distributions to be considered foreground? The default value is 16, higher values make the detector less sensitive to movement. If user selects accumulated averaging, this is ignored. </p>
+<h3 id="burn-in-0">Burn In</h3>
+<p>A delay in starting the motion detection. Often useful to ignore camera setup or deployment. </p>
+<h3 id="does-this-video-come-from-a-plotwatcher-camera-n">Does this video come from a plotwatcher camera (n)</h3>
+<p>Time-lapse cameras pose slightly different problems, and this popular product (http://day6outdoors.com/) has its own special settings. Depending on your use, it may be a good hardware option.</p>
+<h3 id="downsample-frame-rate-by-scanning-x-frames-0">Downsample frame rate by scanning X frames</h3>
+<p>While we love HD video(often 30 fps and higher), this is a ton of data! To skip between frames looking for motion, use this parameter. This will jump frames, and then computing every frame once motion is found. The downsampling arguments takes in an integer for how many frames to skip. For example if i entered 5, MotionMeerkat would skip five frames for every 1 it analyzed. Once it found motion, it would analyze the next frame without skipping, greatly reducing computational time. </p>
+<h3 id="output-images-as-frames-video-or-both-frames">Output images as frames, video or both </h3>
+<p>If both, At the end of the run MotionMeerkat will recombine all the jpegs into a single video file with the same frame rate. This was made by popular demand to interface with other video software like EventMeasure (SEAGIS). I'm still testing 'video' only, to delete the frames, let me know if there are issues with codecs and playing in other media players. The frames still need to be written to file. Please note that choosing video or both will add a bit of time as video is encoded. </p>
+<h1> Parameters to be implemented </h1>
+<h3 id="subsect-the-image-by-selecting-a-region-of-interest-n">Subsect the image by selecting a region of interest? (n)</h3>
+<p>If you want MotionMeerkat to scan just one part of the image, enter 'y', and the first frame will appear. Drag a single rectangle across the desired area and click. Hit esc. The first image will appear in the cropped view. All motion outside the region of interest will be ignored.</p>
+<h3 id="subregion-of-interest-to-include-or-exclude-include">Subregion of interest to 'include' or 'exclude'?</h3>
+<p>Videos often have a single object that moves consistently throughout the stream. For example, underwater cameras often attract fish by using caged bait, which slowly drifts up and down. These known sources of motion can be excluded by setting a region to ignore. Simply use the <strong>Subsect the image by selecting a region of interest? ('y'es or 'n'o)</strong> feature, and then specify 'exclude'. The first window of the video will pop up, and the user can draw using <strong>right click</strong> a rectangle around the area to ignore. After drawing the rectangle, hit ESC to exit the screen. The resulting first frame, with the excluded area indicated with a white box, will flash briefly. Don't worry, the output image will still have the whole frame, but any movement inside the excluded area will be ignored!</p>
+<p><em>Update: This option only works if you select the top left corner first and then drag to bottom right.</em></p>
+<h2 id="highlight-region-for-area-count-n">"Highlight region for area count?"</h2>
+<p>If you want to have motion detection across the entire frame, but count the number of times an object is inside a certain portion of the frame. Default is 'n'o. If set to yes, only frames in that area will be output, along with a new counter 'area counter.csv' that gives the time stamp and the x,y coordinates. </p>
+<p>If you select this option, a small teal box will appear around your desired area anytime the object is within that area. Please let me know if you find this box helpful/annoying, it was suggested by a user. </p>
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

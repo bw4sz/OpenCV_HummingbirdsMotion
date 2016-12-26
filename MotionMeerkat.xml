@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<module name="MotionMeerkat" type="runtime">
+    <tag name="inputs">
+		<tag name="mex_url" type="system-input"/>
+		<tag name="bisque_token" type="system-input"/>
+		<tag name="resource_url" type="resource">
+			<template>
+				<tag name="label" value="Select input video file or directory" />
+				<tag name="accepted_type" value="image" />
+				<tag name="accepted_type" value="dataset" />
+			</template>
+		</tag>
+    <tag name="minThresh" value="30" type="number">
+	            <template>
+	                <tag name="label" value="Minimum contour threshold" />
+            		  <tag name="minValue" value="0" type="number"/>
+		         <tag name="allowDecimals" value="false" type="boolean"/>
+	                <tag name="reference" value="resource_url" />
+	                <tag name="allowNone" value="false" type="boolean" />
+	                <tag name="description" value="Minimum size of the contour for motion detected object" />
+	            </template>
+	        </tag>
+    <tag name="newcombo" value="Acc" type="combo">
+            <template>
+                <tag name="label" value="Background method? (Acc)"/>
+                <tag name="select">
+                    <value>Acc</value>
+                    <value>MOG</value>
+                </tag>
+                <tag name="editable" value="false" type="boolean"/>
+	         <tag name="description" value="Accumulated Averaging (Acc) or Mixture of Gaussian (MOG)" />
+            </template>             
+        </tag>
+    <tag name="moghistory" value="500" type="number">
+	            <template>
+	                <tag name="label" value="MOG History" />
+	                <tag name="reference" value="resource_url" />
+	                <tag name="allowNone" value="true" type="boolean" />
+	                <tag name="description" value="Background update rate for mixture model" />
+	            </template>
+	        </tag>
+    <tag name="mogvariance" value="16" type="number">
+	            <template>
+	                <tag name="label" value="MOG Variance" />
+	                <tag name="reference" value="resource_url" />
+	                <tag name="allowNone" value="true" type="boolean" />
+	                <tag name="description" value="MOG Variance threshold between foreground and background distributions" />
+	            </template>
+	        </tag>
+    <tag name="accAvg" value="0.35" type="number">
+	            <template>
+	                <tag name="label" value="Accumulated averaging threshold" />
+            		  <tag name="minValue" value="0.01" type="number"/>
+		         <tag name="allowDecimals" value="true" type="boolean"/>
+	                <tag name="reference" value="resource_url" />
+	                <tag name="allowNone" value="true" type="boolean" />
+	                <tag name="description" value="Minimum size of the contour for motion detected object" />
+	            </template>
+	        </tag>
+    <tag name="burnin" value="0" type="number">
+	            <template>
+	                <tag name="label" value="Delay" />
+		         <tag name="allowDecimals" value="true" type="boolean"/>
+	                <tag name="reference" value="resource_url" />
+		         <tag name="units" value="min"/>
+	                <tag name="allowNone" value="true" type="boolean" />
+	                <tag name="description" value="Time to delay motion detection in minutes" />
+	            </template>
+	        </tag>
+	 </tag>
+    <tag name="outputs">
+		<tag name="mex_url" type="mex" />
+		<tag name="resource_url" type="dataset" />
+		<tag name="frames_csv" type="file">
+            <template>
+                <tag name="label" value="Frames CSV" />
+            </template>
+    </tag>
+	</tag>
+	<tag name="title" type="string" value="Motion Detection"/> 
+    <tag name="authors" type="string" value="Ben Weinstein - Stony Brook University"/> 
+    <tag name="description" type="string" value="Extract motion events from video files. Citation: Integrating motion video detection and ecological monitoring. BG Weinstein
+Methods in Ecology and Evolution 6 (3), 357-362"/>
+	<tag name="thumbnail" type="file" value="public/thumbnail.ico"/>
+	<tag name="help"      type="file" value="public/help.html" />
+	<tag name="execute_options">
+		<tag name="iterable" value="image_url" type="dataset" />
+	</tag>   
+
+</module>
