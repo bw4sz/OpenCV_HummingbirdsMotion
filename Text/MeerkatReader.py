@@ -7,7 +7,6 @@ from pylab import *
 import sourceM
 from imutils import contours
 
-
 ion()
 
 files=glob.glob("C:/Users/Ben\Dropbox/Thesis/Maquipucuna_SantaLucia/HolgerCameras/201608/*")
@@ -35,21 +34,21 @@ for f in files[0:2]:
     
     plt.imshow(display_image,cmap="Greys")    
     fig = plt.show()        
-    plt.pause(2)
+    plt.pause(0.00001)
 
     #resize
     display_image = cv2.resize(display_image,None,fx=10, fy=10, interpolation = cv2.INTER_CUBIC)
     
     plt.imshow(display_image,cmap="Greys")
     fig = plt.show()        
-    plt.pause(2)
+    plt.pause(0.00001)
 
     #threshold
     ret,display_image=cv2.threshold(display_image,247,255,cv2.THRESH_BINARY)
     
     plt.imshow(display_image,cmap="Greys")
     fig = plt.show()        
-    plt.pause(2)
+    plt.pause(0.00001)
     
     #smoth
     display_image=cv2.GaussianBlur(display_image,(5,5),0)
@@ -60,7 +59,7 @@ for f in files[0:2]:
     
     plt.imshow(display_image,cmap="Greys")
     fig = plt.show()        
-    plt.pause(2)
+    plt.pause(0.00001)
     
     ##split into letters##
     #get contours
@@ -73,7 +72,7 @@ for f in files[0:2]:
         cv2.drawContours(draw,[x],-1,(100,100,255),3)
     plt.imshow(draw,cmap="Greys")
     fig = plt.show()        
-    plt.pause(2)
+    plt.pause(0.00001)
 
     #get rid of child
     #order contour left to right
@@ -106,7 +105,7 @@ for f in files[0:2]:
             break
         plt.imshow(letter,cmap="gray")
         fig = plt.show()        
-        plt.pause(2)
+        plt.pause(0.00001)
         
         ##Try tesseract
         try:
@@ -116,7 +115,7 @@ for f in files[0:2]:
         import pytesseract
         
         img = Image.fromarray(letter)
-        i = pytesseract.image_to_string(img,lang="eng",config="-psm 10 digits")
+        i = pytesseract.image_to_string(img,lang="eng",config="-psm 10")
         ID.append(i)
     print "ID is:" + str(ID)
     IDlist.append(ID)
