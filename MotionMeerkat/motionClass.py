@@ -59,7 +59,7 @@ class Motion:
                 self.stamp=[]
 
                 #Write header row
-                self.stamp.append(("Time","Frame","X","Y"))
+                self.stamp.append(("Time","Frame","Position"))
                 
                 #Empty list for area counter
                 self.areaC=[]
@@ -395,7 +395,10 @@ class Motion:
                         
                         #Make an object to get the average box size
                         sumbox = []
-                        
+
+                        #Empty list for position stamp
+                        position_stamp=[]                        
+
                         if casc.type=="MultiPolygon":
                             #draw shapely bounds
                                 for p in range(1,len(casc.geoms)):
@@ -413,6 +416,8 @@ class Motion:
                                         if casc.geoms[p].area > ((self.width * self.height) * self.minSIZE):
                                                         if self.todraw: 
                                                                 cv2.rectangle(current_image,topleft,bottomright,(0,0,255),thickness=3)
+                                                                #add to output file
+                                                                position_stamp.append((topleft,bottomright))
 
                                                         #Return the centroid to list, rounded two decimals
                                                         x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
@@ -434,6 +439,7 @@ class Motion:
                                 if casc.area > ((self.width * self.height) * self.minSIZE):
                                                 if self.todraw: 
                                                         cv2.rectangle(current_image,topleft,bottomright,(0,0,255),thickness=3)                                                        
+                                                        position_stamp.append((topleft,bottomright))
                                                         
                                                 x=round(casc.centroid.coords.xy[0][0],2)
                                                 y=round(casc.centroid.coords.xy[1][0],2)
@@ -502,8 +508,8 @@ class Motion:
                         sec = timedelta(seconds=int(self.frame_count/float(self.frame_rate)))             
                         d = datetime(1,1,1) + sec
 
-                        for target in bound_center:
-                                stampadd=(str("%d:%d:%d "  % (d.hour,d.minute, d.second)), int(self.frame_count),target[0],target[1])
+                        for target in position_stamp:
+                                stampadd=(str("%d:%d:%d "  % (d.hour,d.minute, d.second)), int(self.frame_count),target)
                                 self.stamp.append(stampadd)
 
                         #if inside area and counter is on, write stamp to a seperate file

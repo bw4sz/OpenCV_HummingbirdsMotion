@@ -18,8 +18,8 @@ RUN apt-get install -y python-pip
 RUN pip install --upgrade pip
 
 RUN cd ~/ &&\
-    git clone https://github.com/Itseez/opencv.git &&\
-    git clone https://github.com/Itseez/opencv_contrib.git &&\
+    git clone https://github.com/Itseez/opencv.git --depth 1 &&\
+    git clone https://github.com/Itseez/opencv_contrib.git --depth 1 &&\
     cd opencv && mkdir build && cd build && cmake  -DWITH_QT=ON -DWITH_OPENGL=ON -DFORCE_VTK=ON -DWITH_TBB=ON -DWITH_GDAL=ON -DWITH_XINE=ON -DBUILD_EXAMPLES=ON .. && \
     make -j4 && make install && ldconfig
 
