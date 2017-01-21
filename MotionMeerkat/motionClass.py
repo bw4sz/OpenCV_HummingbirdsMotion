@@ -416,8 +416,8 @@ class Motion:
                                         if casc.geoms[p].area > ((self.width * self.height) * self.minSIZE):
                                                         if self.todraw: 
                                                                 cv2.rectangle(current_image,topleft,bottomright,(0,0,255),thickness=3)
-                                                                #add to output file
-                                                                position_stamp.append((topleft,bottomright))
+                                                        #add to output file
+                                                        position_stamp.append((topleft,bottomright))
 
                                                         #Return the centroid to list, rounded two decimals
                                                         x=round(casc.geoms[p].centroid.coords.xy[0][0],2)
