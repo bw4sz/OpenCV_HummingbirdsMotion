@@ -42,3 +42,4 @@ Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environmen
 Filename: "{app}\main.exe"; Description: "{cm:LaunchProgram,MotionMeerkat}"; Flags: nowait postinstall skipifsilent
 Filename: "https://github.com/bw4sz/OpenCV_HummingbirdsMotion/wiki"; Flags: shellexec runasoriginaluser postinstall; Description: "Open the Wiki."
              
+ 
