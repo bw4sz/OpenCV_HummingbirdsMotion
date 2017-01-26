@@ -7,7 +7,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{5C784574-7162-4518-849C-B2C13F88B122}
 AppName=MotionMeerkat
-AppVersion=2.0.4
+AppVersion=2.0.5
 AppPublisher=Ben Weinstein                                   
 AppPublisherURL=benweinstein.weebly.com
 AppSupportURL=benweinstein.weebly.com
