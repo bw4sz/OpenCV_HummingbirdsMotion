@@ -804,7 +804,7 @@ class Motion:
                                         fileupper=files.upper()
                                         if fileupper.endswith((".TLV",".AVI",".MPG",".MP4",".MOD",".MTS",".WMV",".MOV",".MP2",".MPEG-4",".DTS",".VOB",".MJPEG",".M4V",".XBA")):
                                                 videoPool.append(os.path.join(root, files))                                                
-                                                print "Added " + str(files) + " to queue"
+                                                print("Added " + str(files) + " to queue")
                         if len(videoPool)==0:
                                 raise ValueError("No videos in the supplied folder. If videos exist, ensure that they can be read by standard video CODEC libraries. If your video can be read in single file mode, but is not found in batch mode, please submit an issue.")
                         for vid in videoPool:      
