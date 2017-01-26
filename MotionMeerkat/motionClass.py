@@ -801,11 +801,12 @@ class Motion:
                         #Create Pool of Videos
                         for (root, dirs, files) in os.walk(self.batchpool):
                                 for files in files:
-                                        videoPool.append(os.path.join(root, files))
-                                        if not files.endswith((".TLV",".AVI",".avi",".MPG",".mp4",".MOD",".MTS",".wmv",".WMV",".mpg",".tlv",".MOV")):
-                                                print "Unusual file type: " + str(files) + "This may not be a fatal error, but ensure that this is a desired video file, and that it can be read by standard video CODEC libraries."
-                        if len(videoPool):
-                                raise ValueError("No videos in the supplied folder")
+                                        fileupper=files.upper()
+                                        if fileupper.endswith((".TLV",".AVI",".MPG",".MP4",".MOD",".MTS",".WMV",".MOV",".MP2",".MPEG-4",".DTS",".VOB",".MJPEG",".M4V",".XBA")):
+                                                videoPool.append(os.path.join(root, files))                                                
+                                                print "Added " + str(files) + " to queue"
+                        if len(videoPool)==0:
+                                raise ValueError("No videos in the supplied folder. If videos exist, ensure that they can be read by standard video CODEC libraries. If your video can be read in single file mode, but is not found in batch mode, please submit an issue.")
                         for vid in videoPool:      
                                 
                                 #Place run inside try catch loop; in case of error, step to next video
