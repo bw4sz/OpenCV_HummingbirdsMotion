@@ -52,6 +52,10 @@ class Motion:
                 self.vis=False
                 if self.vis: self.todraw = True
                 
+                #Create log file
+                self.log_file_report = self.file_destination + "/" + "Parameters_Results.log"
+                self.log_report = file(log_file_report, 'a' )                
+
                 #Capture average minimum box size for plotting
                 self.avg_area = []
                                 
@@ -636,50 +640,46 @@ class Motion:
                 cv2.destroyAllWindows()
                 if self.remove_singles:
                         singles_removed=PostProcessing.remove_singletons(self.frame_results,self.single_distance*self.frame_rate,self.file_destination)
-                
-                #Create log file
-                log_file_report = self.file_destination + "/" + "Parameters_Results.log"
-                log_report = file(log_file_report, 'a' )
         
                 #Print parameters
                 #Batch or single file
-                log_report.write("\nInput Parameters")        
-                log_report.write("\nRun type: %s" % self.runtype)
+                self.log_report.write("\nInput Parameters")        
+                self.log_report.write("\nRun type: %s" % self.runtype)
                 if self.runtype in ["file","pictures"]:
-                        log_report.write("\nInput file path: %s" % self.inDEST)
+                        self.log_report.write("\nInput file path: %s" % self.inDEST)
                         
                 else:
-                        log_report.write("\nInput file path: %s" % self.batchpool)
-                log_report.write("\nOutput dir: %s" % self.fileD)
-                log_report.write("\nBackground Subtraction Method?: %s" % self.subMethod)
-                log_report.write("\nAdapt settings: %s" % self.adapt)
-                log_report.write("\nFrame Rate: %s" % self.frame_rate)
+                        self.log_report.write("\nInput file path: %s" % self.batchpool)
+                self.log_report.write("\nOutput dir: %s" % self.fileD)
+                self.log_report.write("\nBackground Subtraction Method?: %s" % self.subMethod)
+                self.log_report.write("\nAdapt settings: %s" % self.adapt)
+                self.log_report.write("\nFrame Rate: %s" % self.frame_rate)
                 
                 if self.subMethod == "MOG":
-                        log_report.write("\nLearning Rate: %s" % self.moglearning)
-                        log_report.write("\nVariance Rate: %s" % self.mogvariance)
+                        self.log_report.write("\nLearning Rate: %s" % self.moglearning)
+                        self.log_report.write("\nVariance Rate: %s" % self.mogvariance)
                 
                 if self.subMethod == "Acc":
-                        log_report.write("\nAccumulated Averaging: %s" % self.accAvg) 
-                        log_report.write("\nThreshold: %s" % self.threshT)                
+                        self.log_report.write("\nAccumulated Averaging: %s" % self.accAvg) 
+                        self.log_report.write("\nThreshold: %s" % self.threshT)                
         
                 if self.adapt:
-                        log_report.write("\nExpected hitrate: %s" % self.frameHIT)
+                        self.log_report.write("\nExpected hitrate: %s" % self.frameHIT)
                 
-                log_report.write("\nFrame crop: %s" % self.set_ROI)     
+                self.log_report.write("\nFrame crop: %s" % self.set_ROI)     
                 if self.set_ROI:        
-                        log_report.write("\nSet ROI: %s" % self.ROI_include)        
-                log_report.write("\nMinimum size was drawn or entered?: %s" % self.drawSmall)
-                log_report.write("\nMinimum area: %s percent of frame" % (self.minSIZE * 100))
+                        self.log_report.write("\nSet ROI: %s" % self.ROI_include)        
+                self.log_report.write("\nMinimum size was drawn or entered?: %s" % self.drawSmall)
+                self.log_report.write("\nMinimum area: %s percent of frame" % (self.minSIZE * 100))
                 if self.burnin > 0:
-                        log_report.write("\nBurnin: %s" % self.burnin)
+                        self.log_report.write("\nBurnin: %s" % self.burnin)
                 if self.scan > 0:
-                        log_report.write("\nScan frames: %s" % self.scan)
+                        self.log_report.write("\nScan frames: %s" % self.scan)
                 if self.frameSET:
-                        log_report.write("\nManual framerate: %s" % self.frame_rate)
+                        self.log_report.write("\nManual framerate: %s" % self.frame_rate)
                 if self.set_areacounter:
-                        log_report.write("\nArea counter: %s" % self.set_areacounter)
-                log_report.write("\nOutput type: %s\n\n" % self.makeVID)
+                        self.log_report.write("\nArea counter: %s" % self.set_areacounter)
+                self.log_report.write("\nOutput type: %s\n\n" % self.makeVID)
         
                 #Ending time
                 end=time.time()
@@ -698,28 +698,28 @@ class Motion:
                         self.total_count=0
                 
                 ##Write to log file
-                log_report.write("Processing\n")        
-                log_report.write("Total run time (min): %.2f \n" % self.total_min)
-                log_report.write("Average frames per second: %.2f \n " % pfps)
+                self.log_report.write("Processing\n")        
+                self.log_report.write("Total run time (min): %.2f \n" % self.total_min)
+                self.log_report.write("Average frames per second: %.2f \n " % pfps)
         
                 #End of program, report some statistic to screen and log
                 #log
-                log_report.write("\nResults\n")
-                log_report.write("Candidate motion events: %.0f \n" % self.total_count )
-                log_report.write("Frames skipped due to insufficient movement based on the threshold parameter: %.0f \n" % self.nocountr)
-                log_report.write("Frames skipped due to minimum size of the contours: %.0f \n" % self.toosmall)
+                self.log_report.write("\nResults\n")
+                self.log_report.write("Candidate motion events: %.0f \n" % self.total_count )
+                self.log_report.write("Frames skipped due to insufficient movement based on the threshold parameter: %.0f \n" % self.nocountr)
+                self.log_report.write("Frames skipped due to minimum size of the contours: %.0f \n" % self.toosmall)
                 if self.windy:
-                        log_report.write("Frames deleted due to windy conditions: %.0f \n" % self.windy_count)
+                        self.log_report.write("Frames deleted due to windy conditions: %.0f \n" % self.windy_count)
                 if self.remove_singles:
-                        log_report.write("Frames deleted due to singletons: %.0f \n" % singles_removed)
+                        self.log_report.write("Frames deleted due to singletons: %.0f \n" % singles_removed)
                
-                log_report.write("Total frames in files: %.0f \n" % self.frame_count)
+                self.log_report.write("Total frames in files: %.0f \n" % self.frame_count)
                 
                 try:
                         rate=float(self.total_count)/self.frame_count*100
                 except:
                         rate=0
-                log_report.write("Hitrate: %.2f %% \n" % rate)
+                self.log_report.write("Hitrate: %.2f %% \n" % rate)
         
                 #print to screen
                 print("\n\nThank you for using MotionMeerkat! \n")
@@ -801,8 +801,11 @@ class Motion:
                         #Create Pool of Videos
                         for (root, dirs, files) in os.walk(self.batchpool):
                                 for files in files:
-                                        if files.endswith((".TLV",".AVI",".avi",".MPG",".mp4",".MOD",".MTS",".wmv",".WMV",".mpg",".tlv",".MOV")):
-                                                videoPool.append(os.path.join(root, files))
+                                        videoPool.append(os.path.join(root, files))
+                                        if not files.endswith((".TLV",".AVI",".avi",".MPG",".mp4",".MOD",".MTS",".wmv",".WMV",".mpg",".tlv",".MOV")):
+                                                print "Unusual file type: " + str(files) + "This may not be a fatal error, but ensure that this is a desired video file, and that it can be read by standard video CODEC libraries."
+                        if len(videoPool):
+                                raise ValueError("No videos in the supplied folder")
                         for vid in videoPool:      
                                 
                                 #Place run inside try catch loop; in case of error, step to next video
