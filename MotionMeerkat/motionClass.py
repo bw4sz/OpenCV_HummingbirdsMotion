@@ -51,10 +51,6 @@ class Motion:
                 #For debugging, visualize conditions.
                 self.vis=False
                 if self.vis: self.todraw = True
-                
-                #Create log file
-                self.log_file_report = self.file_destination + "/" + "Parameters_Results.log"
-                self.log_report = file(log_file_report, 'a' )                
 
                 #Capture average minimum box size for plotting
                 self.avg_area = []
@@ -119,6 +115,10 @@ class Motion:
                 
                 print("Output path will be %s" % (self.file_destination))
                 
+                #Create log file
+                self.log_file_report = self.file_destination + "/" + "Parameters_Results.log"
+                self.log_report = file(self.log_file_report, 'a' )                       
+
                 #########################
                 ##Begin video capture
                 #########################
