@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<matchingThreshold>20</matchingThreshold>
+<matchingNumber>2</matchingNumber>
+<updateFactor>16</updateFactor>
+<showOutput>1</showOutput>
+</opencv_storage>
