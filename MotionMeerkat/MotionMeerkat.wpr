@@ -11,3 +11,6 @@ proj.directory-list = [{'dirloc': loc('.'),
                         'recursive': False,
                         'watch_for_changes': True}]
 proj.file-type = 'shared'
+proj.launch-config = {loc('MotionMeerkat.py'): ('project',
+        (u'--input C:/Users/Ben/Desktop/MeerkatTest/jantest.mp4 --show',
+         ''))}

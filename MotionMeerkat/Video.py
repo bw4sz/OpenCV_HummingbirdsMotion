@@ -15,12 +15,6 @@ import Crop
 import libbgs
 
 #general functions
-def get_spaced_colors(n):
-    max_value = 16581375 #255**3
-    interval = int(max_value / n)
-    colors = [hex(I)[2:].zfill(6) for I in range(0, max_value, interval)]
-    
-    return [(int(i[:2], 16), int(i[2:4], 16), int(i[4:], 16)) for i in colors]
 
 def mult(p,x):
     return(int(p+p*x))
@@ -76,8 +70,6 @@ def find_contour(foreground):
     contours = [contour for contour in contours if cv2.contourArea(contour) > 50]
     return contours
 
-
-    
 class Video:
     def __init__(self,vid,args):
                 
@@ -144,7 +136,7 @@ class Video:
         self.IS_FIRST_FRAME = True
         
         #colors
-        self.colors=get_spaced_colors(len(self.background_models))
+        self.colors=[(0,0,255),(255,0,0),(0,255,0)]
                        
     def analyze(self):
          
@@ -220,6 +212,10 @@ class Video:
                 if self.args.todraw:                     
                     for bounding_box in remaining_bounding_box:
                         cv2.rectangle(self.original_image, (bounding_box.x, bounding_box.y), (bounding_box.x+bounding_box.w, bounding_box.y+bounding_box.h), self.colors[index], 2)
+                
+                #Write Frame
+                cv2.imwrite(self.file_destination + "/"+str(self.frame_count)+".jpg",self.original_image)
+                        
             if self.args.show:
                 if Motion:
                     cv2.imshow("Motion_Event", self.original_image)
@@ -230,9 +226,11 @@ class Video:
     def create_background(self):    
         bgmodels=[]
         bgmodels.append(cv2.createBackgroundSubtractorMOG2(detectShadows=False,varThreshold=float(self.args.mogvariance)))
-        #self.fgbg.setBackgroundRatio(0.95)
+        bgmodels[0].setBackgroundRatio(0.95)
         
-        #bgmodels.append(libbgs.SuBSENSE())
+        bgmodels.append(libbgs.SuBSENSE())
+        bgmodels.append(libbgs.LOBSTER())
+        
         return bgmodels
         
     def read_frame(self):
@@ -333,18 +331,7 @@ class Video:
                 bboxes=self.annotations[x]
                 for bbox in bboxes: 
                     writer.writerow([x,bbox.x,bbox.y,bbox.h,bbox.w])
-                    
-        if self.googlecloud:
-            #write bounding boxes to google cloud
-            
-            blob=self.bucket.blob(self.parsed.path[1:]+"/annotations.csv")
-            blob.upload_from_filename(self.output_annotations)            
-
-            #write parameter log to google cloud
-            blob=self.bucket.blob(self.parsed.path[1:]+"/parameters.csv")
-            blob.upload_from_filename(self.output_args)            
-            
-                    
+                  
     def adapt(self):
         
             #If current frame is a multiple of the 1000 frames
